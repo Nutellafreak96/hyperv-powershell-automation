@@ -217,7 +217,7 @@ function RamSelectorUI {
         12,
         16,
         32,
-        64) #Array fuer die RAM Zuweisung
+        64) #Array for RAM selection
 
     $form = New-Object System.Windows.Forms.Form
     $form.Text = "RAM Selector"
