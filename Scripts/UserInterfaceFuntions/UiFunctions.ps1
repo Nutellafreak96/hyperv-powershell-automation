@@ -139,3 +139,63 @@ function DomainValueUI {
     }
 }
 
+<#Function to get the Networkswitch the VMs should use#>
+function SwitchSelectorUI {
+    ###############################################################################
+    #                                                                             #
+    #          User Interface for the Networkswitches of the VMs                  # 
+    #                                                                             #
+    ###############################################################################
+
+
+
+    $form = New-Object System.Windows.Forms.Form
+    $form.Text = "Switch Selector"
+    $form.Size = New-Object System.Drawing.Size(350, 400)
+    $form.StartPosition = "CenterScreen"
+
+    $okButton = New-Object System.Windows.Forms.Button
+    $okButton.Location = New-Object System.Drawing.Point(105, 327)
+    $okButton.Size = New-Object System.Drawing.Size(60, 20)
+    $okButton.Text = "OK"
+    $okButton.DialogResult = [System.Windows.Forms.DialogResult]::OK
+    $form.AcceptButton = $okButton
+    $form.Controls.Add($okButton)
+
+    $cancelButton = New-Object System.Windows.Forms.Button
+    $cancelButton.Location = New-Object System.Drawing.Point(165, 327)
+    $cancelButton.Size = New-Object System.Drawing.Size(60, 20)
+    $cancelButton.Text = "Cancel"
+    $cancelButton.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
+    $form.CancelButton = $cancelButton
+    $form.Controls.Add($cancelButton)
+
+    $label = New-Object System.Windows.Forms.Label
+    $label.Location = New-Object System.Drawing.Point(10, 20)
+    $label.Size = New-Object System.Drawing.Size(230, 20)
+    $label.Text = "Please entere the Switch you want to use:"
+    $form.Controls.Add($label)
+
+    $listBox = New-Object System.Windows.Forms.ListBox
+    $listBox.Location = New-Object System.Drawing.Point(10, 40)
+    $listBox.Size = New-Object System.Drawing.Size(316, 20)
+    $listBox.Height = 275
+
+    $VMSwitches = Get-VMSwitch | Select-Object -Property Name
+    [void] $listBox.Items.AddRange($VMSwitches.Name)
+    $listBox.SelectedIndex = 0
+    $form.Add_Shown({ $listBox.Focus() })
+
+    $form.Controls.Add($listBox)
+
+    $form.Topmost = $true
+
+    $result = $form.ShowDialog()
+
+    if ($result -eq [System.Windows.Forms.DialogResult]::OK) {
+        return $listBox.SelectedItem
+    }
+    else {
+        Return "Wrong/Missing Input"
+    }
+}
