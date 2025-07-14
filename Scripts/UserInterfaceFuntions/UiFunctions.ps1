@@ -403,3 +403,116 @@ function SelectDirUI {
     }
 
 }
+<#Function to input password that are used in the process#>
+function PasswordUI {
+
+    ###############################################################################
+    #                                                                             #
+    #                User Interface to get password input                         # 
+    #                                                                             #
+    ###############################################################################
+
+    $form = New-Object System.Windows.Forms.Form
+    $form.Text = "Adminpasswords"
+    $form.Size = New-Object System.Drawing.Size(300, 350)
+    $form.StartPosition = "CenterScreen"
+
+    $okButton = New-Object System.Windows.Forms.Button
+    $okButton.Location = New-Object System.Drawing.Point(80, 281)
+    $okButton.Size = New-Object System.Drawing.Size(60, 20)
+    $okButton.Text = "OK"
+    $okButton.DialogResult = [System.Windows.Forms.DialogResult]::OK
+    $form.AcceptButton = $okButton
+    $form.Controls.Add($okButton)
+
+    $cancelButton = New-Object System.Windows.Forms.Button
+    $cancelButton.Location = New-Object System.Drawing.Point(140, 281)
+    $cancelButton.Size = New-Object System.Drawing.Size(60, 20)
+    $cancelButton.Text = "Cancel"
+    $cancelButton.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
+    $form.CancelButton = $cancelButton
+    $form.Controls.Add($cancelButton)
+
+    $label = New-Object System.Windows.Forms.Label
+    $label.Location = New-Object System.Drawing.Point(10, 20)
+    $label.Size = New-Object System.Drawing.Size(280, 20)
+    $label.Text = "Password for the local Administrator"
+    $form.Controls.Add($label)
+
+    $textBox = New-Object System.Windows.Forms.MaskedTextBox
+    $textBox.Location = New-Object System.Drawing.Point(10, 40)
+    $textBox.Size = New-Object System.Drawing.Size(260, 20)
+    $textBox.PasswordChar = "*"
+    $form.Controls.Add($textBox)
+
+    $label2 = New-Object System.Windows.Forms.Label
+    $label2.Location = New-Object System.Drawing.Point(10, 70)
+    $label2.Size = New-Object System.Drawing.Size(280, 20)
+    $label2.Text = "Password for the Domain-Administrator"
+    $form.Controls.Add($label2)
+
+    $textBox2 = New-Object System.Windows.Forms.MaskedTextBox
+    $textBox2.Location = New-Object System.Drawing.Point(10, 90)
+    $textBox2.Size = New-Object System.Drawing.Size(260, 20)
+    $textBox2.PasswordChar = "*"
+    $form.Controls.Add($textBox2)
+
+    $label3 = New-Object System.Windows.Forms.Label
+    $label3.Location = New-Object System.Drawing.Point(10, 120)
+    $label3.Size = New-Object System.Drawing.Size(280, 20)
+    $label3.Text = "Waehlen Sie ein DSRM Passwort"
+    $form.Controls.Add($label3)
+
+    $textBox3 = New-Object System.Windows.Forms.MaskedTextBox
+    $textBox3.Location = New-Object System.Drawing.Point(10, 140)
+    $textBox3.Size = New-Object System.Drawing.Size(260, 20)
+    $textBox3.PasswordChar = "*"
+    $form.Controls.Add($textBox3)
+
+    $label4 = New-Object System.Windows.Forms.Label
+    $label4.Location = New-Object System.Drawing.Point(10, 170)
+    $label4.Size = New-Object System.Drawing.Size(280, 20)
+    $label4.Text = "Password of the Test-User"
+    $form.Controls.Add($label4)
+
+    $textBox4 = New-Object System.Windows.Forms.MaskedTextBox
+    $textBox4.Location = New-Object System.Drawing.Point(10, 190)
+    $textBox4.Size = New-Object System.Drawing.Size(260, 20)
+    $textBox4.PasswordChar = "*"
+    $form.Controls.Add($textBox4)
+
+    $label5 = New-Object System.Windows.Forms.Label
+    $label5.Location = New-Object System.Drawing.Point(10, 220)
+    $label5.Size = New-Object System.Drawing.Size(280, 20)
+    $label5.Text = "Passwort des Firmen Admins"
+    $form.Controls.Add($label5)
+
+    $textBox5 = New-Object System.Windows.Forms.MaskedTextBox
+    $textBox5.Location = New-Object System.Drawing.Point(10, 240)
+    $textBox5.Size = New-Object System.Drawing.Size(260, 20)
+    $textBox5.PasswordChar = "*"
+    $form.Controls.Add($textBox5)
+
+
+
+    $form.Topmost = $true
+
+    $form.Add_Shown({ $textBox.Select() })
+    $result = $form.ShowDialog()
+
+    $array = @()
+    
+    if ($result -eq [System.Windows.Forms.DialogResult]::OK -and ( ($null -notlike $textBox.Text) -and ($null -notlike $textBox2.Text) -and ($null -notlike $textBox3.text) -and ($null -notlike $textBox4.text) -and ($null -notlike $textBox5.text))) {
+        $array += ConvertTo-SecureString $textBox.Text -AsPlainText -Force
+        $array += ConvertTo-SecureString $textBox2.Text -AsPlainText -Force
+        $array += ConvertTo-SecureString $textBox3.Text -AsPlainText -Force
+        $array += ConvertTo-SecureString $textBox4.Text -AsPlainText -Force
+        $array += ConvertTo-SecureString $textBox5.Text -AsPlainText -Force
+        
+        return $array
+    }
+    else {
+        Write-Host "Wrong/Missing Input"
+        Exit
+    }
+}
