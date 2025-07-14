@@ -592,11 +592,11 @@ function CoreSelectorUi{
     $array = @()
 
     if ($result -eq [System.Windows.Forms.DialogResult]::OK -and ( ($textBox.Text -notlike $null) -and ($textBox2.text -notlike $null) -and ($textBox3.text -notlike $null))) {
-        $array += $textBox.Text
-        $array += $textBox2.Text
-        $array += $textBox3.Text
+        $array += [int]$textBox.Text
+        $array += [int]$textBox2.Text
+        $array += [int]$textBox3.Text
         #Check if to many cores are selected
-        $cores = [int]$array[0]+[int]$array[1]+[int]$array[2]
+        $cores = $array[0]+$array[1]+$array[2]
 
         if($cores -gt $NumProcessorCores){Write-Host "Not enought Cores to assign. Please lower the number of Cores to use.";Exit}
 
@@ -878,6 +878,8 @@ function UserInterface {
 
     #array to store the user input
     $ReturnArray = @()
+    #array to store 
+    $CoreArray = CoreSelectorUi
 
 
     #Check if a password input is missing
@@ -904,6 +906,7 @@ function UserInterface {
     <#14.3#>$ReturnArray += RamSelectorUI
     <#15#>$ReturnArray += $SwitchBox.SelectedItem
     <#16#>$ReturnArray += $filedirselection.SelectedPath
+    <#17,18,19#>$ReturnArray += $CoreArray
 
     #Check on missing input in the UserInterface
     foreach ($item in $ReturnArray) { if ($null -eq $item) { return "Missing Input" } }
@@ -923,9 +926,6 @@ function UserInterface {
     if ($false -eq (TestDomainName -DomainName $DomaenenNameText.Text)){return "Wrong Domain name. (Example: hans.local)"}
 
     
-
-
-
     return $ReturnArray 
 
 }
