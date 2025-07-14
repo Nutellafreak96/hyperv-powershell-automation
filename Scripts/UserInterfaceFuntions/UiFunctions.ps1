@@ -200,7 +200,7 @@ function SwitchSelectorUI {
     }
 }
 
-<##>
+<#Function to let user decide how much RAM the VMs should use#>
 function RamSelectorUI {
 
     ###############################################################################
