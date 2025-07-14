@@ -374,3 +374,26 @@ function ServerIPAdressUI {
         Exit
     }
 }
+
+<#Function to let the User select the Directory to store the VMs#>
+function SelectDirUI {
+
+    $form = New-Object System.Windows.Forms.FolderBrowserDialog
+    $form.Description = "Select a Directory to save the VMs"
+    $form.ShowNewFolderButton = $true
+    $form.InitialDirectory = "C:\"
+    $form.OkRequiresInteraction = $false
+
+
+    $result = $form.ShowDialog()
+
+    if ($result -eq [System.Windows.Forms.DialogResult]::OK) {
+
+        return $form.SelectedPath
+    }
+    else{
+        Write-Host "Wrong/Missing Input"
+        Exit
+    }
+
+}
