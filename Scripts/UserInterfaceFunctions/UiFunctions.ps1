@@ -517,6 +517,98 @@ function PasswordUI {
     }
 }
 
+<#Function to get user input on how many cores the VMs should use#>
+function CoreSelectorUi{
+
+    ###############################################################################
+    #                                                                             #
+    #                User Interface to get cpu core input                         # 
+    #                                                                             #
+    ###############################################################################
+    #Get the number of possible processor cores
+    $NumProcessorCores = Get-CimInstance -ClassName Win32_Processor | Select-Object -ExpandProperty NumberOfLogicalProcessors
+        
+
+    $form = New-Object System.Windows.Forms.Form
+    $form.Text = "Processor Cores - VM"
+    $form.Size = New-Object System.Drawing.Size(270, 300)
+    $form.StartPosition = "CenterScreen"
+
+    $okButton = New-Object System.Windows.Forms.Button
+    $okButton.Location = New-Object System.Drawing.Point(65, 230)
+    $okButton.Size = New-Object System.Drawing.Size(60, 20)
+    $okButton.Text = "OK"
+    $okButton.DialogResult = [System.Windows.Forms.DialogResult]::OK
+    $form.AcceptButton = $okButton
+    $form.Controls.Add($okButton)
+
+    $cancelButton = New-Object System.Windows.Forms.Button
+    $cancelButton.Location = New-Object System.Drawing.Point(125, 230)
+    $cancelButton.Size = New-Object System.Drawing.Size(60, 20)
+    $cancelButton.Text = "Cancel"
+    $cancelButton.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
+    $form.CancelButton = $cancelButton
+    $form.Controls.Add($cancelButton)
+
+    $label = New-Object System.Windows.Forms.Label
+    $label.Location = New-Object System.Drawing.Point(10, 20)
+    $label.Size = New-Object System.Drawing.Size(250, 20)
+    $label.Text = "Enter the number of cores to use(DC):"
+    $form.Controls.Add($label)
+
+    $textBox = New-Object System.Windows.Forms.TextBox
+    $textBox.Location = New-Object System.Drawing.Point(10, 40)
+    $textBox.Size = New-Object System.Drawing.Size(235, 20)
+    $form.Controls.Add($textBox)
+
+    $label2 = New-Object System.Windows.Forms.Label
+    $label2.Location = New-Object System.Drawing.Point(10, 70)
+    $label2.Size = New-Object System.Drawing.Size(250, 20)
+    $label2.Text = "Enter the number of cores to use(FS):"
+    $form.Controls.Add($label2)
+
+    $textBox2 = New-Object System.Windows.Forms.TextBox
+    $textBox2.Location = New-Object System.Drawing.Point(10, 90)
+    $textBox2.Size = New-Object System.Drawing.Size(235, 20)
+    $form.Controls.Add($textBox2)
+
+    $label3 = New-Object System.Windows.Forms.Label
+    $label3.Location = New-Object System.Drawing.Point(10, 120)
+    $label3.Size = New-Object System.Drawing.Size(250, 20)
+    $label3.Text = "Enter the number of cores to use(TS):"
+    $form.Controls.Add($label3)
+
+    $textBox3 = New-Object System.Windows.Forms.TextBox
+    $textBox3.Location = New-Object System.Drawing.Point(10, 140)
+    $textBox3.Size = New-Object System.Drawing.Size(235, 20)
+    $form.Controls.Add($textBox3)
+
+
+    $form.Topmost = $true
+
+    $form.Add_Shown({ $textBox.Select() })
+    $result = $form.ShowDialog()
+
+    $array = @()
+
+    if ($result -eq [System.Windows.Forms.DialogResult]::OK -and ( ($textBox.Text -notlike $null) -and ($textBox2.text -notlike $null) -and ($textBox3.text -notlike $null))) {
+        $array += $textBox.Text
+        $array += $textBox2.Text
+        $array += $textBox3.Text
+        #Check if to many cores are selected
+        $cores = [int]$array[0]+[int]$array[1]+[int]$array[2]
+
+        if($cores -gt $NumProcessorCores){Write-Host "Not enought Cores to assign. Please lower the number of Cores to use.";Exit}
+
+        return $array
+    }
+    else {
+        Write-Host "Wrong/Missing Input"
+        Exit
+    }
+    
+}
+
 ##################################################################
 <#function to check the password policies#>
 function TestPasswordPolicy {
