@@ -127,4 +127,5 @@ $LogFilePath = "$($KundeSpeicherort)\$($Kunde)\ErrorLog.txt"
 #ServerIPAdressUI #get input from the user about the ip-addresses the vms should use
 #SelectDirUI #let the user select the directory to store the vms
 #PasswordUI #let the user input the password used by the script
-UserInterface #userinterface to combine all of the above functions
+#UserInterface #userinterface to combine all of the above functions
+$Daten
