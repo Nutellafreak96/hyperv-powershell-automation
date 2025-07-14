@@ -378,6 +378,12 @@ function ServerIPAdressUI {
 <#Function to let the User select the Directory to store the VMs#>
 function SelectDirUI {
 
+    ###############################################################################
+    #                                                                             #
+    #                User Interface to select the VM dir                          # 
+    #                                                                             #
+    ###############################################################################
+
     $form = New-Object System.Windows.Forms.FolderBrowserDialog
     $form.Description = "Select a Directory to save the VMs"
     $form.ShowNewFolderButton = $true
