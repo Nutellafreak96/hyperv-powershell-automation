@@ -278,3 +278,99 @@ function RamSelectorUI {
         Return "Wrong/Missing Input"
     }
 }
+
+<##>
+function ServerIPAdressUI {
+    ###########################################################
+    #                                                         #
+    #                IP Addresses -- Server                   #
+    #                                                         #
+    ###########################################################
+    
+
+    $form = New-Object System.Windows.Forms.Form
+    $form.Text = "IP-Adressen der Server"
+    $form.Size = New-Object System.Drawing.Size(270, 300)
+    $form.StartPosition = "CenterScreen"
+
+    $okButton = New-Object System.Windows.Forms.Button
+    $okButton.Location = New-Object System.Drawing.Point(65, 230)
+    $okButton.Size = New-Object System.Drawing.Size(60, 20)
+    $okButton.Text = "OK"
+    $okButton.DialogResult = [System.Windows.Forms.DialogResult]::OK
+    $form.AcceptButton = $okButton
+    $form.Controls.Add($okButton)
+
+    $cancelButton = New-Object System.Windows.Forms.Button
+    $cancelButton.Location = New-Object System.Drawing.Point(125, 230)
+    $cancelButton.Size = New-Object System.Drawing.Size(60, 20)
+    $cancelButton.Text = "Cancel"
+    $cancelButton.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
+    $form.CancelButton = $cancelButton
+    $form.Controls.Add($cancelButton)
+
+    $label = New-Object System.Windows.Forms.Label
+    $label.Location = New-Object System.Drawing.Point(10, 20)
+    $label.Size = New-Object System.Drawing.Size(250, 20)
+    $label.Text = "IP Adresse für den DC eingeben:"
+    $form.Controls.Add($label)
+
+    $textBox = New-Object System.Windows.Forms.TextBox
+    $textBox.Location = New-Object System.Drawing.Point(10, 40)
+    $textBox.Size = New-Object System.Drawing.Size(235, 20)
+    $form.Controls.Add($textBox)
+
+    $label2 = New-Object System.Windows.Forms.Label
+    $label2.Location = New-Object System.Drawing.Point(10, 70)
+    $label2.Size = New-Object System.Drawing.Size(250, 20)
+    $label2.Text = "IP Adresse für den FS eingeben:"
+    $form.Controls.Add($label2)
+
+    $textBox2 = New-Object System.Windows.Forms.TextBox
+    $textBox2.Location = New-Object System.Drawing.Point(10, 90)
+    $textBox2.Size = New-Object System.Drawing.Size(235, 20)
+    $form.Controls.Add($textBox2)
+
+    $label3 = New-Object System.Windows.Forms.Label
+    $label3.Location = New-Object System.Drawing.Point(10, 120)
+    $label3.Size = New-Object System.Drawing.Size(250, 20)
+    $label3.Text = "IP Adresse für den TS eingeben:"
+    $form.Controls.Add($label3)
+
+    $textBox3 = New-Object System.Windows.Forms.TextBox
+    $textBox3.Location = New-Object System.Drawing.Point(10, 140)
+    $textBox3.Size = New-Object System.Drawing.Size(235, 20)
+    $form.Controls.Add($textBox3)
+
+    $label4 = New-Object System.Windows.Forms.Label
+    $label4.Location = New-Object System.Drawing.Point(10, 170)
+    $label4.Size = New-Object System.Drawing.Size(250, 20)
+    $label4.Text = "IP Adresse des DeafaultGateway eingeben:"
+    $form.Controls.Add($label4)
+
+    $textBox4 = New-Object System.Windows.Forms.TextBox
+    $textBox4.Location = New-Object System.Drawing.Point(10, 190)
+    $textBox4.Size = New-Object System.Drawing.Size(235, 20)
+    $form.Controls.Add($textBox4)
+
+
+    $form.Topmost = $true
+
+    $form.Add_Shown({ $textBox.Select() })
+    $result = $form.ShowDialog()
+
+    $array = @()
+
+    if ($result -eq [System.Windows.Forms.DialogResult]::OK -and ( ($textBox.Text -notlike $null) -and ($textBox2.text -notlike $null) -and ($textBox3.text -notlike $null) -and ($textBox4.text -notlike $null))) {
+        $array += $textBox.Text
+        $array += $textBox2.Text
+        $array += $textBox3.Text
+        $array += $textBox4.Text
+
+        return $array
+    }
+    else {
+        Write-Host "Wrong/Missing Input"
+        Exit
+    }
+}
