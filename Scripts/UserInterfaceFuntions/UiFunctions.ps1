@@ -516,3 +516,324 @@ function PasswordUI {
         Exit
     }
 }
+
+##################################################################
+<#function to check the password policies#>
+function TestPasswordPolicy {
+    param (
+        [string]$Password
+    )
+
+    $lengthValid = ($Password.Length -ge 12)
+    $hasUpper = $Password -match '[A-Z]'
+    $hasLower = $Password -match '[a-z]'
+    $hasDigit = $Password -match '\d'
+    $hasSpecial = $Password -match '[+-.,\\\?\(\)\!\$\%\&\*\/]'
+
+    if ($lengthValid -and $hasUpper -and $hasLower -and $hasDigit -and $hasSpecial) {
+        return $true
+    }
+
+    return $false
+}
+<#Test the correctness of the Domain name input#>
+function TestDomainName {
+    param (
+        [string]$DomainName
+    )
+    $hasDot = $DomainName -match '[A-Za-z0-9]+(\.[A-Za-z0-9]+)+'
+
+    if($HasDot){return $true}
+    
+    return $false
+}
+<#Userinterface to combine all inputfields from the functions above#>
+
+function UserInterface {
+
+    ###############################################################################
+    #                                                                             #
+    #                User Interface to get all inputs needed                      # 
+    #                                                                             #
+    ###############################################################################
+
+    $window = New-Object System.Windows.Forms.Form
+    $window.Text = "User Interface to create the VMs"
+    $window.Size = New-Object System.Drawing.Size(700, 550)
+    $window.StartPosition = "CenterScreen"
+
+    $OkButtonUi = New-Object System.Windows.Forms.Button
+    $OkButtonUi.Location = New-Object System.Drawing.Point(250, 475)
+    $OkButtonUi.Size = New-Object System.Drawing.Size(100, 20)
+    $OkButtonUi.Text = 'OK'
+    $OkButtonUi.DialogResult = [System.Windows.Forms.DialogResult]::OK
+    $window.AcceptButton = $OkButtonUi
+    $window.Controls.Add($OkButtonUi)
+
+    $CancelButtonUi = New-Object System.Windows.Forms.Button
+    $CancelButtonUi.Location = New-Object System.Drawing.Point(350, 475)
+    $CancelButtonUi.Size = New-Object System.Drawing.Size(100, 20)
+    $CancelButtonUi.Text = 'Cancel'
+    $CancelButtonUi.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
+    $window.CancelButton = $CancelButtonUi
+    $window.Controls.Add($CancelButtonUi)
+
+    #UI to get input about the Domain of the firm
+    $KdNameWindow = New-Object System.Windows.Forms.Label
+    $KdNameWindow.Location = New-Object System.Drawing.Point(35, 20)
+    $KdNameWindow.Size = New-Object System.Drawing.Size(280, 20)
+    $KdNameWindow.Text = "Firm name"
+    $window.Controls.Add($KdNameWindow)
+    $KdNameWindowText = New-Object System.Windows.Forms.TextBox
+    $KdNameWindowText.Location = New-Object System.Drawing.Point(35, 40)
+    $KdNameWindowText.Size = New-Object System.Drawing.Size(280, 20)
+    $window.Controls.Add($KdNameWindowText)
+
+    $DomaenenNameWindow = New-Object System.Windows.Forms.Label
+    $DomaenenNameWindow.Location = New-Object System.Drawing.Point(35, 70)
+    $DomaenenNameWindow.Size = New-Object System.Drawing.Size(280, 20)
+    $DomaenenNameWindow.Text = "Domain name:"
+    $window.Controls.Add($DomaenenNameWindow)
+
+    $DomaenenNameText = New-Object System.Windows.Forms.TextBox
+    $DomaenenNameText.Location = New-Object System.Drawing.Point(35, 90)
+    $DomaenenNameText.Size = New-Object System.Drawing.Size(280, 20)
+    $window.Controls.Add($DomaenenNameText)
+
+    $NetBiosWindow = New-Object System.Windows.Forms.Label
+    $NetBiosWindow.Location = New-Object System.Drawing.Point(35, 120)
+    $NetBiosWindow.Size = New-Object System.Drawing.Size(280, 20)
+    $NetBiosWindow.Text = "NetBIOS name:"
+    $window.Controls.Add($NetBiosWindow)
+
+    $NetBiosText = New-Object System.Windows.Forms.TextBox
+    $NetBiosText.Location = New-Object System.Drawing.Point(35, 140)
+    $NetBiosText.Size = New-Object System.Drawing.Size(280, 20)
+    $window.Controls.Add($NetBiosText)
+
+    $OuNameWindow = New-Object System.Windows.Forms.Label
+    $OuNameWindow.Location = New-Object System.Drawing.Point(35, 170)
+    $OuNameWindow.Size = New-Object System.Drawing.Size(280, 20)
+    $OuNameWindow.Text = "Organizational Unit name:"
+    $window.Controls.Add($OuNameWindow)
+
+    $OuNameText = New-Object System.Windows.Forms.TextBox
+    $OuNameText.Location = New-Object System.Drawing.Point(35, 190)
+    $OuNameText.Size = New-Object System.Drawing.Size(280, 20)
+    $window.Controls.Add($OuNameText)
+
+
+    #UI to get the IP-Adresses
+    $DcIpWindow = New-Object system.Windows.forms.Label
+    $DcIpWindow.Location = New-Object System.Drawing.Point(370, 20)
+    $DcIpWindow.Size = New-Object System.Drawing.Size(280, 20)
+    $DcIpWindow.Text = "DC IP-Address"
+    $window.Controls.Add($DcIpWindow)
+    $DcIPText = New-Object System.Windows.Forms.TextBox
+    $DcIPText.Location = New-Object System.Drawing.Point(370, 40)
+    $DcIPText.Size = New-Object System.Drawing.Size(280, 20)
+    $window.Controls.Add($DcIPText)
+
+    $FsIpWindow = New-Object System.Windows.Forms.Label
+    $FsIpWindow.Location = New-Object System.Drawing.Point(370, 70)
+    $FsIpWindow.Size = New-Object System.Drawing.Size(280, 20)
+    $FsIpWindow.Text = "FS IP-Address"
+    $window.Controls.Add($FsIpWindow)
+    $FsIpText = New-Object System.Windows.Forms.TextBox
+    $FsIpText.Location = New-Object System.Drawing.Point(370, 90)
+    $FsIpText.Size = New-Object System.Drawing.Size(280, 20)
+    $window.Controls.Add($FsIpText)
+
+    $TsIpWindow = New-Object System.Windows.Forms.Label
+    $TsIpWindow.Location = New-Object System.Drawing.Point(370, 120)
+    $TsIpWindow.Size = New-Object System.Drawing.Size(280, 20)
+    $TsIpWindow.Text = "TS IP-Address"
+    $window.Controls.Add($TsIpWindow)
+    $TsIpText = New-Object System.Windows.Forms.TextBox
+    $TsIpText.Location = New-Object System.Drawing.Point(370, 140)
+    $TsIpText.Size = New-Object System.Drawing.Size(280, 20)
+    $window.Controls.Add($TsIpText)
+
+    $GatewayIpWindows = New-Object System.Windows.Forms.Label
+    $GatewayIpWindows.Location = New-Object System.Drawing.Point(370, 170)
+    $GatewayIpWindows.Size = New-Object System.Drawing.Size(280, 20)
+    $GatewayIpWindows.Text = "Standard Gateway IP-Adress"
+    $window.Controls.Add($GatewayIpWindows)
+
+    $GatewayIpText = New-Object System.Windows.Forms.TextBox
+    $GatewayIpText.Location = New-Object System.Drawing.Point(370, 190)
+    $GatewayIpText.Size = New-Object System.Drawing.Size(280, 20)
+    $window.Controls.Add($GatewayIpText)
+
+
+    #UI to get input for the passwords
+    $LocalAdminWindow = New-Object System.Windows.Forms.Label
+    $LocalAdminWindow.Location = New-Object System.Drawing.Point(35, 330)
+    $LocalAdminWindow.Size = New-Object System.Drawing.Size(280, 20)
+    $LocalAdminWindow.Text = "Password of the local/Domain Administrator"
+    $window.Controls.Add($LocalAdminWindow)
+
+    $LocalAdminText = New-Object System.Windows.Forms.MaskedTextBox
+    $LocalAdminText.Location = New-Object System.Drawing.Point(35, 350)
+    $LocalAdminText.Size = New-Object System.Drawing.Size(280, 20)
+    $LocalAdminText.PasswordChar = "*"
+    $window.Controls.Add($LocalAdminText)
+
+    $DsrmPwWindow = New-Object System.Windows.Forms.Label
+    $DsrmPwWindow.Location = New-Object System.Drawing.Point(370, 330)
+    $DsrmPwWindow.Size = New-Object System.Drawing.Size(280, 20)
+    $DsrmPwWindow.Text = "Choose a DSRM password"
+    $window.Controls.Add($DsrmPwWindow)
+
+    $DsrmPwText = New-Object System.Windows.Forms.MaskedTextBox
+    $DsrmPwText.Location = New-Object System.Drawing.Point(370, 350)
+    $DsrmPwText.Size = New-Object System.Drawing.Size(280, 20)
+    $DsrmPwText.PasswordChar = "*"
+    $window.Controls.Add($DsrmPwText)
+
+    $TestUserWindow = New-Object System.Windows.Forms.Label
+    $TestUserWindow.Location = New-Object System.Drawing.Point(35, 380)
+    $TestUserWindow.Size = New-Object System.Drawing.Size(280, 20)
+    $TestUserWindow.Text = "Password of the Test-User"
+    $window.Controls.Add($TestUserWindow)
+
+    $TestUserText = New-Object System.Windows.Forms.MaskedTextBox
+    $TestUserText.Location = New-Object System.Drawing.Point(35, 400)
+    $TestUserText.Size = New-Object System.Drawing.Size(280, 20)
+    $TestUserText.PasswordChar = "*"
+    $window.Controls.Add($TestUserText)
+
+    $DomainAdminChambionic = New-Object System.Windows.Forms.Label
+    $DomainAdminChambionic.Location = New-Object System.Drawing.Point(370, 380)
+    $DomainAdminChambionic.Size = New-Object System.Drawing.Size(280, 20)
+    $DomainAdminChambionic.Text = "Password of the firm Admin"
+    $window.Controls.Add($DomainAdminChambionic)
+
+    $DomainAdminChambionicText = New-Object System.Windows.Forms.MaskedTextBox
+    $DomainAdminChambionicText.Location = New-Object System.Drawing.Point(370, 400)
+    $DomainAdminChambionicText.Size = New-Object System.Drawing.Size(280, 20)
+    $DomainAdminChambionicText.PasswordChar = "*"
+    $window.Controls.Add($DomainAdminChambionicText)
+
+    
+    #Ordner auswahl für das speichern der vms
+    $folderselection = New-Object System.Windows.Forms.FolderBrowserDialog
+    $folderselection.Description = "Choose the location of the VM"
+    $folderselection.ShowNewFolderButton = $true
+    $folderselection.SelectedPath = "C:\"
+    #$folderselection.InitialDirectory = "C:\"
+    #$folderselection.OkRequiresInteraction = $false
+
+    #ordner auswahl für die vorbereitungsdateien
+    $filedirselection = New-Object System.Windows.Forms.FolderBrowserDialog
+    $filedirselection.Description = "Choose the location of the preparation files"
+    $filedirselection.ShowNewFolderButton = $true
+    $filedirselection.SelectedPath = "C:\"
+    #$filedirselection.InitialDirectory = "C:\"
+    #$filedirselection.OkRequiresInteraction = $false
+
+
+    #UI to select the Networkswitch
+
+    $Switch = New-Object System.Windows.Forms.Form
+    $Switch.Text = "Switch Selector"
+    $Switch.Size = New-Object System.Drawing.Size(350, 400)
+    $Switch.StartPosition = "CenterScreen"
+
+    $OkButtonSwitch = New-Object System.Windows.Forms.Button
+    $OkButtonSwitch.Location = New-Object System.Drawing.Point(105, 327)
+    $OkButtonSwitch.Size = New-Object System.Drawing.Size(60, 20)
+    $OkButtonSwitch.Text = "OK"
+    $OkButtonSwitch.DialogResult = [System.Windows.Forms.DialogResult]::OK
+    $Switch.AcceptButton = $OkButtonSwitch
+    $Switch.Controls.Add($OkButtonSwitch)
+
+    $cancelButton = New-Object System.Windows.Forms.Button
+    $cancelButton.Location = New-Object System.Drawing.Point(165, 327)
+    $cancelButton.Size = New-Object System.Drawing.Size(60, 20)
+    $cancelButton.Text = "Cancel"
+    $cancelButton.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
+    $Switch.CancelButton = $cancelButton
+    $Switch.Controls.Add($cancelButton)
+
+    $SwitchWindow = New-Object System.Windows.Forms.Label
+    $SwitchWindow.Location = New-Object System.Drawing.Point(10, 20)
+    $SwitchWindow.Size = New-Object System.Drawing.Size(230, 20)
+    $SwitchWindow.Text = "Select the Networkswitch to use:"
+    $Switch.Controls.Add($SwitchWindow)
+
+    $SwitchBox = New-Object System.Windows.Forms.ListBox
+    $SwitchBox.Location = New-Object System.Drawing.Point(10, 40)
+    $SwitchBox.Size = New-Object System.Drawing.Size(316, 20)
+    $SwitchBox.Height = 275
+
+    $VMSwitches = Get-VMSwitch | Select-Object -Property Name
+    [void] $SwitchBox.Items.AddRange($VMSwitches.Name)
+    $SwitchBox.SelectedIndex = 0
+    $Switch.Add_Shown({ $SwitchBox.Focus() })
+
+    $Switch.Controls.Add($SwitchBox)
+    
+    #set the windows infront of everything
+    $window.TopMost = $true
+    $window.TopLevel = $true
+
+    #ecept the RamSelectorUi every Ui window will be prompted here
+    if ($folderselection.ShowDialog($window) -eq [System.Windows.Forms.DialogResult]::Cancel) { Exit }    
+    if ($filedirselection.ShowDialog($window) -eq [System.Windows.Forms.DialogResult]::Cancel) { Exit }
+    if ($window.ShowDialog() -eq [System.Windows.Forms.DialogResult]::Cancel) { Exit }
+    if ($Switch.ShowDialog($window) -eq [System.Windows.Forms.DialogResult]::Cancel) { Exit }
+
+    #array to store the user input
+    $ReturnArray = @()
+
+
+    #Check if a password input is missing
+    if ((0 -eq $LocalAdminText.TextLength) -and (0 -eq $DomainAdminText.TextLength) -and (0 -eq $DsrmPwText.TextLength) -and (0 -eq $TestUserText.TextLength) -and (0 -eq $LAdminUserTextDC.TextLength) ) 
+    { return "Missing password" }
+
+    #fill the array with the input
+    <#0#>$ReturnArray += $folderselection.SelectedPath 
+    <#1#>$ReturnArray += $KdNameWindowText.Text
+    <#2#>$ReturnArray += $DomaenenNameText.Text
+    <#3#>$ReturnArray += $NetBiosText.Text
+    <#4#> $ReturnArray += $OuNameText.Text
+    <#5#>$ReturnArray += $DcIPText.Text
+    <#6#>$ReturnArray += $FsIpText.Text
+    <#7#>$ReturnArray += $TsIpText.Text
+    <#8#>$ReturnArray += $GatewayIpText.Text
+    <#9#>$ReturnArray += ConvertTo-SecureString $LocalAdminText.Text -AsPlainText -Force
+    #<#10#>$ReturnArray += ConvertTo-SecureString $DomainAdminText.Text -AsPlainText -Force
+    <#11#>$ReturnArray += ConvertTo-SecureString $DsrmPwText.Text -AsPlainText -Force
+    <#12#>$ReturnArray += ConvertTo-SecureString $TestUserText.Text -AsPlainText -Force
+    <#13#>$ReturnArray += ConvertTo-SecureString $DomainAdminChambionicText.Text -AsPlainText -Force
+    <#14.1#>$ReturnArray += RamSelectorUI
+    <#14.2#>$ReturnArray += RamSelectorUI
+    <#14.3#>$ReturnArray += RamSelectorUI
+    <#15#>$ReturnArray += $SwitchBox.SelectedItem
+    <#16#>$ReturnArray += $filedirselection.SelectedPath
+
+    #Check on missing input in the UserInterface
+    foreach ($item in $ReturnArray) { if ($null -eq $item) { return "Missing Input" } }
+
+    #Check if the password policies are met
+    if ($false -eq (TestPasswordPolicy -Password $DsrmPwText)) { return "A password does not meet the password policy requirements (at least 12 characters, numbers, special characters, uppercase and lowercase letters)" }
+    if ($false -eq (TestPasswordPolicy -Password $TestUserText)) { return "A password does not meet the password policy requirements (at least 12 characters, numbers, special characters, uppercase and lowercase letters)" }
+    if ($false -eq (TestPasswordPolicy -Password $DomainAdminChambionicText)) { return "A password does not meet the password policy requirements (at least 12 characters, numbers, special characters, uppercase and lowercase letters)" }
+
+    #Check if the Ip-Addresses are correct
+    $RegExIpAdress = '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+'
+    for ($i = 5; $i -le 8; $i++) {
+        if ($ReturnArray[$i] -notmatch $RegExIpAdress) { return "Wrong IP-Address Input (Example: 10.20.30.40)" }
+    }
+    
+    #Check if the Domain name is correct
+    if ($false -eq (TestDomainName -DomainName $DomaenenNameText.Text)){return "Wrong Domain name. (Example: hans.local)"}
+
+    
+
+
+
+    return $ReturnArray 
+
+}
