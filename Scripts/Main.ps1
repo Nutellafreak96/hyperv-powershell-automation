@@ -118,17 +118,12 @@ $LogFilePath = "$($KundeSpeicherort)\$($Kunde)\ErrorLog.txt"
 #How to write to LogFile
 #Write-Output "$(Get-TimeStamp) -- Message" | Out-File $LogFilePath -append
 
+<#Functions to Handle small things about VMs#>
 
-<#Main-Part#>
-#FirmName #get input from the user about the firm name
-#DomainValueUI #get input from the user for important domain values
-#SwitchSelectorUI #let the user decide which networkswitch the vms use
-#RamSelectorUI #let the user decied how much ram the vms use
-#ServerIPAdressUI #get input from the user about the ip-addresses the vms should use
-#SelectDirUI #let the user select the directory to store the vms
-#PasswordUI #let the user input the password used by the script
-#UserInterface #userinterface to combine all of the above functions
-#$Daten
+#Funktion um einen Zeitstempel zu erstellen z.B. für Logs
+function Get-TimeStamp {
+    return "[{0:dd/MM/yy} {0:HH:mm:ss}]" -f (Get-Date)
+}
 
 #Erstellen der VM´s
 function CreateVMs {
@@ -175,3 +170,51 @@ function RestartVMs {
 
 }
 
+
+############################################################
+#Main (Aufrufen von Funktionen und Abarbeitung des Scripts)#
+############################################################
+
+#FirmName #get input from the user about the firm name
+#DomainValueUI #get input from the user for important domain values
+#SwitchSelectorUI #let the user decide which networkswitch the vms use
+#RamSelectorUI #let the user decied how much ram the vms use
+#ServerIPAdressUI #get input from the user about the ip-addresses the vms should use
+#SelectDirUI #let the user select the directory to store the vms
+#PasswordUI #let the user input the password used by the script
+#UserInterface #userinterface to combine all of the above functions
+#$Daten
+
+#Erstellen des Ordners fuer die Vms des Kunden
+CreateCustomerDir -KundeSpeicherort $KundeSpeicherort -KundenName $Kunde -DateienSpeicherort $DateienSpeicherort 
+Write-Output "$(Get-TimeStamp) -- Skript nach dem Erstellen der Ordnerstruktur und Kopieren der vhdx" | Out-File $LogFilePath -append
+
+#Erstelln der VMs
+CreateVMs
+Write-Output "$(Get-TimeStamp) -- VMs erstellt" | Out-File $LogFilePath -append
+
+#Bearbeiten der Anzahl der virtuellen Prozessoren und des Arbeitsspeichers
+UpdateVMRessources -DC $VM_Name_DC -FS $VM_Name_FS -TS $VM_Name_TS -CoreDc $CoreDc -CoreFs $CoreFs -CoreTs $CoreTs -RamDc $RamDc -RamFs $RamFs -RamTs $RamTs
+
+Write-Output "$(Get-TimeStamp) -- VM Ressourcen angepasst" | Out-File $LogFilePath -append
+
+
+#Starten der VMs
+StartVMs
+
+Write-Output "$(Get-TimeStamp) -- VMs gestartet" | Out-File $LogFilePath -append
+
+
+Start-Sleep -Seconds 240 #4min warten damit Server online sind
+###########################
+
+
+Write-Output "$(Get-TimeStamp) -- Windows Initialisierung fertig" | Out-File $LogFilePath -append
+
+#Kopieren der wichtigsten Dateien auf den Servern
+CopyFiles -Schnittstelle $CopyService -DC $VM_Name_DC -FS $VM_Name_FS -TS $VM_Name_TS -Dateienspeicherort $DateienSpeicherort -Credential $LCredential
+Write-Output "$(Get-TimeStamp) -- Kopieren der Dateien fertig" | Out-File $LogFilePath -append
+
+#Loeschen der Antwortdatei zum ueberspringen von Windows einrichtungspunkten | Löschen der unattend.xml
+DeleteFiles -DC $VM_Name_DC -FS $VM_Name_FS -TS $VM_Name_TS -Credential $LCredential
+Write-Output "$(Get-TimeStamp) -- Löschen Sicherheitsrelevanter Dateien fertig" | Out-File $LogFilePath -append
