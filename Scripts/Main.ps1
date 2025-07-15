@@ -128,4 +128,50 @@ $LogFilePath = "$($KundeSpeicherort)\$($Kunde)\ErrorLog.txt"
 #SelectDirUI #let the user select the directory to store the vms
 #PasswordUI #let the user input the password used by the script
 #UserInterface #userinterface to combine all of the above functions
-$Daten
+#$Daten
+
+#Erstellen der VM´s
+function CreateVMs {
+    New-VM @DC | Out-Null
+    New-VM @FS | Out-Null
+    New-VM @TS | Out-Null
+    
+    #Erstellen und hinzufuegen einer neuen virtuellen Festplatte fuer den FS
+    #Laufwerk an VM fuer FS Haengen (G:Daten [500MB])
+    New-VHD -Fixed -Path "$($KundeSpeicherort)\$($Kunde)\FS\fs.vhdx" -SizeBytes 10MB | Out-Null
+    Add-VMHardDiskDrive -VMName $VM_Name_FS  -Path "$($KundeSpeicherort)\$($Kunde)\FS\fs.vhdx" 
+}
+#Löschen der VM´s
+function DeleteVMs {
+    Remove-VM -Name $VM_Name_DC -Force
+    Remove-VM -Name $VM_Name_FS -Force
+    Remove-VM -Name $VM_Name_TS -Force
+}
+
+function StartVMs {   
+    Start-VM -Name $VM_Name_DC -AsJob | Out-Null
+    Start-VM -Name $VM_Name_FS -AsJob | Out-Null
+    Start-VM -Name $VM_Name_TS -AsJob | Out-Null
+    Get-Job | Wait-Job | Out-Null
+    Get-Job | Where-Object State -like 'Completed' | Remove-Job | Out-Null
+
+}
+#Stoppen der VM´s
+function StopVMs {
+
+    Stop-VM -Name $VM_Name_DC -AsJob | Out-Null
+    Stop-VM -Name $VM_Name_FS -AsJob | Out-Null
+    Stop-VM -Name $VM_Name_TS -AsJob | Out-Null
+    Get-Job | Wait-Job | Out-Null
+    Get-Job | Where-Object State -like 'Completed' | Remove-Job | Out-Null
+}
+#Neustarten der VMs
+function RestartVMs {
+    Restart-VM -Name $VM_Name_DC -AsJob -Force | Out-Null
+    Restart-VM -Name $VM_Name_FS -AsJob -Force | Out-Null
+    Restart-VM -Name $VM_Name_TS -AsJob -Force | Out-Null
+    Get-Job | Wait-Job | Out-Null
+    Get-Job | Where-Object State -like 'Completed' | Remove-Job | Out-Null
+
+}
+
