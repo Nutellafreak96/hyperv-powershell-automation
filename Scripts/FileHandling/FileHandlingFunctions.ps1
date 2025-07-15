@@ -1,6 +1,4 @@
-
-
-#Erstellen des Ordners für die VM´s des Kunden und kopieren der vorbereiteten VHDX
+<#Create Directorys for the Firm VMs and copy the prepared VHDX#>
 function CreateCustomerDir {
 
     param(
@@ -36,4 +34,33 @@ function CreateCustomerDir {
 
 
 }
+<#Enable Copy Service on VMs and Create Directory on VMs to copy necessary files to it#>
+function CopyFiles {
+    param(
+        [String]$Schnittstelle,
+        [string]$DC,
+        [string]$FS,
+        [String]$TS,
+        [string]$DateienSpeicherort,
+        [pscredential]$Credential
+    )
+    #Aktivieren der Möglichkeit dateien vom Host in eine VM zu Kopieren
+    Enable-VMIntegrationService -VMName $DC -Name $Schnittstelle
+    Enable-VMIntegrationService -VMName $FS -Name $Schnittstelle
+    Enable-VMIntegrationService -VMName $TS -Name $Schnittstelle
 
+    #Erstellen eines temp Ordners in den Vms
+    Invoke-Command -VMName $DC -ScriptBlock { New-Item -Path "C:\" -ItemType Directory -Name "temp" | Out-Null } -Credential $Credential
+    Invoke-Command -VMName $FS  -ScriptBlock { New-Item -Path "C:\" -ItemType Directory -Name "temp" | Out-Null } -Credential $Credential 
+    Invoke-Command -VMName $TS  -ScriptBlock { New-Item -Path "C:\" -ItemType Directory -Name "temp" | Out-Null } -Credential $Credential 
+
+    #Kopieren der Dateien in die richtige VM    
+    Copy-VMFile -DestinationPath "C:\temp\Dateiserver.xml" -FileSource Host -VMName $FS -SourcePath "$($DateienSpeicherort)\Bereitstellungskonfiguration.xml" -CreateFullPath | Out-Null
+    Copy-VMFile -DestinationPath "C:\temp\DefaultApps.xml" -FileSource Host -VMName $DC -SourcePath "$($DateienSpeicherort)\chromedefault.xml" -CreateFullPath | Out-Null
+    
+    #Nutzen einer Session zum DC um den Ordner kopieren zu können
+    $DcS = New-PSSession -VMName $DC -Credential $Credential
+    Copy-Item -ToSession $DcS -Destination "C:\temp\" -Path "$($DateienSpeicherort)\{812FABB7-FDB3-4A46-8E8D-85BD985BA327}" -Recurse
+    Get-PSSession | Remove-PSSession
+    
+}
