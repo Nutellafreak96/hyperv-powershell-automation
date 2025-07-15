@@ -64,3 +64,17 @@ function CopyFiles {
     Get-PSSession | Remove-PSSession
     
 }
+
+<#Delete the unattend files from the vm because they secure relevant information to the admin users on the systems#>
+function DeleteFiles {
+    param(
+        [string]$DC,
+        [string]$FS,
+        [string]$TS,
+        [pscredential]$Credential
+    )
+
+    Invoke-Command -VMName $DC -ScriptBlock { Remove-Item -Path "C:\Windows\System32\Sysprep\unattend.*" -Force } -Credential $Credential
+    Invoke-Command -VMName $FS -ScriptBlock { Remove-Item -Path "C:\Windows\System32\Sysprep\unattend.*" -Force } -Credential $Credential
+    Invoke-Command -VMName $TS -ScriptBlock { Remove-Item -Path "C:\Windows\System32\Sysprep\unattend.*" -Force } -Credential $Credential
+}
