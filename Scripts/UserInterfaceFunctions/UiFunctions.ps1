@@ -279,7 +279,7 @@ function RamSelectorUI {
     }
 }
 
-<##>
+<#Function to get input from the user about the static IP-Addresses the VM should have#>
 function ServerIPAdressUI {
     ###########################################################
     #                                                         #
@@ -289,7 +289,7 @@ function ServerIPAdressUI {
     
 
     $form = New-Object System.Windows.Forms.Form
-    $form.Text = "IP-Adressen der Server"
+    $form.Text = "IP-Adressen of the Server"
     $form.Size = New-Object System.Drawing.Size(270, 300)
     $form.StartPosition = "CenterScreen"
 
@@ -312,7 +312,7 @@ function ServerIPAdressUI {
     $label = New-Object System.Windows.Forms.Label
     $label.Location = New-Object System.Drawing.Point(10, 20)
     $label.Size = New-Object System.Drawing.Size(250, 20)
-    $label.Text = "IP Adresse für den DC eingeben:"
+    $label.Text = "Enter the IP:"
     $form.Controls.Add($label)
 
     $textBox = New-Object System.Windows.Forms.TextBox
