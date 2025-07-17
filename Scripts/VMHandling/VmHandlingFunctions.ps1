@@ -34,3 +34,20 @@ function ChangeMacAddress {
     Set-VMNetworkAdapter -VMName $FS -StaticMacAddress $FSMacAddress
     Set-VMNetworkAdapter -VMName $TS -StaticMacAddress $TSMacAddress
 }
+
+<#Change the IP Addresses of the Windows Server on the VMs to static IP Adresses and install the Fileserver Featuer on the FS VM#>
+function ChangeVMSettings {
+    param(
+        [string]$DC,
+        [string]$FS,
+        [string]$TS,
+        [pscredential]$Credential
+    )
+
+    #Den VMs eine statische IP zuweisen, sowie den Computernamen aendern
+    Invoke-Command -VMName $DC -FilePath ".\VMHandling\ChangeIP_rename_DC.ps1" -Credential $Credential -AsJob | Out-Null
+    Invoke-Command -VMName $FS -FilePath ".\DeployFileServerRole.ps1" -Credential $Credential -AsJob | Out-Null
+    Invoke-Command -VMName $TS -FilePath ".\VMHandling\ChangeIp_Rename_TS.ps1" -Credential $Credential -AsJob | Out-Null
+    Get-Job | Wait-Job | Out-Null
+    Get-Job | Where-Object State -like 'Completed' | Remove-Job | Out-Null
+}
