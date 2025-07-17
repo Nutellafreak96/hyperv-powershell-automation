@@ -218,3 +218,26 @@ Write-Output "$(Get-TimeStamp) -- Kopieren der Dateien fertig" | Out-File $LogFi
 #Loeschen der Antwortdatei zum ueberspringen von Windows einrichtungspunkten | Löschen der unattend.xml
 DeleteFiles -DC $VM_Name_DC -FS $VM_Name_FS -TS $VM_Name_TS -Credential $LCredential
 Write-Output "$(Get-TimeStamp) -- Löschen Sicherheitsrelevanter Dateien fertig" | Out-File $LogFilePath -append
+
+#Loeschen der Antwortdatei zum ueberspringen von Windows einrichtungspunkten | Löschen der unattend.xml
+DeleteFiles -DC $VM_Name_DC -FS $VM_Name_FS -TS $VM_Name_TS -Credential $LCredential
+Write-Output "$(Get-TimeStamp) -- Löschen Sicherheitsrelevanter Dateien fertig" | Out-File $LogFilePath -append
+
+#Stoppen der Vms um die MacAddresse statisch zu setzen
+StopVMs
+$DcState = (Get-VM -Name $VM_Name_DC).State
+$FsState = (Get-VM -Name $VM_Name_FS).State
+$TsState = (Get-VM -Name $VM_Name_TS).State
+while ( ($DcState -ne "off") -or ($FsState -ne "off") -or ($TsState -ne "off") ) {
+    Start-Sleep -Seconds 1
+    Write-Output "$(Get-TimeStamp) -- Loop1 DC:$($DcState) FS:$($FsState) TS:$($TsState)" | Out-File $LogFilePath -append
+    $DcState = (Get-VM -Name $VM_Name_DC).State
+    $FsState = (Get-VM -Name $VM_Name_FS).State
+    $TsState = (Get-VM -Name $VM_Name_TS).State
+}
+Write-Output "$(Get-TimeStamp) -- VMs gestoppt" | Out-File $LogFilePath -append
+
+
+#MacAddressen auf statisch setzen
+ChangeMacAddress -DC $VM_Name_DC -FS $VM_Name_FS -TS $VM_Name_TS
+Write-Output "$(Get-TimeStamp) -- MAC Addressen der VMs auf statisch umgestellt" | Out-File $LogFilePath -append
