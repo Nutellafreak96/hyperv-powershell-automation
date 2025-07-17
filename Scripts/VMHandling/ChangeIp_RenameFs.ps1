@@ -1,0 +1,21 @@
+#Fileserver installieren und einrichten
+
+$InterfaceAlias = Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.InterfaceAlias -like "Extern*" -or $_.InterfaceAlias -like "Ethernet*"} | Select-Object -ExpandProperty InterfaceAlias
+
+Disable-NetAdapterBinding -Name $InterfaceAlias -ComponentID "ms_tcpip6"
+New-NetIPAddress -InterfaceAlias $InterfaceAlias -IPAddress $Using:FSIPAdress -AddressFamily IPv4 -DefaultGateway $Using:DefaultGateway -PrefixLength 24 #| Out-Null 
+Set-DnsClientServerAddress -InterfaceAlias $InterfaceAlias -ServerAddresses $Using:DCIPAdress 
+
+$InterfaceIpAddress = (Get-NetIPAddress -InterfaceAlias $InterfaceAlias  -AddressFamily IPv4).IPAddress
+
+
+if($InterfaceIpAddress -ne $Using:FSIPAdress){
+    New-NetIPAddress -InterfaceAlias $InterfaceAlias -IPAddress $Using:FSIPAdress -AddressFamily IPv4 -DefaultGateway $Using:DefaultGateway -PrefixLength 24 #| Out-Null
+    Set-DnsClientServerAddress -InterfaceAlias $InterfaceAlias -ServerAddresses $Using:DCIPAdress 
+
+}
+
+
+Rename-Computer -NewName "FS"
+Restart-Computer -Force 
+
