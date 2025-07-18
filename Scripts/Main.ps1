@@ -170,6 +170,12 @@ function RestartVMs {
 
 }
 
+#Installiert die ActiveDiretoryDomainService Rolle um aus der VM "DC" einen DomainController zu machen
+function DeployADDSRole {
+    Invoke-Command -VMName $VM_Name_DC -FilePath ".\DeployADDSRole.ps1" -Credential $LCredential
+}
+
+
 
 ############################################################
 #Main (Aufrufen von Funktionen und Abarbeitung des Scripts)#
@@ -262,3 +268,8 @@ Write-Output "$(Get-TimeStamp) -- VMs haben eine feste IP erhalten und der virtu
 
 
 Start-Sleep -Seconds 60
+
+#Installieren der Active Direktory Rolle 
+DeployADDSRole
+Write-Output "$(Get-TimeStamp) -- DC wurde erstellt" | Out-File $LogFilePath -append
+
