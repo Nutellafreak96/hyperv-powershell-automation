@@ -241,3 +241,24 @@ Write-Output "$(Get-TimeStamp) -- VMs gestoppt" | Out-File $LogFilePath -append
 #MacAddressen auf statisch setzen
 ChangeMacAddress -DC $VM_Name_DC -FS $VM_Name_FS -TS $VM_Name_TS
 Write-Output "$(Get-TimeStamp) -- MAC Addressen der VMs auf statisch umgestellt" | Out-File $LogFilePath -append
+
+#Starten der Vms um weiter daran zu arbeiten
+StartVMs
+Start-Sleep -Seconds 10
+Write-Output "$(Get-TimeStamp) -- VMs erneut gestartet" | Out-File $LogFilePath -append
+
+while ( ($DcState -eq "off") -or ($FsState -eq "off") -or ($TsState -eq "off") ) {
+    Start-Sleep -Seconds 1
+    Write-Output "$(Get-TimeStamp) -- Loop2 DC:$($DcState) FS:$($FsState) TS:$($TsState)" | Out-File $LogFilePath -append
+    $DcState = (Get-VM -Name $VM_Name_DC).State
+    $FsState = (Get-VM -Name $VM_Name_FS).State
+    $TsState = (Get-VM -Name $VM_Name_TS).State
+}
+#Aendern der IP-Adressen der Server auf statische IPs
+Start-Sleep -Seconds 30
+
+ChangeVMSettings -Dc $VM_Name_DC -FS $VM_Name_FS -TS $VM_Name_TS -Credential $LCredential
+Write-Output "$(Get-TimeStamp) -- VMs haben eine feste IP erhalten und der virtuelle Computer bekommt einen neuen Namen | FS Rolle installiert" | Out-File $LogFilePath -append
+
+
+Start-Sleep -Seconds 60
