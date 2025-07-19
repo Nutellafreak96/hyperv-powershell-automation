@@ -1,80 +1,146 @@
-<#Create Directorys for the Firm VMs and copy the prepared VHDX#>
-function CreateCustomerDir {
+<#
+.SYNOPSIS
+Creates directories for a customer's virtual machines and copies the prepared VHDX files.
 
+.DESCRIPTION
+This function creates a folder structure (DC, FS, TS) for a given customer at a specified storage location.
+It also copies a prepared VHDX image into each subfolder and creates a log file for tracking errors.
+
+.PARAMETER CustomerPath
+The base directory where the customer's folders should be created.
+
+.PARAMETER CustomerName
+The name of the customer; used as the subdirectory name.
+
+.PARAMETER SourcePath
+The location of the prepared VHDX files to be copied.
+
+.EXAMPLE
+CreateCustomerDirectory -CustomerPath "D:\VMs" -CustomerName "Contoso" -SourcePath "C:\Images"
+#>
+function CreateCustomerDirectory {
     param(
-        [string]$KundeSpeicherort,
-        [string]$KundenName,
-        [string]$DateienSpeicherort
+        [string]$CustomerPath,
+        [string]$CustomerName,
+        [string]$SourcePath
     )
-    Write-Host $KundeSpeicherort
-    Write-host $KundenName
-    Write-Host $DateienSpeicherort
 
-    #Ueberpruefen ob Directory schon vorhanden ist
-    if (Test-Path "$($KundeSpeicherort)\$($KundenName)") { Remove-Item -Path "$($KundeSpeicherort)\$($KundenName)" -Force -Recurse }
-    
+    Write-Host $CustomerPath
+    Write-Host $CustomerName
+    Write-Host $SourcePath
 
-    
+    # Check if directory already exists and remove it
+    if (Test-Path "$($CustomerPath)\$($CustomerName)") {
+        Remove-Item -Path "$($CustomerPath)\$($CustomerName)" -Force -Recurse
+    }
 
-    #Erstellen der Ordner fuer den Kunden
-    New-Item -Name "DC" -Path "$($KundeSpeicherort)\$($KundenName)" -ItemType Directory | Out-Null
-    New-Item -Name "FS" -Path "$($KundeSpeicherort)\$($KundenName)" -ItemType Directory | Out-Null
-    New-Item -Name "TS" -Path "$($KundeSpeicherort)\$($KundenName)" -ItemType Directory | Out-Null
+    # Create folders for the customer
+    New-Item -Name "DC" -Path "$($CustomerPath)\$($CustomerName)" -ItemType Directory | Out-Null
+    New-Item -Name "FS" -Path "$($CustomerPath)\$($CustomerName)" -ItemType Directory | Out-Null
+    New-Item -Name "TS" -Path "$($CustomerPath)\$($CustomerName)" -ItemType Directory | Out-Null
 
-    #Erstellen des Log-Files
-    New-Item -Name "ErrorLog.txt" -Path "$($KundeSpeicherort)\$($KundenName)" -ItemType File | Out-Null
+    # Create the error log file
+    New-Item -Name "ErrorLog.txt" -Path "$($CustomerPath)\$($CustomerName)" -ItemType File | Out-Null
 
-
-    #Verteilen der vorbereiteten VHDX f�r die VM�s
-    #Write-Progress zum Anzeigen des fortschrittes einbauen
-    Copy-Item -Path "$($DateienSpeicherort)\Serverprep.vhdx" -Destination "$($KundeSpeicherort)\$($KundenName)\DC\Serverprep.vhdx"
-    Copy-Item -Path "$($DateienSpeicherort)\Serverprep.vhdx" -Destination "$($KundeSpeicherort)\$($KundenName)\FS\Serverprep.vhdx"
-    Copy-Item -Path "$($DateienSpeicherort)\Serverprep.vhdx" -Destination "$($KundeSpeicherort)\$($KundenName)\TS\Serverprep.vhdx" 
-
-
-
+    # Copy the prepared VHDX files to the customer directories
+    Copy-Item -Path "$($SourcePath)\Serverprep.vhdx" -Destination "$($CustomerPath)\$($CustomerName)\DC\Serverprep.vhdx"
+    Copy-Item -Path "$($SourcePath)\Serverprep.vhdx" -Destination "$($CustomerPath)\$($CustomerName)\FS\Serverprep.vhdx"
+    Copy-Item -Path "$($SourcePath)\Serverprep.vhdx" -Destination "$($CustomerPath)\$($CustomerName)\TS\Serverprep.vhdx"
 }
-<#Enable Copy Service on VMs and Create Directory on VMs to copy necessary files to it#>
-function CopyFiles {
+
+
+<#
+.SYNOPSIS
+Enables VM guest services and copies configuration files into customer VMs.
+
+.DESCRIPTION
+Activates the "Guest Services" integration component on Hyper-V VMs and creates a temp directory on each VM.
+It then copies necessary deployment files from the host system to each VM using `Copy-VMFile` and PowerShell remoting.
+
+.PARAMETER IntegrationServiceName
+The name of the integration service (e.g. "Guest Service Interface").
+
+.PARAMETER VmDc
+Name of the Domain Controller VM.
+
+.PARAMETER VmFs
+Name of the File Server VM.
+
+.PARAMETER VmTs
+Name of the Terminal Server VM.
+
+.PARAMETER SourcePath
+Directory path on the host where configuration files are stored.
+
+.PARAMETER Credential
+Admin Credentials used to access the guest VMs via PowerShell remoting.
+
+.EXAMPLE
+CopyFilesToVMs -IntegrationServiceName "Guest Service Interface" -VmDc "DC01" -VmFs "FS01" -VmTs "TS01" -SourcePath "C:\Deploy" -Credential $cred
+#>
+function CopyFilesToVMs {
     param(
-        [String]$Schnittstelle,
-        [string]$DC,
-        [string]$FS,
-        [String]$TS,
-        [string]$DateienSpeicherort,
-        [pscredential]$Credential
+        [string]$IntegrationServiceName,
+        [string]$VmDc,
+        [string]$VmFs,
+        [string]$VmTs,
+        [string]$SourcePath,
+        [psCredential]$Credential
     )
-    #Aktivieren der Möglichkeit dateien vom Host in eine VM zu Kopieren
-    Enable-VMIntegrationService -VMName $DC -Name $Schnittstelle
-    Enable-VMIntegrationService -VMName $FS -Name $Schnittstelle
-    Enable-VMIntegrationService -VMName $TS -Name $Schnittstelle
 
-    #Erstellen eines temp Ordners in den Vms
-    Invoke-Command -VMName $DC -ScriptBlock { New-Item -Path "C:\" -ItemType Directory -Name "temp" | Out-Null } -Credential $Credential
-    Invoke-Command -VMName $FS  -ScriptBlock { New-Item -Path "C:\" -ItemType Directory -Name "temp" | Out-Null } -Credential $Credential 
-    Invoke-Command -VMName $TS  -ScriptBlock { New-Item -Path "C:\" -ItemType Directory -Name "temp" | Out-Null } -Credential $Credential 
+    # Enable file copy integration service on each VM
+    Enable-VMIntegrationService -VMName $VmDc -Name $IntegrationServiceName
+    Enable-VMIntegrationService -VMName $VmFs -Name $IntegrationServiceName
+    Enable-VMIntegrationService -VMName $VmTs -Name $IntegrationServiceName
 
-    #Kopieren der Dateien in die richtige VM    
-    Copy-VMFile -DestinationPath "C:\temp\Dateiserver.xml" -FileSource Host -VMName $FS -SourcePath "$($DateienSpeicherort)\Bereitstellungskonfiguration.xml" -CreateFullPath | Out-Null
-    Copy-VMFile -DestinationPath "C:\temp\DefaultApps.xml" -FileSource Host -VMName $DC -SourcePath "$($DateienSpeicherort)\chromedefault.xml" -CreateFullPath | Out-Null
-    
-    #Nutzen einer Session zum DC um den Ordner kopieren zu können
-    $DcS = New-PSSession -VMName $DC -Credential $Credential
-    Copy-Item -ToSession $DcS -Destination "C:\temp\" -Path "$($DateienSpeicherort)\{812FABB7-FDB3-4A46-8E8D-85BD985BA327}" -Recurse
+    # Create "temp" folder in each VM
+    Invoke-Command -VMName $VmDc -ScriptBlock { New-Item -Path "C:\" -ItemType Directory -Name "temp" | Out-Null } -Credential $Credential
+    Invoke-Command -VMName $VmFs -ScriptBlock { New-Item -Path "C:\" -ItemType Directory -Name "temp" | Out-Null } -Credential $Credential
+    Invoke-Command -VMName $VmTs -ScriptBlock { New-Item -Path "C:\" -ItemType Directory -Name "temp" | Out-Null } -Credential $Credential
+
+    # Copy configuration files to the appropriate VMs
+    Copy-VMFile -DestinationPath "C:\temp\FileServerConfig.xml" -FileSource Host -VMName $VmFs -SourcePath "$($SourcePath)\Bereitstellungskonfiguration.xml" -CreateFullPath | Out-Null
+    Copy-VMFile -DestinationPath "C:\temp\DefaultApps.xml" -FileSource Host -VMName $VmDc -SourcePath "$($SourcePath)\chromedefault.xml" -CreateFullPath | Out-Null
+
+    # Use a PowerShell session to copy a directory to the Domain Controller
+    $dcSession = New-PSSession -VMName $VmDc -Credential $Credential
+    Copy-Item -ToSession $dcSession -Destination "C:\temp\" -Path "$($SourcePath)\{812FABB7-FDB3-4A46-8E8D-85BD985BA327}" -Recurse
     Get-PSSession | Remove-PSSession
-    
 }
 
-<#Delete the unattend files from the vm because they secure relevant information to the admin users on the systems#>
-function DeleteFiles {
+
+<#
+.SYNOPSIS
+Removes unattended installation files from Windows VMs.
+
+.DESCRIPTION
+Deletes all unattend.xml-related files from the `Sysprep` directory on Domain Controller, File Server, and Terminal Server VMs
+to prevent exposure of sensitive administrator information.
+
+.PARAMETER VmDc
+Name of the Domain Controller VM.
+
+.PARAMETER VmFs
+Name of the File Server VM.
+
+.PARAMETER VmTs
+Name of the Terminal Server VM.
+
+.PARAMETER Credential
+Admin Credentials for connecting to each VM.
+
+.EXAMPLE
+DeleteSensitiveFiles -VmDc "DC01" -VmFs "FS01" -VmTs "TS01" -Credential $cred
+#>
+function DeleteSensitiveFiles {
     param(
-        [string]$DC,
-        [string]$FS,
-        [string]$TS,
-        [pscredential]$Credential
+        [string]$VmDc,
+        [string]$VmFs,
+        [string]$VmTs,
+        [psCredential]$Credential
     )
 
-    Invoke-Command -VMName $DC -ScriptBlock { Remove-Item -Path "C:\Windows\System32\Sysprep\unattend.*" -Force } -Credential $Credential
-    Invoke-Command -VMName $FS -ScriptBlock { Remove-Item -Path "C:\Windows\System32\Sysprep\unattend.*" -Force } -Credential $Credential
-    Invoke-Command -VMName $TS -ScriptBlock { Remove-Item -Path "C:\Windows\System32\Sysprep\unattend.*" -Force } -Credential $Credential
+    Invoke-Command -VMName $VmDc -ScriptBlock { Remove-Item -Path "C:\Windows\System32\Sysprep\unattend.*" -Force } -Credential $Credential
+    Invoke-Command -VMName $VmFs -ScriptBlock { Remove-Item -Path "C:\Windows\System32\Sysprep\unattend.*" -Force } -Credential $Credential
+    Invoke-Command -VMName $VmTs -ScriptBlock { Remove-Item -Path "C:\Windows\System32\Sysprep\unattend.*" -Force } -Credential $Credential
 }
