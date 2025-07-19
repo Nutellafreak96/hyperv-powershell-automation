@@ -225,10 +225,6 @@ Write-Output "$(Get-TimeStamp) -- Kopieren der Dateien fertig" | Out-File $LogFi
 DeleteFiles -DC $VM_Name_DC -FS $VM_Name_FS -TS $VM_Name_TS -Credential $LCredential
 Write-Output "$(Get-TimeStamp) -- Löschen Sicherheitsrelevanter Dateien fertig" | Out-File $LogFilePath -append
 
-#Loeschen der Antwortdatei zum ueberspringen von Windows einrichtungspunkten | Löschen der unattend.xml
-DeleteFiles -DC $VM_Name_DC -FS $VM_Name_FS -TS $VM_Name_TS -Credential $LCredential
-Write-Output "$(Get-TimeStamp) -- Löschen Sicherheitsrelevanter Dateien fertig" | Out-File $LogFilePath -append
-
 #Stoppen der Vms um die MacAddresse statisch zu setzen
 StopVMs
 $DcState = (Get-VM -Name $VM_Name_DC).State
