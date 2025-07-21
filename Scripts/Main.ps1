@@ -172,7 +172,7 @@ function RestartVMs {
 
 #Installiert die ActiveDiretoryDomainService Rolle um aus der VM "DC" einen DomainController zu machen
 function DeployADDSRole {
-    Invoke-Command -VMName $VM_Name_DC -FilePath ".\DeployADDSRole.ps1" -Credential $LCredential
+    Invoke-Command -VMName $VM_Name_DC -FilePath ".\DeployDomainControlerRole.ps1" -Credential $LCredential
 }
 
 
