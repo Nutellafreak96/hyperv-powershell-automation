@@ -175,6 +175,12 @@ function DeployADDSRole {
     Invoke-Command -VMName $VM_Name_DC -FilePath ".\DeployDomainControlerRole.ps1" -Credential $LCredential
 }
 
+#Fuegt die VM�s FS und TS zu der Domain des DC hinzu
+function JoinDomain {
+    Invoke-Command -VMName $VM_Name_FS -ScriptBlock { Add-Computer -DomainName $Using:DomainName -Credential $Using:DCredential -Restart } -Credential $LCredential
+    Invoke-Command -VMName $VM_Name_TS -ScriptBlock { Add-Computer -DomainName $using:DomainName -Credential $Using:DCredential -Restart } -Credential $LCredential
+}
+
 
 
 ############################################################
@@ -269,3 +275,7 @@ Start-Sleep -Seconds 60
 DeployADDSRole
 Write-Output "$(Get-TimeStamp) -- DC wurde erstellt" | Out-File $LogFilePath -append
 
+Start-Sleep -Seconds 390 #6,5min warten auf Server neustart
+#Hinzufuegen der anderen server zu der Domaene 
+JoinDomain
+Write-Output "$(Get-TimeStamp) -- VMs treten der Domain bei" | Out-File $LogFilePath -append
