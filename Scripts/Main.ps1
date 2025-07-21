@@ -181,6 +181,10 @@ function JoinDomain {
     Invoke-Command -VMName $VM_Name_TS -ScriptBlock { Add-Computer -DomainName $using:DomainName -Credential $Using:DCredential -Restart } -Credential $LCredential
 }
 
+#Haengt eine virtuelle Festplatte an f�r die Daten und erstellt die notwendigsten Ordner
+function DirectoryPreparation {
+    Invoke-Command -VMName $VM_Name_FS -FilePath ".\FS Handling\DirectoryPreparation.ps1" -Credential $DCredential
+}
 
 
 ############################################################
@@ -279,3 +283,9 @@ Start-Sleep -Seconds 390 #6,5min warten auf Server neustart
 #Hinzufuegen der anderen server zu der Domaene 
 JoinDomain
 Write-Output "$(Get-TimeStamp) -- VMs treten der Domain bei" | Out-File $LogFilePath -append
+
+Start-Sleep -Seconds 60 #1min warten auf Server neustart
+#Erstellen der wichtigsten Laufwerke und Ordner
+DirectoryPreparation
+
+Write-Output "$(Get-TimeStamp) -- Ordnerstruktur auf der neuen Festplatte am FS erstellt" | Out-File $LogFilePath -append
