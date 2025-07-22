@@ -188,9 +188,9 @@ function DirectoryPreparation {
 
 #Erstellt die standard Gruppenrichtlinien und Gruppen und erstellt auch ein paar Benutzer
 function BasicADStructure {
-    Invoke-Command -VMName $VM_Name_DC -FilePath ".\DCHandling\Script-Gruppenrichtlinien.ps1" -Credential $DCredential 
-    Invoke-Command -VMName $VM_Name_DC -FilePath ".\DCHandling\AD-User-Groups.ps1" -Credential $DCredential 
-    Invoke-Command -VMName $VM_Name_DC -FilePath ".\DCHandling\GPO-Registry.ps1" -Credential $DCredential 
+    Invoke-Command -VMName $VM_Name_DC -FilePath ".\ActiveDirectoryHandling\OrganizationalUnitStructure.ps1" -Credential $DCredential 
+    Invoke-Command -VMName $VM_Name_DC -FilePath ".\ActiveDirectoryHandling\ADUserGroups.ps1" -Credential $DCredential 
+    Invoke-Command -VMName $VM_Name_DC -FilePath ".\ActiveDirectoryHandling\RegistryGroupPolicies.ps1" -Credential $DCredential 
     Invoke-Command -VMName $VM_Name_DC -ScriptBlock { Move-Item -Path "C:\temp\DefaultApps.xml" -Destination "C:\Windows\SYSVOL\domain\scripts" } -Credential $DCredential 
 }
 
