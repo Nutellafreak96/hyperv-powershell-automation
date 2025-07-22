@@ -186,6 +186,14 @@ function DirectoryPreparation {
     Invoke-Command -VMName $VM_Name_FS -FilePath ".\FS Handling\DirectoryPreparation.ps1" -Credential $DCredential
 }
 
+#Erstellt die standard Gruppenrichtlinien und Gruppen und erstellt auch ein paar Benutzer
+function BasicADStructure {
+    Invoke-Command -VMName $VM_Name_DC -FilePath ".\DCHandling\Script-Gruppenrichtlinien.ps1" -Credential $DCredential 
+    Invoke-Command -VMName $VM_Name_DC -FilePath ".\DCHandling\AD-User-Groups.ps1" -Credential $DCredential 
+    Invoke-Command -VMName $VM_Name_DC -FilePath ".\DCHandling\GPO-Registry.ps1" -Credential $DCredential 
+    Invoke-Command -VMName $VM_Name_DC -ScriptBlock { Move-Item -Path "C:\temp\DefaultApps.xml" -Destination "C:\Windows\SYSVOL\domain\scripts" } -Credential $DCredential 
+}
+
 
 ############################################################
 #Main (Aufrufen von Funktionen und Abarbeitung des Scripts)#
@@ -289,3 +297,7 @@ Start-Sleep -Seconds 60 #1min warten auf Server neustart
 DirectoryPreparation
 
 Write-Output "$(Get-TimeStamp) -- Ordnerstruktur auf der neuen Festplatte am FS erstellt" | Out-File $LogFilePath -append
+
+#Erstellen der Grundarbeitsstruktur (Organisationseinheit)
+BasicADStructure
+Write-Output "$(Get-TimeStamp) -- OU,User,Gruppen,GPO erstellt " | Out-File $LogFilePath -append
