@@ -1,0 +1,249 @@
+<#$Keys = @{
+ "HKCU\AppEvents"
+ "HKCU\Console"
+ "HKCU\Control Panel"
+ "HKCU\Environment"
+ "HKCU\EUDC"
+ "HKCU\Keyboard Layout"
+ "HKCU\Network"
+ "HKCU\Printers"
+ "HKCU\Software"
+ "HKCU\System"
+ "HKCU\Volatile Environment"
+ "HKLM\BCD00000000"
+ "HKLM\HARDWARE"
+ "HKLM\SAM"
+ "HKLM\SECURITY"
+ "HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
+ "HKLM\SYSTEM"
+}#>
+#foreach{$key in $keys}{Get-GPRegistryValue -Name $GPO -Key $key}
+
+
+
+#Erstellen der GPO für die Energieeinstllungen - Hoechstleistung
+#Verlinken der GPO
+#Setzen der Registry Werte
+
+
+
+New-GPO -Name "Computer - Energie - Hoechstleistung"  | Out-Null
+New-GPLink -Name "Computer - Energie - Hoechstleistung" -Target "OU=Computer,$($Using:OUPathname)" -LinkEnabled Yes | Out-Null
+New-GPLink -Name "Computer - Energie - Hoechstleistung" -Target "OU=RDS-Server,$($Using:OUPathname)" -LinkEnabled Yes | Out-Null
+$Energie = @{
+        Name      = "Computer - Energie - Hoechstleistung"
+        Key       = "HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Power\Powersettings"
+        ValueName = "ActivePowerScheme"
+        Value     = "8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c"  
+        Type      = "String"
+}
+Set-GPRegistryValue @Energie | Out-Null
+
+
+New-GPO -Name "Computer - RDP - Settings" | Out-Null
+New-GPLink -Name "Computer - RDP - Settings" -Target "OU=RDS-Server,$($Using:OUPathname)" -LinkEnabled Yes | Out-Null
+$Settings = @(
+    @{
+        Name      = "Computer - RDP - Settings"
+        Key       = "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
+        ValueName = "MaxDisconnectionTime"
+        Value     = 7200000  
+        Type      = "DWord"
+    },
+    @{
+        Name      = "Computer - RDP - Settings"
+        Key       = "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
+        ValueName = "MaxIdleTime"
+        Value     = 10800000  
+        Type      = "DWord"
+    }
+)
+foreach ($params in $Settings) {Set-GPRegistryValue @params | Out-Null}
+
+ 
+New-GPO -Name "Computer - RDS - Lizenzen" | Out-Null
+New-GPLink -Name "Computer - RDS - Lizenzen" -Target "OU=RDS-Server,$($Using:OUPathname)" -LinkEnabled Yes | Out-Null
+$lizenzen = @(
+    @{
+        Name      = "Computer - RDS - Lizenzen"
+        Key       = "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
+        ValueName = "LicenseServers"
+        Value     = "192.168.175.103"  
+        Type      = "String"
+    },
+    @{
+        Name      = "Computer - RDS - Lizenzen"
+        Key       = "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
+        ValueName = "LicensingMode"
+        Value     = 4  
+        Type      = "DWord"
+    }
+)
+foreach ($params in $lizenzen) {Set-GPRegistryValue @params | Out-Null}
+
+#Wichtig fuer die DefaultApps da es ueber eine Freigabe laeuft
+
+New-GPO -Name "Computer - Default - Apps" | Out-Null
+New-GPLink -Name "Computer - Default - Apps" -Target "OU=RDS-Server,$($Using:OUPathname)" -LinkEnabled Yes | Out-Null
+$defaultApps = @{
+    Name      = "Computer - Default - Apps"
+    Key       = "HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\System"
+    ValueName = "DefaultAssociationsConfiguration"
+    Value     = "\\DC\netlogon\DefaultApps.xml" #C:\Windows\SYSVOL\sysvol\kevin.local\scripts\DefaultApps.xml
+    Type      = "String"
+}
+Set-GPRegistryValue @defaultApps | Out-Null
+
+
+
+# Load the XML file
+$xmlPath = "C:\temp\{812FABB7-FDB3-4A46-8E8D-85BD985BA327}\DomainSysvol\GPO\User\Preferences\Drives\Drives.xml"
+$xml = [xml](Get-Content -Path $xmlPath)
+
+# Fetch groups and their SIDs
+$groups = Get-ADGroup -Filter * -SearchBase "OU=kevinOU,DC=kevin,DC=local"
+
+# Create an array of group name and SID pairs
+$groupSidPairs = @()
+foreach ($group in $groups) {
+    # Ensure the name format matches what's in the XML
+    $groupSidPairs += [PSCustomObject]@{
+        GroupName = "kevin\" + $group.Name
+        SID       = $group.SID.Value
+    }
+}
+
+# Go through each Drive in the XML
+foreach ($drive in $xml.Drives.Drive) {
+    foreach ($filter in $drive.Filters.FilterGroup) {
+        $groupName = $filter.GetAttribute("name")
+        
+        # Find matching group in the sid pairs
+        $matchingPair = $groupSidPairs | Where-Object { $_.GroupName -eq $groupName }
+
+        # If a matching group is found, update SID
+        if ($matchingPair) {
+            $filter.SetAttribute("sid", $matchingPair.SID)
+        } else {
+            Write-Host "No matching group found for: $groupName"
+        }
+    }
+}
+
+# Save the updated XML back to the same file
+$xml.Save($xmlPath)
+
+
+
+
+#New-GPO -Name "User - Netzwerk - Laufwerke" | Out-Null
+Import-GPO -BackupGpoName "User - Netzwerk - Laufwerke" -TargetName "User - Netzwerk - Laufwerke" -Path "C:\temp" -CreateIfNeeded |Out-Null
+New-GPLink -Name "User - Netzwerk - Laufwerke" -Target "OU=User,$($Using:OUPathname)" -LinkEnabled Yes | Out-Null
+New-GPLink -Name "User - Netzwerk - Laufwerke" -Target "OU=Admins,$($Using:OUPathname)" -LinkEnabled Yes | Out-Null
+
+##Neue GPO die CMD,POwershell,Outlook und Systemsteuerung zusammenfasst
+
+New-GPO -Name "User - GUI - Settings" | Out-Null
+New-GPLink -Name "User - GUI - Settings" -Target "OU=User,$($Using:OUPathname)" -LinkEnabled Yes | Out-Null
+$UserSettings = @(
+    @{
+        Name = "User - GUI - Settings"
+        Key = "HKEY_CURRENT_USER\Software\Policies\Microsoft\office\16.0\Outlook\Preferences"
+        ValueName = "NewOutlookMigrationUserSetting"
+        Value = 00000000
+        Type = "DWord"
+    },
+    @{
+        Name = "User - GUI - Settings"
+        Key = "HKEY_CURRENT_USER\Software\Policies\Microsoft\office\16.0\Outlook\Options\General"
+        ValueName = "DoNewOutlookAutoMigration"
+        Value = 00000000
+        Type = "DWord"
+    },
+    @{
+        Name = "User - GUI - Settings"
+        Key = "HKEY_CURRENT_USER\Software\Policies\Microsoft\office\16.0\Outlook\Preferences"
+        ValueName = "UseNewOutlook"
+        Value = 00000000
+        Type = "DWord"
+    },
+    @{
+        Name = "User - GUI - Settings"
+        Key = "HKEY_CURRENT_USER\SOFTWARE\Policies\Microsoft\Office\16.0\Outlook\Options\General"
+        ValueName = "NewOutlookAutoMigrationRetryIntervals"
+        Value = 00000000
+        Type = "DWord"
+    },
+    @{
+        Name = "User - GUI - Settings"
+        Key = "HKEY_CURRENT_USER\Software\Policies\Microsoft\office\16.0\Outlook\Options\General"
+        ValueName = "HideNewOutlookToggle"
+        Value = 00000001
+        Type = "DWord"
+    },
+    @{
+    Name      = "User - GUI - Settings"
+    Key       = "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer"
+    Value     = 1
+    Type      = "DWord"
+    ValueName = "RestrictCpl"
+},
+@{
+    Name      = "User - GUI - Settings"
+    Key       = "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\RestrictCpl"
+    Value     = "Microsoft.PowerOptions"
+    Type      = "String"
+    ValueName = "1"
+},
+@{
+    Name      = "User - GUI - Settings"
+    Key       = "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\RestrictCpl"
+    Value     = "Microsoft.Sound"
+    Type      = "String"
+    ValueName = "2"
+},
+@{
+    Name      = "User - GUI - Settings"
+    Key       = "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\RestrictCpl"
+    Value     = "Microsoft.Keyboard"
+    Type      = "String"
+    ValueName = "3"
+},
+@{
+    Name      = "User - GUI - Settings"
+    Key       = "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\RestrictCpl"
+    Value     = "Microsoft.DevicesAndPrinters"
+    Type      = "String"
+    ValueName = "4"
+},
+@{
+    Name      = "User - GUI - Settings"
+    Key       = "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\Explorer\RestrictCpl"
+    Value     = "Microsoft.Mouse"
+    Type      = "String"
+    ValueName = "5"
+},
+@{
+    Name      = "User - GUI - Settings"
+    Key       = "HKEY_CURRENT_USER\Software\Policies\Microsoft\Windows\Powershell"
+    Value     = 0
+    Type      = "DWord"
+    ValueName = "EnableScripts"
+},
+@{ 
+    Name      = "User - GUI - Settings"
+    Key       = "HKEY_CURRENT_USER\Software\Policies\Microsoft\Windows\Powershell"
+    #PolicyState : Delete
+    Value     = ""
+    Type      = "String"
+    ValueName = "ExecutionPolicy"
+},
+@{
+    Name      = "User - GUI - Settings"
+    Key       = "HKEY_CURRENT_USER\Software\Policies\Microsoft\Windows\System"
+    Value     = 2
+    Type      = "DWord"
+    ValueName = "DisableCMD"
+}
+)
+foreach($params in $UserSettings){Set-GPRegistryValue @params | Out-Null}
