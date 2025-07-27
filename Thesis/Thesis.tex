@@ -1,28 +1,103 @@
 \documentclass[conference]{IEEEtran}
 \IEEEoverridecommandlockouts
+
+% Math packages
 \usepackage{amsmath,amssymb,amsfonts}
+
+% Algorithms
 \usepackage{algorithmic}
-\usepackage{graphicx}
-\usepackage{textcomp}
-\usepackage{xcolor}
-\usepackage{subcaption} % Added for subfigures
-\usepackage{booktabs}   % For better table formatting
+
+% Figures and graphics
+\usepackage{graphicx}       % For including graphics
+\usepackage{float}          % For figure placement control
+\usepackage{subcaption}     % For subfigures
+
+% Text and fonts
+\usepackage{textcomp}       % For special symbols like °
+
+% Colors
+\usepackage{xcolor}         % For color definitions
+
+% Tables
+\usepackage{booktabs}       % For professional-looking tables
+
+% Bibliography
 \usepackage[numbers,sort&compress]{natbib}
 \bibliographystyle{unsrtnat}
-\usepackage{float} % To control figure placement
 
+% Encoding and spacing
+\usepackage[utf8]{inputenc} % UTF-8 support
+\usepackage{titlesec}       % For customizing section titles
+\usepackage{setspace}       % For line spacing control
 
+\definecolor{HKS66}{RGB}{118,185,0}
+
+%verbesserte Datums ausgabe
+\usepackage[ddmmyyyy]{datetime}
+\renewcommand{\dateseparator}{.}
 
 \begin{document}
 
-\title{Anomaly-based Network Intrusion Detection Systems: How do anomaly based NIDS perform with existing Dataset on network attacks like DoS?}
+\begin{titlepage}
+    \thispagestyle{empty}
+    \parindent=0pt
+    \begin{minipage}[b]{0.35\textwidth}
+        \includegraphics[width=\textwidth]{Pictures/htw-berlin_logo.jpg}
+    \end{minipage}
+    \begin{minipage}[b]{0.65\textwidth}
+        ~
+    \end{minipage}
 
-\author{\IEEEauthorblockN{Kevin Hübner}
-\IEEEauthorblockA{\textit{HTW Berlin} \\
-570746}
-}
+    \vspace{0.5em}
+    \textcolor{HKS66}{\rule{\linewidth}{0.4mm}}
 
-\maketitle
+    \vspace*{\stretch{0.5}}
+
+    % === TITEL UND ART DER ARBEIT ===
+    \begin{center}
+        {\LARGE\bfseries\color{HKS66} Skriptgesteuerte Erstellung und Konfiguration von Windows-basierten virtuellen Maschinen in Hyper-V mittels PowerShell} \\[1em]
+        \textcolor{HKS66}{\rule{\linewidth}{0.4mm}}\\[1.5em]
+        {\LARGE\bfseries Bachelorarbeit}
+    \end{center}
+
+    \vspace*{\stretch{0.5}}
+
+    % === AUTOR UND HOCHSCHULE ===
+    \begin{center}
+        \normalsize % (Standardgröße) — du kannst hier z. B. \large draus machen
+        von\\[2ex]
+        {\bfseries\large\fontsize{14pt}{16pt}\selectfont Kevin Hübner}\\[2ex]
+        Matrikelnummer: 570746\\[4ex]
+        {\bfseries\fontsize{13pt}{15pt}\selectfont Fachbereich 1: Computer Engineering}\\
+        Hochschule für Technik und Wirtschaft Berlin\\[2ex]
+    \end{center}
+
+    \vspace*{\stretch{1}}
+
+    % === DATUM ===
+    \begin{center}
+        {\Large Datum: Berlin, \today}
+    \end{center}
+
+    \vspace*{\stretch{1}}
+
+    % === BEGUTACHTER ===
+\begin{center}
+    \begin{tabular}{ll}
+        {\bfseries\large Erstgutachten:} &  \\
+        {\bfseries\large Zweitgutachten:} &  \\
+    \end{tabular}
+\end{center}
+
+    \vspace*{\stretch{2}}
+
+    \textcolor{HKS66}{\rule{\linewidth}{0.4mm}}
+
+\end{titlepage}
+
+
+\newpage
+
 
 
 % Refs
