@@ -89,7 +89,6 @@ $DCredential = New-Object @DCredentialParams
 #Fuer den DomainController
 $DC = @{
     Name       = $VM_Name_DC
-    #MemoryStartupBytes = $RamSelected
     Generation = 2
     VHDPath    = $DC_VHDX_Path
     Path       = "$($KundeSpeicherort)\$Kunde\DC"
@@ -98,7 +97,6 @@ $DC = @{
 #Fuer den Fileserver
 $FS = @{
     Name       = $VM_Name_FS
-    #MemoryStartupBytes = $RamSelected
     Generation = 2
     VHDPath    = $FS_VHDX_Path
     Path       = "$($KundeSpeicherort)\$($Kunde)\FS"
@@ -107,7 +105,6 @@ $FS = @{
 #Fuer den Terminalserver
 $TS = @{
     Name       = $VM_Name_TS
-    #MemoryStartupBytes = $RamSelected
     Generation = 2
     VHDPath    = $TS_VHDX_Path
     Path       = "$($KundeSpeicherort)\$($Kunde)\TS"
@@ -200,7 +197,6 @@ function BasicADStructure {
 #Main (Aufrufen von Funktionen und Abarbeitung des Scripts)#
 ############################################################
 
-$Daten
 
 #Erstellen des Ordners fuer die Vms des Kunden
 CreateCustomerDirectory  -CustomerPath $KundeSpeicherort -CustomerName $Kunde -SourcePath $DateienSpeicherort 
