@@ -1,100 +1,104 @@
-<#$Keys = @{
- "HKCU\AppEvents"
- "HKCU\Console"
- "HKCU\Control Panel"
- "HKCU\Environment"
- "HKCU\EUDC"
- "HKCU\Keyboard Layout"
- "HKCU\Network"
- "HKCU\Printers"
- "HKCU\Software"
- "HKCU\System"
- "HKCU\Volatile Environment"
- "HKLM\BCD00000000"
- "HKLM\HARDWARE"
- "HKLM\SAM"
- "HKLM\SECURITY"
- "HKLM\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
- "HKLM\SYSTEM"
-}#>
-#foreach{$key in $keys}{Get-GPRegistryValue -Name $GPO -Key $key}
+
+<#
+.SYNOPSIS
+Creates and links Group Policy Objects (GPOs) and sets associated registry values for system and user configurations.
+
+.DESCRIPTION
+This script automates the creation and linking of GPOs for:
+- Energy settings (High Performance mode)
+- Remote Desktop settings (timeout policies)
+- RDS licensing configuration
+- Default application associations
+- Outlook UI configuration and system restrictions for users
+- Drive mapping group SID correction in XML
+It also updates an XML file with correct group SIDs for drive mapping preferences.
+
+.PARAMETER Using:OUPathname
+A scoped variable (e.g. from a parent script block) containing the base OU distinguished name used for GPO targeting.
+
+.NOTES
+- Requires RSAT tools (GroupPolicy and ActiveDirectory modules)
+- This script assumes that group names match the names used in Drive.xml
+- Uses `Set-GPRegistryValue` to enforce registry-based GPO settings
+#>
 
 
-
-#Erstellen der GPO für die Energieeinstllungen - Hoechstleistung
-#Verlinken der GPO
-#Setzen der Registry Werte
-
-
-
-New-GPO -Name "Computer - Energie - Hoechstleistung"  | Out-Null
+# --- Energy Policy GPO ---
+# Creates a GPO to enforce High Performance energy plan and links it to target OUs
+New-GPO -Name "Computer - Energie - Hoechstleistung" | Out-Null
 New-GPLink -Name "Computer - Energie - Hoechstleistung" -Target "OU=Computer,$($Using:OUPathname)" -LinkEnabled Yes | Out-Null
 New-GPLink -Name "Computer - Energie - Hoechstleistung" -Target "OU=RDS-Server,$($Using:OUPathname)" -LinkEnabled Yes | Out-Null
-$Energie = @{
-        Name      = "Computer - Energie - Hoechstleistung"
-        Key       = "HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Power\Powersettings"
-        ValueName = "ActivePowerScheme"
-        Value     = "8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c"  
-        Type      = "String"
+$energyPolicy = @{
+    Name      = "Computer - Energie - Hoechstleistung"
+    Key       = "HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Power\Powersettings"
+    ValueName = "ActivePowerScheme"
+    Value     = "8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c"  # High Performance GUID
+    Type      = "String"
 }
-Set-GPRegistryValue @Energie | Out-Null
+Set-GPRegistryValue @energyPolicy | Out-Null
 
 
+# --- RDP Settings GPO ---
+# Creates a GPO to configure RDP timeout values and links it to the RDS OU
 New-GPO -Name "Computer - RDP - Settings" | Out-Null
 New-GPLink -Name "Computer - RDP - Settings" -Target "OU=RDS-Server,$($Using:OUPathname)" -LinkEnabled Yes | Out-Null
-$Settings = @(
+$rdpSettings = @(
     @{
         Name      = "Computer - RDP - Settings"
         Key       = "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
         ValueName = "MaxDisconnectionTime"
-        Value     = 7200000  
+        Value     = 7200000  # 2 hours
         Type      = "DWord"
     },
     @{
         Name      = "Computer - RDP - Settings"
         Key       = "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
         ValueName = "MaxIdleTime"
-        Value     = 10800000  
+        Value     = 10800000  # 3 hours
         Type      = "DWord"
     }
 )
-foreach ($params in $Settings) {Set-GPRegistryValue @params | Out-Null}
+foreach ($params in $rdpSettings) { Set-GPRegistryValue @params | Out-Null }
 
  
+# --- RDS Licensing GPO ---
+# Configures RDS license server and mode
 New-GPO -Name "Computer - RDS - Lizenzen" | Out-Null
 New-GPLink -Name "Computer - RDS - Lizenzen" -Target "OU=RDS-Server,$($Using:OUPathname)" -LinkEnabled Yes | Out-Null
-$lizenzen = @(
+$rdsLicensing = @(
     @{
         Name      = "Computer - RDS - Lizenzen"
         Key       = "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
         ValueName = "LicenseServers"
-        Value     = "192.168.175.103"  
+        Value     = "192.168.175.103"
         Type      = "String"
     },
     @{
         Name      = "Computer - RDS - Lizenzen"
         Key       = "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services"
         ValueName = "LicensingMode"
-        Value     = 4  
+        Value     = 4  # Per user
         Type      = "DWord"
     }
 )
-foreach ($params in $lizenzen) {Set-GPRegistryValue @params | Out-Null}
+foreach ($params in $rdsLicensing) { Set-GPRegistryValue @params | Out-Null }
 
-#Wichtig fuer die DefaultApps da es ueber eine Freigabe laeuft
-
+# --- Default Apps GPO ---
+# Configures file association defaults from a shared XML file
 New-GPO -Name "Computer - Default - Apps" | Out-Null
 New-GPLink -Name "Computer - Default - Apps" -Target "OU=RDS-Server,$($Using:OUPathname)" -LinkEnabled Yes | Out-Null
 $defaultApps = @{
     Name      = "Computer - Default - Apps"
     Key       = "HKEY_LOCAL_MACHINE\Software\Policies\Microsoft\Windows\System"
     ValueName = "DefaultAssociationsConfiguration"
-    Value     = "\\DC\netlogon\DefaultApps.xml" #C:\Windows\SYSVOL\sysvol\kevin.local\scripts\DefaultApps.xml
+    Value     = "\\DC\netlogon\DefaultApps.xml"
     Type      = "String"
 }
 Set-GPRegistryValue @defaultApps | Out-Null
 
 
+# --- XML SID Update for Drive Mapping ---
+# Updates drive mapping XML to match current group SIDs
 
 # Load the XML file
 $xmlPath = "C:\temp\{812FABB7-FDB3-4A46-8E8D-85BD985BA327}\DomainSysvol\GPO\User\Preferences\Drives\Drives.xml"
@@ -108,7 +112,7 @@ $groupSidPairs = @()
 foreach ($group in $groups) {
     # Ensure the name format matches what's in the XML
     $groupSidPairs += [PSCustomObject]@{
-        GroupName = "kevin\" + $group.Name
+        GroupName = "$($Using:DomainName)\" + $group.Name
         SID       = $group.SID.Value
     }
 }
@@ -136,13 +140,14 @@ $xml.Save($xmlPath)
 
 
 
-#New-GPO -Name "User - Netzwerk - Laufwerke" | Out-Null
-Import-GPO -BackupGpoName "User - Netzwerk - Laufwerke" -TargetName "User - Netzwerk - Laufwerke" -Path "C:\temp" -CreateIfNeeded |Out-Null
+# --- User Drive Mapping GPO ---
+# Restores GPO for mapping network drives and links it to user/admin OUs
+Import-GPO -BackupGpoName "User - Netzwerk - Laufwerke" -TargetName "User - Netzwerk - Laufwerke" -Path "C:\temp" -CreateIfNeeded | Out-Null
 New-GPLink -Name "User - Netzwerk - Laufwerke" -Target "OU=User,$($Using:OUPathname)" -LinkEnabled Yes | Out-Null
 New-GPLink -Name "User - Netzwerk - Laufwerke" -Target "OU=Admins,$($Using:OUPathname)" -LinkEnabled Yes | Out-Null
 
-##Neue GPO die CMD,POwershell,Outlook und Systemsteuerung zusammenfasst
-
+# --- GUI Lockdown GPO ---
+# Hides new Outlook toggle and disables access to certain Control Panel items
 New-GPO -Name "User - GUI - Settings" | Out-Null
 New-GPLink -Name "User - GUI - Settings" -Target "OU=User,$($Using:OUPathname)" -LinkEnabled Yes | Out-Null
 $UserSettings = @(

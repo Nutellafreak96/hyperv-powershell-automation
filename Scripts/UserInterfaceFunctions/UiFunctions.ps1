@@ -1,7 +1,40 @@
+<#
+/**
+ * @file YourScriptName.ps1
+ * @brief Script to provide user interface functions for input gathering in Windows PowerShell.
+ *
+ * This script loads the necessary .NET assemblies for Windows Forms and Drawing, 
+ * enabling GUI elements such as forms, buttons, labels, and text boxes.
+ *
+ * It contains multiple functions to display dialog windows for user input, 
+ * such as getting firm names, domain values, and selecting virtual machine switches.
+ *
+ * @note Requires PowerShell with access to System.Windows.Forms and System.Drawing assemblies.
+ *
+ * @author Your Name
+ * @date 2025-07-28
+ */
+#>
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
-<#Function to get the firm name#>
+Add-Type -AssemblyName System.Windows.Forms
+Add-Type -AssemblyName System.Drawing
+
+<#
+.SYNOPSIS
+    Displays a dialog to input the firm name.
+
+.DESCRIPTION
+    Opens a Windows Forms dialog prompting the user to enter a firm name.
+    Returns the entered string if OK is pressed and input is valid; otherwise, exits the script.
+
+.RETURNS
+    [string] The firm name entered by the user.
+
+.EXAMPLE
+    $firmName = FirmName
+#>
 function FirmName {
 
     ###############################################################################
@@ -56,7 +89,26 @@ function FirmName {
     }
 }
 
-<#Function to get values ecessary for the domain/organisationalunit#>
+<#
+.SYNOPSIS
+    Displays a dialog to input domain-related values.
+
+.DESCRIPTION
+    Opens a Windows Forms dialog prompting the user to enter three domain values:
+    - Domain Value
+    - NetBIOS Name
+    - Organizational Unit Name
+    Returns these values as an array if OK is pressed and input is valid; otherwise, exits the script.
+
+.RETURNS
+    [string[]] Array containing Domain Value, NetBIOS name, and Organizational Unit name.
+
+.EXAMPLE
+    $domainValues = DomainValueUI
+    $domain = $domainValues[0]
+    $netbios = $domainValues[1]
+    $ouName = $domainValues[2]
+#>
 function DomainValueUI {
 
     ###############################################################################
@@ -139,7 +191,21 @@ function DomainValueUI {
     }
 }
 
-<#Function to get the Networkswitch the VMs should use#>
+<#
+.SYNOPSIS
+    Displays a dialog to select a VM network switch.
+
+.DESCRIPTION
+    Opens a Windows Forms dialog with a listbox containing available VM switches
+    retrieved via Get-VMSwitch. Returns the selected switch name if OK is pressed,
+    otherwise returns a string indicating invalid input.
+
+.RETURNS
+    [string] The selected VM switch name or "Wrong/Missing Input" if cancelled.
+
+.EXAMPLE
+    $selectedSwitch = SwitchSelectorUI
+#>
 function SwitchSelectorUI {
     ###############################################################################
     #                                                                             #
@@ -200,7 +266,22 @@ function SwitchSelectorUI {
     }
 }
 
-<#Function to let user decide how much RAM the VMs should use#>
+<#
+.SYNOPSIS
+    Displays a dialog for the user to select the amount of RAM for the VMs.
+
+.DESCRIPTION
+    Opens a Windows Forms dialog presenting a predefined list of RAM values (in GB).
+    The user selects a RAM value, which is returned as a string including the unit "GB".
+    If the user cancels or does not select a value, a "Wrong/Missing Input" string is returned.
+
+.RETURNS
+    [string] The selected RAM amount in GB, e.g., "4GB", or "Wrong/Missing Input" if cancelled.
+
+.EXAMPLE
+    $ram = RamSelectorUI
+    Write-Host "Selected RAM: $ram"
+#>
 function RamSelectorUI {
 
     ###############################################################################
@@ -279,7 +360,32 @@ function RamSelectorUI {
     }
 }
 
-<#Function to get input from the user about the static IP-Addresses the VM should have#>
+<#
+.SYNOPSIS
+    Collects static IP addresses for multiple VM roles via a user interface.
+
+.DESCRIPTION
+    Opens a Windows Forms dialog with text boxes for the user to input:
+    - Server IP address
+    - File Server IP address (FS)
+    - Terminal Server IP address (TS)
+    - Default Gateway IP address
+    Validates that none of these fields are empty.
+    Returns an array of the entered IP addresses in the order above.
+    If the user cancels or any field is empty, the script prints a warning and exits.
+
+.RETURNS
+    [string[]] Array containing the entered IP addresses:
+        [0] Server IP address
+        [1] File Server IP address
+        [2] Terminal Server IP address
+        [3] Default Gateway IP address
+
+.EXAMPLE
+    $ips = ServerIPAdressUI
+    Write-Host "Server IP: $($ips[0])"
+    Write-Host "File Server IP: $($ips[1])"
+#>
 function ServerIPAdressUI {
     ###########################################################
     #                                                         #
@@ -375,7 +481,22 @@ function ServerIPAdressUI {
     }
 }
 
-<#Function to let the User select the Directory to store the VMs#>
+<#
+.SYNOPSIS
+    Opens a dialog for the user to select a directory to store the VMs.
+
+.DESCRIPTION
+    Displays a Windows Forms FolderBrowserDialog allowing the user to browse and select
+    a folder path. The dialog starts at C:\ and allows creating new folders.
+    Returns the selected directory path if OK is pressed; otherwise exits the script.
+
+.RETURNS
+    [string] The full path of the selected directory.
+
+.EXAMPLE
+    $vmPath = SelectDirUI
+    Write-Host "VMs will be saved to: $vmPath"
+#>
 function SelectDirUI {
 
     ###############################################################################
@@ -403,7 +524,28 @@ function SelectDirUI {
     }
 
 }
-<#Function to input password that are used in the process#>
+
+<#
+.SYNOPSIS
+    Collects multiple passwords from the user via a secure input form.
+
+.DESCRIPTION
+    Presents a Windows Forms dialog with masked input fields for the following passwords:
+    - Local Administrator
+    - Domain Administrator
+    - DSRM Password
+    - Test User Password
+    - Company Admin Password
+    Returns an array of SecureString objects for these passwords if all fields are filled and OK is pressed.
+    If cancelled or missing input, the script outputs a warning and exits.
+
+.RETURNS
+    [SecureString[]] Array of passwords in the order listed above.
+
+.EXAMPLE
+    $passwords = PasswordUI
+    # Access individual passwords with $passwords[0], $passwords[1], etc.
+#>
 function PasswordUI {
 
     ###############################################################################
@@ -517,7 +659,24 @@ function PasswordUI {
     }
 }
 
-<#Function to get user input on how many cores the VMs should use#>
+<#
+.SYNOPSIS
+    Opens a UI form to select the number of CPU cores for each VM type.
+
+.DESCRIPTION
+    Presents a Windows Forms dialog with input fields for the number of cores to assign
+    to three VM types: Domain Controller (DC), File Server (FS), and Terminal Server (TS).
+    The user inputs integer values, which are validated to ensure the total does not exceed
+    the number of logical processors available on the host machine.
+    If validation fails or inputs are missing, the script exits with a message.
+
+.RETURNS
+    [int[]] An array of integers representing the cores assigned to DC, FS, and TS in that order.
+
+.EXAMPLE
+    $cores = CoreSelectorUi
+    Write-Host "DC cores: $($cores[0]), FS cores: $($cores[1]), TS cores: $($cores[2])"
+#>
 function CoreSelectorUi{
 
     ###############################################################################
@@ -609,8 +768,27 @@ function CoreSelectorUi{
     
 }
 
-##################################################################
-<#function to check the password policies#>
+<#
+.SYNOPSIS
+    Validates a password string against defined complexity policies.
+
+.DESCRIPTION
+    Checks if the password meets these criteria:
+    - Minimum length of 12 characters
+    - Contains at least one uppercase letter
+    - Contains at least one lowercase letter
+    - Contains at least one digit
+    - Contains at least one special character from the set: + - . , \ ? ( ) ! $ % & * /
+
+.PARAMETER Password
+    The password string to validate.
+
+.RETURNS
+    [bool] True if all policy criteria are met, otherwise False.
+
+.EXAMPLE
+    $valid = TestPasswordPolicy -Password "Str0ng!Passw0rd"
+#>
 function TestPasswordPolicy {
     param (
         [string]$Password
@@ -628,7 +806,24 @@ function TestPasswordPolicy {
 
     return $false
 }
-<#Test the correctness of the Domain name input#>
+
+<#
+.SYNOPSIS
+    Validates a domain name string format.
+
+.DESCRIPTION
+    Checks if the domain name contains at least one dot-separated label sequence
+    composed of alphanumeric characters, e.g., "example.local".
+
+.PARAMETER DomainName
+    The domain name string to validate.
+
+.RETURNS
+    [bool] True if the domain name matches the expected pattern, otherwise False.
+
+.EXAMPLE
+    $isValid = TestDomainName -DomainName "corp.example.com"
+#>
 function TestDomainName {
     param (
         [string]$DomainName
@@ -639,8 +834,9 @@ function TestDomainName {
     
     return $false
 }
-<#Userinterface to combine all inputfields from the functions above#>
 
+
+<#Userinterface to combine all inputfields from the functions above#>
 function UserInterface {
 
     ###############################################################################
