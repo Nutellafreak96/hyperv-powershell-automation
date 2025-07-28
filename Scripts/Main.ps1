@@ -10,6 +10,7 @@ Add-Type -AssemblyName System.Drawing
 
 
 
+
 #Ueberpruefen ob das Skript als Administrator ausgefuehrt wird
 
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
@@ -199,18 +200,10 @@ function BasicADStructure {
 #Main (Aufrufen von Funktionen und Abarbeitung des Scripts)#
 ############################################################
 
-#FirmName #get input from the user about the firm name
-#DomainValueUI #get input from the user for important domain values
-#SwitchSelectorUI #let the user decide which networkswitch the vms use
-#RamSelectorUI #let the user decied how much ram the vms use
-#ServerIPAdressUI #get input from the user about the ip-addresses the vms should use
-#SelectDirUI #let the user select the directory to store the vms
-#PasswordUI #let the user input the password used by the script
-#UserInterface #userinterface to combine all of the above functions
-#$Daten
+
 
 #Erstellen des Ordners fuer die Vms des Kunden
-CreateCustomerDir -KundeSpeicherort $KundeSpeicherort -KundenName $Kunde -DateienSpeicherort $DateienSpeicherort 
+CreateCustomerDirectory  -KundeSpeicherort $KundeSpeicherort -KundenName $Kunde -DateienSpeicherort $DateienSpeicherort 
 Write-Output "$(Get-TimeStamp) -- Skript nach dem Erstellen der Ordnerstruktur und Kopieren der vhdx" | Out-File $LogFilePath -append
 
 #Erstelln der VMs
