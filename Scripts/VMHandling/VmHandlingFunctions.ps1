@@ -37,9 +37,9 @@ function UpdateVMResources {
         [string]$VmDc,
         [string]$VmFs,
         [string]$VmTs,
-        [Int16]$CoreDc,
-        [Int16]$CoreFs,
-        [Int16]$CoreTs,
+        [Int]$CoreDc,
+        [Int]$CoreFs,
+        [Int]$CoreTs,
         [Int64]$RamDc,
         [Int64]$RamFs,
         [Int64]$RamTs
@@ -109,10 +109,10 @@ function ChangeVMSettings {
         [pscredential]$Credential
     )
 
-    Invoke-Command -VMName $VmDc -FilePath ".\VMHandling\ChangeIP_rename_DC.ps1" -Credential $Credential -AsJob | Out-Null
+    Invoke-Command -VMName $VmDc -FilePath ".\VMHandling\ChangeIpRenameDc.ps1" -Credential $Credential -AsJob | Out-Null
     Invoke-Command -VMName $VmFs -FilePath ".\DeployFileServerRole.ps1" -Credential $Credential -AsJob | Out-Null
-    Invoke-Command -VMName $VmTs -FilePath ".\VMHandling\ChangeIp_Rename_TS.ps1" -Credential $Credential -AsJob | Out-Null
-
+    Invoke-Command -VMName $VmTs -FilePath ".\VMHandling\ChangeIpRenameTs.ps1" -Credential $Credential -AsJob | Out-Null
+    
     Get-Job | Wait-Job | Out-Null
     Get-Job | Where-Object State -like 'Completed' | Remove-Job | Out-Null
 }
