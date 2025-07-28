@@ -200,10 +200,10 @@ function BasicADStructure {
 #Main (Aufrufen von Funktionen und Abarbeitung des Scripts)#
 ############################################################
 
-
+$Daten
 
 #Erstellen des Ordners fuer die Vms des Kunden
-CreateCustomerDirectory  -KundeSpeicherort $KundeSpeicherort -KundenName $Kunde -DateienSpeicherort $DateienSpeicherort 
+CreateCustomerDirectory  -CustomerPath $KundeSpeicherort -CustomerName $Kunde -SourcePath $DateienSpeicherort 
 Write-Output "$(Get-TimeStamp) -- Skript nach dem Erstellen der Ordnerstruktur und Kopieren der vhdx" | Out-File $LogFilePath -append
 
 #Erstelln der VMs
@@ -211,7 +211,7 @@ CreateVMs
 Write-Output "$(Get-TimeStamp) -- VMs erstellt" | Out-File $LogFilePath -append
 
 #Bearbeiten der Anzahl der virtuellen Prozessoren und des Arbeitsspeichers
-UpdateVMRessources -DC $VM_Name_DC -FS $VM_Name_FS -TS $VM_Name_TS -CoreDc $CoreDc -CoreFs $CoreFs -CoreTs $CoreTs -RamDc $RamDc -RamFs $RamFs -RamTs $RamTs
+UpdateVMRessources -VmDc $VM_Name_DC -VmFs $VM_Name_FS -VmTs $VM_Name_TS -CoreDc $CoreDc -CoreFs $CoreFs -CoreTs $CoreTs -RamDc $RamDc -RamFs $RamFs -RamTs $RamTs
 
 Write-Output "$(Get-TimeStamp) -- VM Ressourcen angepasst" | Out-File $LogFilePath -append
 
@@ -229,12 +229,13 @@ Start-Sleep -Seconds 240 #4min warten damit Server online sind
 Write-Output "$(Get-TimeStamp) -- Windows Initialisierung fertig" | Out-File $LogFilePath -append
 
 #Kopieren der wichtigsten Dateien auf den Servern
-CopyFiles -Schnittstelle $CopyService -DC $VM_Name_DC -FS $VM_Name_FS -TS $VM_Name_TS -Dateienspeicherort $DateienSpeicherort -Credential $LCredential
+CopyFilesToVMs -IntegrationServiceName $CopyService -VmDc $VM_Name_DC  -VmFs $VM_Name_FS -VmTs $VM_Name_TS  -SourcePath $DateienSpeicherort -Credential $LCredential
 Write-Output "$(Get-TimeStamp) -- Kopieren der Dateien fertig" | Out-File $LogFilePath -append
 
 #Loeschen der Antwortdatei zum ueberspringen von Windows einrichtungspunkten | Löschen der unattend.xml
-DeleteFiles -DC $VM_Name_DC -FS $VM_Name_FS -TS $VM_Name_TS -Credential $LCredential
+DeleteSensitiveFiles -VmDc $VM_Name_DC -VmFs $VM_Name_FS -VmTs $VM_Name_TS -Credential $LCredential
 Write-Output "$(Get-TimeStamp) -- Löschen Sicherheitsrelevanter Dateien fertig" | Out-File $LogFilePath -append
+
 
 #Stoppen der Vms um die MacAddresse statisch zu setzen
 StopVMs
@@ -252,7 +253,7 @@ Write-Output "$(Get-TimeStamp) -- VMs gestoppt" | Out-File $LogFilePath -append
 
 
 #MacAddressen auf statisch setzen
-ChangeMacAddress -DC $VM_Name_DC -FS $VM_Name_FS -TS $VM_Name_TS
+ChangeMacAddress -VmDC $VM_Name_DC -VmFs $VM_Name_FS -VmTs $VM_Name_TS
 Write-Output "$(Get-TimeStamp) -- MAC Addressen der VMs auf statisch umgestellt" | Out-File $LogFilePath -append
 
 #Starten der Vms um weiter daran zu arbeiten
@@ -270,7 +271,7 @@ while ( ($DcState -eq "off") -or ($FsState -eq "off") -or ($TsState -eq "off") )
 #Aendern der IP-Adressen der Server auf statische IPs
 Start-Sleep -Seconds 30
 
-ChangeVMSettings -Dc $VM_Name_DC -FS $VM_Name_FS -TS $VM_Name_TS -Credential $LCredential
+ChangeVMSettings -VmDC $VM_Name_DC -VmFs $VM_Name_FS -VmTs $VM_Name_TS -Credential $LCredential
 Write-Output "$(Get-TimeStamp) -- VMs haben eine feste IP erhalten und der virtuelle Computer bekommt einen neuen Namen | FS Rolle installiert" | Out-File $LogFilePath -append
 
 

@@ -5,7 +5,7 @@ Updates CPU and memory resources of the specified VMs.
 .DESCRIPTION
 Modifies the number of virtual processors and sets the startup memory for each VM (Domain Controller, File Server, Terminal Server).
 
-.PARAMETER VmDC
+.PARAMETER VmDc
 Name of the Domain Controller VM.
 
 .PARAMETER VmFs
@@ -34,7 +34,7 @@ RAM allocation (in bytes) for the Terminal Server.
 #>
 function UpdateVMResources {
     param(
-        [string]$VmDC,
+        [string]$VmDc,
         [string]$VmFs,
         [string]$VmTs,
         [Int16]$CoreDc,
@@ -45,7 +45,7 @@ function UpdateVMResources {
         [Int64]$RamTs
     )
 
-    Set-VM -Name $VmDC -ProcessorCount $CoreDc -MemoryStartupBytes $RamDc | Out-Null
+    Set-VM -Name $VmDc -ProcessorCount $CoreDc -MemoryStartupBytes $RamDc | Out-Null
     Set-VM -Name $VmFs -ProcessorCount $CoreFs -MemoryStartupBytes $RamFs | Out-Null
     Set-VM -Name $VmTs -ProcessorCount $CoreTs -MemoryStartupBytes $RamTs | Out-Null
 }
@@ -57,7 +57,7 @@ Sets the MAC address of VMs to static values.
 .DESCRIPTION
 Reads the current dynamic MAC address of the VMs and reassigns them as static to preserve the address.
 
-.PARAMETER VmDC
+.PARAMETER VmDc
 Name of the Domain Controller VM.
 
 .PARAMETER VmFs
@@ -68,16 +68,16 @@ Name of the Terminal Server VM.
 #>
 function ChangeMacAddress {
     param(
-        [string]$VmDC,
+        [string]$VmDc,
         [string]$VmFs,
         [string]$VmTs
     )
     
-    $DcMacAddress = Get-VM -Name $VmDC | Get-VMNetworkAdapter | Select-Object -ExpandProperty MacAddress
+    $DcMacAddress = Get-VM -Name $VmDc | Get-VMNetworkAdapter | Select-Object -ExpandProperty MacAddress
     $FsMacAddress = Get-VM -Name $VmFs | Get-VMNetworkAdapter | Select-Object -ExpandProperty MacAddress
     $TSsMacAddress = Get-VM -Name $VmTs | Get-VMNetworkAdapter | Select-Object -ExpandProperty MacAddress
 
-    Set-VMNetworkAdapter -VMName $VmDC -StaticMacAddress $DcMacAddress
+    Set-VMNetworkAdapter -VMName $VmDc -StaticMacAddress $DcMacAddress
     Set-VMNetworkAdapter -VMName $VmFs -StaticMacAddress $FsMacAddress
     Set-VMNetworkAdapter -VMName $VmTs -StaticMacAddress $TSsMacAddress
 }
@@ -89,7 +89,7 @@ Changes IP addresses and hostnames of VMs, and installs the File Server role.
 .DESCRIPTION
 Runs PowerShell scripts inside each VM to configure static IP addresses, rename computers, and install the File Server feature on the FS VM.
 
-.PARAMETER VmDC
+.PARAMETER VmDc
 Name of the Domain Controller VM.
 
 .PARAMETER VmFs
@@ -103,13 +103,13 @@ Credentials used to execute the remote scripts in the VMs.
 #>
 function ChangeVMSettings {
     param(
-        [string]$VmDC,
+        [string]$VmDc,
         [string]$VmFs,
         [string]$VmTs,
         [pscredential]$Credential
     )
 
-    Invoke-Command -VMName $VmDC -FilePath ".\VMHandling\ChangeIP_rename_DC.ps1" -Credential $Credential -AsJob | Out-Null
+    Invoke-Command -VMName $VmDc -FilePath ".\VMHandling\ChangeIP_rename_DC.ps1" -Credential $Credential -AsJob | Out-Null
     Invoke-Command -VMName $VmFs -FilePath ".\DeployFileServerRole.ps1" -Credential $Credential -AsJob | Out-Null
     Invoke-Command -VMName $VmTs -FilePath ".\VMHandling\ChangeIp_Rename_TS.ps1" -Credential $Credential -AsJob | Out-Null
 
