@@ -211,7 +211,7 @@ CreateVMs
 Write-Output "$(Get-TimeStamp) -- VMs erstellt" | Out-File $LogFilePath -append
 
 #Bearbeiten der Anzahl der virtuellen Prozessoren und des Arbeitsspeichers
-UpdateVMRessources -VmDc $VM_Name_DC -VmFs $VM_Name_FS -VmTs $VM_Name_TS -CoreDc $CoreDc -CoreFs $CoreFs -CoreTs $CoreTs -RamDc $RamDc -RamFs $RamFs -RamTs $RamTs
+UpdateVMResources -VmDc $VM_Name_DC -VmFs $VM_Name_FS -VmTs $VM_Name_TS -CoreDc $CoreDc -CoreFs $CoreFs -CoreTs $CoreTs -RamDc $RamDc -RamFs $RamFs -RamTs $RamTs
 
 Write-Output "$(Get-TimeStamp) -- VM Ressourcen angepasst" | Out-File $LogFilePath -append
 
