@@ -45,7 +45,9 @@ $RamFs = $Daten[14] #Variable um den Ausgewaehlten RAM den VM´s zuzuweisen
 $RamTs = $Daten[15] #Variable um den Ausgewaehlten RAM den VM´s zuzuweisen
 $SwitchSelected = $Daten[16] #Variable zum speichern der Netzwerkschnittstelle der VMs
 $DateienSpeicherort = $Daten[17] #Speicherort der vorbereiteten Datein
-
+$CoreDc = $Daten[18] #Anzahl der Prozessoren der Dc Vm
+$CoreFs = $Daten[19] #Anzahl der Prozessoren der Fs Vm
+$CoreTs = $Daten[20] #Anzahl der Prozessoren der Ts Vm
 
 #Pfad der WindowsServer VHDX
 $DC_VHDX_Path = "$($KundeSpeicherort)\$($Kunde)\DC\Serverprep.vhdx"
