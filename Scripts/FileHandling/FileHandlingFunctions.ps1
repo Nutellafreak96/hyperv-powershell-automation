@@ -25,9 +25,6 @@ function CreateCustomerDirectory {
         [string]$SourcePath
     )
 
-    Write-Host $CustomerPath
-    Write-Host $CustomerName
-    Write-Host $SourcePath
 
     # Check if directory already exists and remove it
     if (Test-Path "$($CustomerPath)\$($CustomerName)") {
