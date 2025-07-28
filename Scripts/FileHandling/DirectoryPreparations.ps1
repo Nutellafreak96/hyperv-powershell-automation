@@ -17,6 +17,9 @@ These include folders for configuration databases, general data storage, scanned
 # Bring Disk 1 online
 Get-Disk -Number 1 | Set-Disk -IsOffline $false 
 
+# Initialize Disk for first use
+Initialize-Disk -Number 1
+
 # Create a new volume on Disk 1 and assign it as drive D:
 Get-Disk -Number 1 | New-Volume -FriendlyName "Daten" -DriveLetter D -FileSystem NTFS | Out-Null
 
