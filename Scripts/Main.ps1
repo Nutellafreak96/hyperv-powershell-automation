@@ -194,6 +194,10 @@ function BasicADStructure {
     Invoke-Command -VMName $VM_Name_DC -ScriptBlock { Move-Item -Path "C:\temp\DefaultApps.xml" -Destination "C:\Windows\SYSVOL\domain\scripts" } -Credential $DCredential 
 }
 
+#Legt die Zugriffsrechte fuer verschiedene Ordner fest
+function DirPermissions {
+    Invoke-Command -VMName $VM_Name_FS -FilePath ".\FileHandling\Permissions.ps1" -Credential $DCredential
+}
 
 ############################################################
 #Main (Aufrufen von Funktionen und Abarbeitung des Scripts)#
@@ -293,3 +297,8 @@ Write-Output "$(Get-TimeStamp) -- Ordnerstruktur auf der neuen Festplatte am FS 
 #Erstellen der Grundarbeitsstruktur (Organisationseinheit)
 BasicADStructure
 Write-Output "$(Get-TimeStamp) -- OU,User,Gruppen,GPO erstellt " | Out-File $LogFilePath -append
+
+#Freigeben der Ordner und setzen der Zugriffsrechte
+DirPermissions
+Write-Output "$(Get-TimeStamp) -- Ordner Freigaben erstellt und NTFS Rechte bearbeitet" | Out-File $LogFilePath -append
+#Installieren der Remotedesktopdienste auf dem ts
