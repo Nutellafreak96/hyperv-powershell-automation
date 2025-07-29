@@ -210,7 +210,7 @@ function DeployTSRole {
     )
     
     #Invoke-Command -VMName $TS -ScriptBlock { Install-WindowsFeature -Name "Remote-Desktop-Services"  | Out-Null } -Credential $Credential
-    Invoke-Command -VMName $TS -ScriptBlock {Install-WindowsFeature -IncludeManagementTools -Name @("RDS-RD-Server","RDS-Connection-Broker","RDS-Web-Access")}
+    Invoke-Command -VMName $TS -ScriptBlock {Install-WindowsFeature -IncludeManagementTools -Name @("Remote-Desktop-Services, RDS-RD-Server","RDS-Connection-Broker","RDS-Web-Access")}
     Invoke-Command -VMName $TS -FilePath ".\DeployRemoteDesktopServices.ps1" -Credential $Credential
     
     Invoke-Command -VMName $TS -ScriptBlock { Install-WindowsFeature -Name "RDS-Licensing" -Restart | Out-Null } -Credential $Credential
