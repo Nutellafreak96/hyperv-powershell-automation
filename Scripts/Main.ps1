@@ -183,7 +183,7 @@ function JoinDomain {
 
 #Haengt eine virtuelle Festplatte an f�r die Daten und erstellt die notwendigsten Ordner
 function DirectoryPreparation {
-    Invoke-Command -VMName $VM_Name_FS -FilePath ".\FS Handling\DirectoryPreparations.ps1" -Credential $DCredential
+    Invoke-Command -VMName $VM_Name_FS -FilePath ".\FileHandling\DirectoryPreparations.ps1" -Credential $DCredential
 }
 
 #Erstellt die standard Gruppenrichtlinien und Gruppen und erstellt auch ein paar Benutzer
