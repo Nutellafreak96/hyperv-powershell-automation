@@ -199,6 +199,35 @@ function DirPermissions {
     Invoke-Command -VMName $VM_Name_FS -FilePath ".\FileHandling\Permissions.ps1" -Credential $DCredential
 }
 
+#Installiert die remoteDesktopService Rolle um aus der VM "TS" einen TerminalServer zu machen
+function DeployTSRole {
+
+    param(
+        [string]$DC,
+        [string]$TS,
+        [string]$RdpName,
+        [pscredential]$Credential
+    )
+    
+    #Invoke-Command -VMName $TS -ScriptBlock { Install-WindowsFeature -Name "Remote-Desktop-Services"  | Out-Null } -Credential $Credential
+    Invoke-Command -VMName $TS -ScriptBlock {Install-WindowsFeature -IncludeManagementTools -Name @("RDS-RD-Server","RDS-Connection-Broker","RDS-Web-Access")}
+    Invoke-Command -VMName $TS -FilePath ".\DeployRemoteDesktopServices.ps1" -Credential $Credential
+    
+    Invoke-Command -VMName $TS -ScriptBlock { Install-WindowsFeature -Name "RDS-Licensing" -Restart | Out-Null } -Credential $Credential
+
+    
+    
+    Restart-VM -VMName $TS -Force
+    Start-Sleep -Seconds 120
+    Invoke-Command -VMName $TS -ScriptBlock { Set-RDSessionCollectionConfiguration -UserGroup "TSUser" -CollectionName $Using:RdpName | Out-Null } -Credential $Credential
+    
+    Start-Sleep -Seconds 120
+    Invoke-Command -VMName $TS -ScriptBlock { Get-Service -Name "Remotedesktopverwaltung" | Stop-Service } -Credential $Credential
+    
+    Invoke-Command -VMName $TS -ScriptBlock { Get-Service -Name "Remotedesktopverwaltung" | Start-Service } -Credential $Credential
+    
+}
+
 ############################################################
 #Main (Aufrufen von Funktionen und Abarbeitung des Scripts)#
 ############################################################
@@ -292,6 +321,7 @@ Start-Sleep -Seconds 60 #1min warten auf Server neustart
 #Erstellen der wichtigsten Laufwerke und Ordner
 DirectoryPreparation
 
+
 Write-Output "$(Get-TimeStamp) -- Ordnerstruktur auf der neuen Festplatte am FS erstellt" | Out-File $LogFilePath -append
 
 #Erstellen der Grundarbeitsstruktur (Organisationseinheit)
@@ -302,3 +332,12 @@ Write-Output "$(Get-TimeStamp) -- OU,User,Gruppen,GPO erstellt " | Out-File $Log
 DirPermissions
 Write-Output "$(Get-TimeStamp) -- Ordner Freigaben erstellt und NTFS Rechte bearbeitet" | Out-File $LogFilePath -append
 #Installieren der Remotedesktopdienste auf dem ts
+
+
+
+
+DeployTSRole -DC $VM_Name_DC -TS $VM_Name_TS -RdpName $KundeRDP -Credential $DCredential
+Write-Output "$(Get-TimeStamp) -- TS Rolle installiert und eingerichtet" | Out-File $LogFilePath -append
+#VMs neustarten
+RestartVMs
+Write-Output "$(Get-TimeStamp) -- VMs neugestartet" | Out-File $LogFilePath -append
