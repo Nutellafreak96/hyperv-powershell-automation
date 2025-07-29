@@ -58,41 +58,29 @@ $userAccounts = @(
     }
 )
 
-foreach ($user in $userAccounts) {
-    New-ADUser @user
-}
+foreach ($user in $userAccounts) {New-ADUser @user}
 
 # --- Create Groups ---
-$groupNames = @("DATEVUSER", "TSUser", "Daten_LW", "Scan_LW", "GF", "GF_LW")
-foreach ($groupName in $groupNames) {
-    New-ADGroup -Name $groupName -GroupScope DomainLocal -DisplayName $groupName -Path "OU=Groups,$($Using:OUPathname)"
-}
+New-ADGroup -Name "DATEVUSER" -GroupScope DomainLocal -DisplayName "DATEVUSER" -Path "OU=Groups,$($Using:OUPathname)"
+New-ADGroup -Name "TSUser" -GroupScope DomainLocal -DisplayName "TSUSer" -Path "OU=Groups,$($Using:OUPathname)"
+New-ADGroup -Name "Daten_LW" -GroupScope DomainLocal -DisplayName "Daten_LW" -Path "OU=Groups,$($Using:OUPathname)"
+New-ADGroup -Name "Scan_LW" -GroupScope DomainLocal -DisplayName "Scan_LW" -Path "OU=Groups,$($Using:OUPathname)"
+New-ADGroup -Name "GF" -GroupScope DomainLocal -DisplayName "GF" -Path "OU=Groups,$($Using:OUPathname)"
+New-ADGroup -Name "GF_LW" -GroupScope DomainLocal -DisplayName "GF_LW" -Path "OU=Groups,$($Using:OUPathname)"
+
 
 # --- Assign Users to Groups ---
-$usersOU = "OU=User,$($Using:OUPathname)"
-$adminsOU = "OU=Admins,$($Using:OUPathname)"
-
-$adUsers = Get-ADUser -Filter * | Where-Object DistinguishedName -like "*$usersOU"
-$adminUsers = Get-ADUser -Filter * | Where-Object DistinguishedName -like "*$adminsOU"
-
-# Custom domain groups
-Add-ADGroupMember -Identity "Scan_LW" -Members $adUsers, $adminUsers
-Add-ADGroupMember -Identity "TSUser" -Members $adUsers, $adminUsers
-Add-ADGroupMember -Identity "Daten_LW" -Members $adUsers, $adminUsers
-Add-ADGroupMember -Identity "DATEVUSER" -Members $adUsers, $adminUsers
-
-# Built-in AD administrative groups
-$builtInGroups = @(
-    "Domänen-Admins",
-    "Administratoren",
-    "Schema-Admins",
-    "Organisations-Admins",
-    "Richtlinien-Ersteller-Besitzer"
-)
-
-foreach ($group in $builtInGroups) {
-    Add-ADGroupMember -Identity $group -Members $adminUsers
-}
+$AdUser = Get-ADUser -Filter * | Select-Object -Property DistinguishedName,SamAccountName | Where-Object DistinguishedName -match "OU=User,$($Using:OUPathname)"
+$AdminAdUser = Get-ADUser -Filter * | Select-Object -Property DistinguishedName,SamAccountName | Where-Object DistinguishedName -match "OU=Admins,$($Using:OUPathname)"
+Add-ADGroupMember -Identity Scan_LW -Members $AdUser, $AdminAdUser
+Add-ADGroupMember -Identity TSUser -Members $AdUser, $AdminAdUser
+Add-ADGroupMember -Identity Daten_LW -Members $AdUser, $AdminAdUser
+Add-ADGroupMember -Identity DATEVUSER -Members $AdUser, $AdminAdUser
+Add-ADGroupMember -Identity Domänen-Admins -Members $AdminAdUser
+Add-ADGroupMember -Identity Administratoren -Members $AdminAdUser
+Add-ADGroupMember -Identity Schema-Admins -Members $AdminAdUser
+Add-ADGroupMember -Identity Organisations-Admins -Members $AdminAdUser
+Add-ADGroupMember -Identity Richtlinien-Ersteller-Besitzer -Members $AdminAdUser
 
 # --- Move default Administrator to the Admins OU ---
 (Get-ADUser -Identity "Administrator").ObjectGUID | Move-ADObject -TargetPath "OU=Admins,$($Using:OUPathname)"
