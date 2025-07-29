@@ -14,14 +14,31 @@ These include folders for configuration databases, general data storage, scanned
 .\Prepare-DatevFolders.ps1
 #>
 
-# Bring Disk 1 online
-Get-Disk -Number 1 | Set-Disk -IsOffline $false 
 
-# Initialize Disk for first use
-Initialize-Disk -Number 1
+
+# Bring Disk 1 online
+$disk = Get-Disk -Number 1
+Set-Disk -InputObject $disk -IsOffline $false | Out-Null
+
+
+
+# Check if the disk is initialized
+if ($disk.PartitionStyle -eq 'RAW') {
+    Initialize-Disk -Number 1 -PartitionStyle GPT | Out-Null # Initialize Disk for first use if 
+}
 
 # Create a new volume on Disk 1 and assign it as drive D:
-Get-Disk -Number 1 | New-Volume -FriendlyName "Daten" -DriveLetter D -FileSystem NTFS | Out-Null
+#New-Volume -Disk $disk -FriendlyName "Daten" -DriveLetter D -FileSystem NTFS | Out-Null 
+
+# Clear existing partitions and data on Disk 1
+Get-Disk -Number 1 | Clear-Disk -RemoveData -Confirm:$false | Out-Null
+
+# Initialize Disk for first use with GPT partition style
+Initialize-Disk -Number 1 -PartitionStyle GPT | Out-Null
+
+# Create a new partition that uses the full capacity of Disk 1
+New-Partition -DiskNumber 1 -UseMaximumSize -AssignDriveLetter | Format-Volume -FileSystem NTFS -NewFileSystemLabel "Daten" -Confirm:$false | Out-Null
+
 
 # Create DATEV-specific folder structure under D:\Freigaben\
 New-Item -ItemType Directory -Path "D:\Freigaben\WINDVSW1\" -Name "CONFIGDB" | Out-Null
