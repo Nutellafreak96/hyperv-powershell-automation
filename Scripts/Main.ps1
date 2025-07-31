@@ -1,4 +1,4 @@
-#Zum erstellen von .NET Klassen und damit zum erstellen von GUI Fenstern in Powershell muessen diese beiden Sachen eingebunden werden
+﻿#Zum erstellen von .NET Klassen und damit zum erstellen von GUI Fenstern in Powershell muessen diese beiden Sachen eingebunden werden
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
@@ -196,7 +196,8 @@ function BasicADStructure {
 }
 
 #Legt die Zugriffsrechte fuer verschiedene Ordner fest
-function DirPermissions {
+function DirPermissions 
+{
     Invoke-Command -VMName $VM_Name_FS -FilePath ".\FileHandling\Permissions.ps1" -Credential $DCredential
 }
 
@@ -211,7 +212,7 @@ function DeployTSRole {
     )
     
     # Step 1: Wait until VM is ready initially
-    Wait-ForVM -VMName $TS -Credential $Credential
+    #Wait-ForVM -VMName $TS -Credential $Credential 
 
     # Step 2: Install RDS roles with automatic reboot
     Invoke-Command -VMName $TS -ScriptBlock {
@@ -223,14 +224,12 @@ function DeployTSRole {
     } -Credential $Credential
 
     # Step 2.5: Wait again after reboot
-    Wait-ForVM -VMName $TS -Credential $Credential
+    Wait-ForVM -VMName $TS -Credential $Credential -MaxRetries 100 -WaitSeconds 10 -IP $DCIPAdress
 
     # Step 3: Configure RDS deployment
     Invoke-Command -VMName $TS -ScriptBlock {
         $FQDN = "TS." + $Using:DomainName
-
         New-RDSessionDeployment -ConnectionBroker $FQDN -SessionHost $FQDN -WebAccessServer $FQDN | Out-Null
-        Add-RDSessionHost -SessionHost $FQDN -ConnectionBroker $FQDN -CollectionName $Using:KundeRDP | Out-Null
         New-RDSessionCollection -CollectionName $Using:KundeRDP -SessionHost $FQDN -ConnectionBroker $FQDN | Out-Null
     } -Credential $Credential
 
@@ -243,7 +242,7 @@ function DeployTSRole {
     Invoke-Command -VMName $TS -ScriptBlock { Restart-Computer -Force } -Credential $Credential
 
     #  Wait for VM to come back online
-    Wait-ForVM -VMName $TS -Credential $Credential
+    Wait-ForVM -VMName $TS -Credential $Credential -MaxRetries 100 -WaitSeconds 10 -IP $DCIPAdress
 
     # Configure session collection user group
     Invoke-Command -VMName $TS -ScriptBlock {
@@ -251,34 +250,16 @@ function DeployTSRole {
     } -Credential $Credential
 
     #  Wait again to make sure services are stable
-    Wait-ForVM -VMName $TS -Credential $Credential
+    Wait-ForVM -VMName $TS -Credential $Credential -MaxRetries 100 -WaitSeconds 10 -IP $DCIPAdress
 
     # Restart remote desktop management service
     Invoke-Command -VMName $TS -ScriptBlock {
         Get-Service -Name "Remotedesktopverwaltung" | Stop-Service
         Get-Service -Name "Remotedesktopverwaltung" | Start-Service
     } -Credential $Credential
-
-    <#
-    Invoke-Command -VMName $TS -ScriptBlock {Install-WindowsFeature -IncludeManagementTools -Name @("Remote-Desktop-Services", "RDS-RD-Server","RDS-Connection-Broker","RDS-Web-Access") -Restart | Out-Null} -Credential $Credential
-    #Invoke-Command -VMName $TS -ScriptBlock { Restart-Computer -Force } -Credential $Credential
-    Start-Sleep -Seconds 120
-    Invoke-Command -VMName $TS -FilePath ".\DeployRemoteDesktopServices.ps1" -Credential $Credential | Out-Null
-
-    Invoke-Command -VMName $TS -ScriptBlock { Install-WindowsFeature -Name "RDS-Licensing" -Restart | Out-Null } -Credential $Credential
-    
-
-    Invoke-Command -VMName $TS -ScriptBlock { Restart-Computer -Force } -Credential $Credential
-    #Restart-VM -VMName $TS -Force
-    Start-Sleep -Seconds 120
-    Invoke-Command -VMName $TS -ScriptBlock { Set-RDSessionCollectionConfiguration -UserGroup "TSUser" -CollectionName $Using:RdpName | Out-Null } -Credential $Credential
-    
-    Start-Sleep -Seconds 120
-    Invoke-Command -VMName $TS -ScriptBlock { Get-Service -Name "Remotedesktopverwaltung" | Stop-Service } -Credential $Credential
-    
-    Invoke-Command -VMName $TS -ScriptBlock { Get-Service -Name "Remotedesktopverwaltung" | Start-Service } -Credential $Credential
-    #>
 }
+
+
 
 ############################################################
 #Main (Aufrufen von Funktionen und Abarbeitung des Scripts)#
@@ -388,10 +369,7 @@ DirPermissions
 Write-Output "$(Get-TimeStamp) -- Ordner Freigaben erstellt und NTFS Rechte bearbeitet" | Out-File $LogFilePath -append
 #Installieren der Remotedesktopdienste auf dem ts
 
-
-
-
-#DeployTSRole -DC $VM_Name_DC -TS $VM_Name_TS -RdpName $KundeRDP -Credential $DCredential
+DeployTSRole -DC $VM_Name_DC -TS $VM_Name_TS -RdpName $KundeRDP -Credential $DCredential
 Write-Output "$(Get-TimeStamp) -- TS Rolle installiert und eingerichtet" | Out-File $LogFilePath -append
 #VMs neustarten
 RestartVMs
