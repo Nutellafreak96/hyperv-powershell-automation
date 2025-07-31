@@ -116,3 +116,31 @@ function ChangeVMSettings {
     Get-Job | Wait-Job | Out-Null
     Get-Job | Where-Object State -like 'Completed' | Remove-Job | Out-Null
 }
+
+
+<##>
+function Wait-ForVM {
+    param (
+        [string]$VMName,
+        [pscredential]$Credential,
+        [int]$MaxRetries = 60,
+        [int]$WaitSeconds = 10
+    )
+    $retryCount = 0
+    $vmReady = $false
+
+    while (-not $vmReady -and $retryCount -lt $MaxRetries) {
+        try {
+            Invoke-Command -VMName $VMName -ScriptBlock { "Test" } -Credential $Credential -ErrorAction Stop | Out-Null
+            $vmReady = $true
+        } catch {
+            Write-Host "VM $($VMName) not ready... retrying ($($retryCount)/$($MaxRetries))"
+            Start-Sleep -Seconds $WaitSeconds
+            $retryCount++
+        }
+    }
+
+    if (-not $vmReady) {
+        throw "VM $($VMName) did not become ready after $($MaxRetries) attempts."
+    }
+}
