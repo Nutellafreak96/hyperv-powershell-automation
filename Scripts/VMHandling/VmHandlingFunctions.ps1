@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
 Updates CPU and memory resources of the specified VMs.
 
@@ -121,20 +121,21 @@ function ChangeVMSettings {
 <##>
 function Wait-ForVM {
     param (
-        [string]$VMName,
-        [pscredential]$Credential,
+        [Parameter(Mandatory=$true)][string]$VMName,
+        [Parameter(Mandatory=$true)][pscredential]$Credential,
         [int]$MaxRetries = 60,
-        [int]$WaitSeconds = 10
+        [int]$WaitSeconds = 10,
+        [string] $IP
     )
     $retryCount = 0
     $vmReady = $false
-
+    
     while (-not $vmReady -and $retryCount -lt $MaxRetries) {
         try {
-            Invoke-Command -VMName $VMName -ScriptBlock { "Test" } -Credential $Credential -ErrorAction Stop | Out-Null
+            Invoke-Command -VMName $VMName -ScriptBlock { Test-Connection -ComputerName $ip -Quiet } -Credential $Credential -ErrorAction Stop | Out-Null
             $vmReady = $true
         } catch {
-            Write-Host "VM $($VMName) not ready... retrying ($($retryCount)/$($MaxRetries))"
+            Write-Output "VM $($VMName) not ready... retrying ($($retryCount)/$($MaxRetries))" 
             Start-Sleep -Seconds $WaitSeconds
             $retryCount++
         }
