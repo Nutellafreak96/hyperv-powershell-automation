@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
 Creates directories for a customer's virtual machines and copies the prepared VHDX files.
 

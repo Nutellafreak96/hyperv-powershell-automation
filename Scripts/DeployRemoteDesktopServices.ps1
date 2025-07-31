@@ -1,4 +1,4 @@
-#Erstellen eines Terminalservers durch das Installieren der Rolle Remodedesktopservices
+﻿#Erstellen eines Terminalservers durch das Installieren der Rolle Remodedesktopservices
 
 
 $FQDN = "TS." + $Using:DomainName

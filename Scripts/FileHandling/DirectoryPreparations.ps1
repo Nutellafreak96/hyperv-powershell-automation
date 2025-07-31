@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
 Prepares the file server (FS) for DATEV and configures folder structures for sharing.
 

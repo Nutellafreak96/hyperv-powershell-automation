@@ -1,4 +1,4 @@
-<#
+﻿<#
 /**
  * @file YourScriptName.ps1
  * @brief Script to provide user interface functions for input gathering in Windows PowerShell.

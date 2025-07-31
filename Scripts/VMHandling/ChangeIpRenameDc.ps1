@@ -1,4 +1,4 @@
-$InterfaceAlias = Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.InterfaceAlias -like "Extern*" -or $_.InterfaceAlias -like "Ethernet*"} | Select-Object -ExpandProperty InterfaceAlias
+﻿$InterfaceAlias = Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.InterfaceAlias -like "Extern*" -or $_.InterfaceAlias -like "Ethernet*"} | Select-Object -ExpandProperty InterfaceAlias
 
 <#disable ipv6 to prevent problems for joining a domain#>
 Disable-NetAdapterBinding -Name $InterfaceAlias -ComponentID "ms_tcpip6"

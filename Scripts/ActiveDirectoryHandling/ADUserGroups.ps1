@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
 Creates necessary Active Directory (AD) users and groups, assigns group memberships, and moves the default Administrator account.
 
@@ -72,15 +72,15 @@ New-ADGroup -Name "GF_LW" -GroupScope DomainLocal -DisplayName "GF_LW" -Path "OU
 # --- Assign Users to Groups ---
 $AdUser = Get-ADUser -Filter * | Select-Object -Property DistinguishedName,SamAccountName | Where-Object DistinguishedName -match "OU=User,$($Using:OUPathname)"
 $AdminAdUser = Get-ADUser -Filter * | Select-Object -Property DistinguishedName,SamAccountName | Where-Object DistinguishedName -match "OU=Admins,$($Using:OUPathname)"
-Add-ADGroupMember -Identity Scan_LW -Members $AdUser, $AdminAdUser
-Add-ADGroupMember -Identity TSUser -Members $AdUser, $AdminAdUser
-Add-ADGroupMember -Identity Daten_LW -Members $AdUser, $AdminAdUser
-Add-ADGroupMember -Identity DATEVUSER -Members $AdUser, $AdminAdUser
-Add-ADGroupMember -Identity Domänen-Admins -Members $AdminAdUser
-Add-ADGroupMember -Identity Administratoren -Members $AdminAdUser
-Add-ADGroupMember -Identity Schema-Admins -Members $AdminAdUser
-Add-ADGroupMember -Identity Organisations-Admins -Members $AdminAdUser
-Add-ADGroupMember -Identity Richtlinien-Ersteller-Besitzer -Members $AdminAdUser
+Add-ADGroupMember -Identity "Scan_LW"-Members $AdUser, $AdminAdUser
+Add-ADGroupMember -Identity "TSUser" -Members $AdUser, $AdminAdUser
+Add-ADGroupMember -Identity "Daten_LW" -Members $AdUser, $AdminAdUser
+Add-ADGroupMember -Identity "DATEVUSER" -Members $AdUser, $AdminAdUser
+Add-ADGroupMember -Identity "Domänen-Admins" -Members $AdminAdUser
+Add-ADGroupMember -Identity "Administratoren" -Members $AdminAdUser
+Add-ADGroupMember -Identity "Schema-Admins" -Members $AdminAdUser
+Add-ADGroupMember -Identity "Organisations-Admins" -Members $AdminAdUser
+Add-ADGroupMember -Identity "Richtlinien-Ersteller-Besitzer" -Members $AdminAdUser
 
 # --- Move default Administrator to the Admins OU ---
 #(Get-ADUser -Identity "Administrator").ObjectGUID | Move-ADObject -TargetPath "OU=Admins,$($Using:OUPathname)"

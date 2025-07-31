@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
 Creates an organizational unit (OU) structure in Active Directory.
 

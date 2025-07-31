@@ -1,4 +1,4 @@
-#Fileserver installieren und einrichten
+﻿#Fileserver installieren und einrichten
 
 $InterfaceAlias = Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.InterfaceAlias -like "Extern*" -or $_.InterfaceAlias -like "Ethernet*"} | Select-Object -ExpandProperty InterfaceAlias
 

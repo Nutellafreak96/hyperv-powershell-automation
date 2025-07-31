@@ -1,4 +1,4 @@
-#Installieren der ADDS Rolle und Konfigurieren eines neuen Forest (Heraufstufen zu einem DomainController)
+﻿#Installieren der ADDS Rolle und Konfigurieren eines neuen Forest (Heraufstufen zu einem DomainController)
 #Add-Computer -DomainName $Domäne -Restart ##hinzufuegen zu einer domäne
 
 
