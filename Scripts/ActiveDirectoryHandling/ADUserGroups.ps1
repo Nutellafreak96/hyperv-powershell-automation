@@ -83,4 +83,4 @@ Add-ADGroupMember -Identity Organisations-Admins -Members $AdminAdUser
 Add-ADGroupMember -Identity Richtlinien-Ersteller-Besitzer -Members $AdminAdUser
 
 # --- Move default Administrator to the Admins OU ---
-(Get-ADUser -Identity "Administrator").ObjectGUID | Move-ADObject -TargetPath "OU=Admins,$($Using:OUPathname)"
+#(Get-ADUser -Identity "Administrator").ObjectGUID | Move-ADObject -TargetPath "OU=Admins,$($Using:OUPathname)"
