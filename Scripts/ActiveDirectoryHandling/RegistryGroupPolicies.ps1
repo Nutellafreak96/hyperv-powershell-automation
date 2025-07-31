@@ -112,7 +112,7 @@ $groupSidPairs = @()
 foreach ($group in $groups) {
     # Ensure the name format matches what's in the XML
     $groupSidPairs += [PSCustomObject]@{
-        GroupName = "$($Using:DomainName)\" + $group.Name
+        GroupName = "$($Using:NetBIOSName)\" + $group.Name
         SID       = $group.SID.Value
     }
 }
