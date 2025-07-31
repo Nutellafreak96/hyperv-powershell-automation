@@ -1,4 +1,4 @@
-#region NTFS Share and Permission Setup
+﻿#region NTFS Share and Permission Setup
 
 <##
 .SYNOPSIS
@@ -17,31 +17,31 @@
 
 $ShareDefinitions = @(
     @{
-        Name = "GF"
-        Path = "D:\Freigaben\GF"
+        Name         = "GF"
+        Path         = "D:\Freigaben\GF"
         ChangeAccess = "$($Using:NetBiosName)\GF"
-        FullAccess = "$($Using:NetBiosName)\Domänen-Admins"
+        FullAccess   = "$($Using:NetBiosName)\Domänen-Admins"
     },
     @{
-        Name = "Daten"
-        Path = "D:\Freigaben\Daten"
+        Name         = "Daten"
+        Path         = "D:\Freigaben\Daten"
         ChangeAccess = "$($Using:NetBiosName)\Daten_LW"
-        FullAccess = "$($Using:NetBiosName)\Domänen-Admins"
-     },
-     @{
-        Name = "Scan"
-        Path = "D:\Freigaben\Scan"
+        FullAccess   = "$($Using:NetBiosName)\Domänen-Admins"
+    },
+    @{
+        Name         = "Scan"
+        Path         = "D:\Freigaben\Scan"
         ChangeAccess = "$($Using:NetBiosName)\Scan_LW"
-        FullAccess = "$($Using:NetBiosName)\Domänen-Admins"
-     },
-     @{
-        Name = "DATEV"
-        Path = "D:\Freigaben\WINDVSW1"
+        FullAccess   = "$($Using:NetBiosName)\Domänen-Admins"
+    },
+    @{
+        Name         = "DATEV"
+        Path         = "D:\Freigaben\WINDVSW1"
         ChangeAccess = "$($Using:NetBiosName)\DATEVUSER"
-        FullAccess = "$($Using:NetBiosName)\Domänen-Admins"        
-     }
+        FullAccess   = "$($Using:NetBiosName)\Domänen-Admins"        
+    }
 )
-foreach($items in $ShareDefinitions){New-SmbShare @items | Out-Null}
+foreach ($items in $ShareDefinitions) { New-SmbShare @items | Out-Null }
 
 
 # NTFS Permissions - Disable inheritance, remove inherited rules
@@ -60,7 +60,7 @@ $rights = "Modify,Synchronize"
 $inheritance = "ContainerInherit"
 $propagation = "none"
 $type = "Allow"											 
-$ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity,$rights,$inheritance,$propagation, $type)
+$ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity, $rights, $inheritance, $propagation, $type)
 $WINDVSW1.AddaccessRule($ACE)
 Set-Acl -Path "D:\Freigaben\WINDVSW1\" -AclObject $WINDVSW1
 
@@ -70,7 +70,7 @@ $rights = "Write,Delete,Read,Synchronize"
 $inheritance = "ObjectInherit"
 $propagation = "InheritOnly"
 $type = "Allow"
-$ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity,$rights,$inheritance,$propagation, $type)
+$ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity, $rights, $inheritance, $propagation, $type)
 $WINDVSW1.AddaccessRule($ACE)
 Set-Acl -Path "D:\Freigaben\WINDVSW1\" -AclObject $WINDVSW1
 
@@ -81,7 +81,7 @@ $rights = "FullControl"
 $inheritance = "ContainerInherit, ObjectInherit" 				 
 $propagation = "None" 											 
 $type = "Allow" 
-$ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity,$rights,$inheritance,$propagation, $type)
+$ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity, $rights, $inheritance, $propagation, $type)
 $WINDVSW1.AddaccessRule($ACE)
 Set-Acl -Path "D:\Freigaben\WINDVSW1\" -AclObject $WINDVSW1
 
@@ -92,7 +92,7 @@ $rights = "FullControl"
 $inheritance = "ContainerInherit, ObjectInherit"  				 
 $propagation = "InheritOnly" 											 
 $type = "Allow" 
-$ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity,$rights,$inheritance,$propagation, $type)
+$ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity, $rights, $inheritance, $propagation, $type)
 $WINDVSW1.AddaccessRule($ACE)
 Set-Acl -Path "D:\Freigaben\WINDVSW1\" -AclObject $WINDVSW1
 
@@ -103,7 +103,7 @@ $rights = "FullControl"
 $inheritance = "ContainerInherit, ObjectInherit"  				 
 $propagation = "None" 											 
 $type = "Allow" 
-$ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity,$rights,$inheritance,$propagation, $type)
+$ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity, $rights, $inheritance, $propagation, $type)
 $WINDVSW1.AddaccessRule($ACE)
 Set-Acl -Path "D:\Freigaben\WINDVSW1\" -AclObject $WINDVSW1
 
@@ -123,19 +123,22 @@ $rights = "FullControl"
 $inheritance = "ContainerInherit, ObjectInherit" 				 
 $propagation = "None" 											 
 $type = "Allow" 
-$ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity,$rights,$inheritance,$propagation, $type)
+$ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity, $rights, $inheritance, $propagation, $type)
 $Scan.AddaccessRule($ACE)
 Set-Acl -Path "D:\Freigaben\Scan\" -AclObject $Scan
+
 #Group: Scan_LW
+
 $Scan = Get-Acl -Path "D:\Freigaben\Scan\"
 $identity = "Scan_LW"
 $rights = "Modify, Synchronize"											 
 $inheritance = "ContainerInherit, ObjectInherit" 				 
 $propagation = "None" 											 
 $type = "Allow" 
-$ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity,$rights,$inheritance,$propagation, $type)
+$ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity, $rights, $inheritance, $propagation, $type)
 $Scan.AddaccessRule($ACE)
 Set-Acl -Path "D:\Freigaben\Scan\" -AclObject $Scan
+
 #Ersteller-Besitzer
 $Scan = Get-Acl -Path "D:\Freigaben\Scan\"
 $identity = "ERSTELLER-BESITZER"
@@ -143,9 +146,10 @@ $rights = "FullControl"
 $inheritance = "ContainerInherit, ObjectInherit"  				 
 $propagation = "InheritOnly" 											 
 $type = "Allow" 
-$ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity,$rights,$inheritance,$propagation, $type)
+$ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity, $rights, $inheritance, $propagation, $type)
 $Scan.AddaccessRule($ACE)
 Set-Acl -Path "D:\Freigaben\Scan\" -AclObject $Scan
+
 #System
 $Scan = Get-Acl -Path "D:\Freigaben\Scan\"
 $identity = "SYSTEM"
@@ -153,7 +157,7 @@ $rights = "FullControl"
 $inheritance = "ContainerInherit, ObjectInherit"  				 
 $propagation = "None" 											 
 $type = "Allow" 
-$ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity,$rights,$inheritance,$propagation, $type)
+$ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity, $rights, $inheritance, $propagation, $type)
 $Scan.AddaccessRule($ACE)
 Set-Acl -Path "D:\Freigaben\Scan\" -AclObject $Scan
 
@@ -173,7 +177,7 @@ $rights = "FullControl"
 $inheritance = "ContainerInherit, ObjectInherit" 				 
 $propagation = "None" 											 
 $type = "Allow" 
-$ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity,$rights,$inheritance,$propagation, $type)
+$ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity, $rights, $inheritance, $propagation, $type)
 $GF.AddaccessRule($ACE)
 Set-Acl -Path "D:\Freigaben\GF\" -AclObject $GF
 
@@ -184,7 +188,7 @@ $rights = "Modify, Synchronize"
 $inheritance = "ContainerInherit, ObjectInherit" 				 
 $propagation = "None" 											 
 $type = "Allow" 
-$ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity,$rights,$inheritance,$propagation, $type)
+$ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity, $rights, $inheritance, $propagation, $type)
 $GF.AddaccessRule($ACE)
 Set-Acl -Path "D:\Freigaben\GF\" -AclObject $GF
 
@@ -195,7 +199,7 @@ $rights = "FullControl"
 $inheritance = "ContainerInherit, ObjectInherit"  				 
 $propagation = "InheritOnly" 											 
 $type = "Allow" 
-$ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity,$rights,$inheritance,$propagation, $type)
+$ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity, $rights, $inheritance, $propagation, $type)
 $GF.AddaccessRule($ACE)
 Set-Acl -Path "D:\Freigaben\GF\" -AclObject $GF
 
@@ -206,7 +210,7 @@ $rights = "FullControl"
 $inheritance = "ContainerInherit, ObjectInherit"  				 
 $propagation = "None" 											 
 $type = "Allow" 
-$ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity,$rights,$inheritance,$propagation, $type)
+$ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity, $rights, $inheritance, $propagation, $type)
 $GF.AddaccessRule($ACE)
 Set-Acl -Path "D:\Freigaben\GF\" -AclObject $GF
 
@@ -226,7 +230,7 @@ $rights = "FullControl"
 $inheritance = "ContainerInherit, ObjectInherit" 				 
 $propagation = "None" 											 
 $type = "Allow" 
-$ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity,$rights,$inheritance,$propagation, $type)
+$ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity, $rights, $inheritance, $propagation, $type)
 $Daten.AddaccessRule($ACE)
 Set-Acl -Path "D:\Freigaben\Daten\" -AclObject $Daten
 
@@ -237,7 +241,7 @@ $rights = "Modify, Synchronize"
 $inheritance = "ContainerInherit, ObjectInherit" 				 
 $propagation = "None" 											 
 $type = "Allow" 
-$ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity,$rights,$inheritance,$propagation, $type)
+$ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity, $rights, $inheritance, $propagation, $type)
 $Daten.AddaccessRule($ACE)
 Set-Acl -Path "D:\Freigaben\Daten\" -AclObject $Daten
 
@@ -248,7 +252,7 @@ $rights = "FullControl"
 $inheritance = "ContainerInherit, ObjectInherit"  				 
 $propagation = "InheritOnly" 											 
 $type = "Allow" 
-$ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity,$rights,$inheritance,$propagation, $type)
+$ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity, $rights, $inheritance, $propagation, $type)
 $Daten.AddaccessRule($ACE)
 Set-Acl -Path "D:\Freigaben\Daten\" -AclObject $Daten
 
@@ -259,6 +263,6 @@ $rights = "FullControl"
 $inheritance = "ContainerInherit, ObjectInherit"  				 
 $propagation = "None" 											 
 $type = "Allow" 
-$ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity,$rights,$inheritance,$propagation, $type)
+$ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity, $rights, $inheritance, $propagation, $type)
 $Daten.AddaccessRule($ACE)
 Set-Acl -Path "D:\Freigaben\Daten\" -AclObject $Daten
