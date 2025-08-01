@@ -1123,3 +1123,98 @@ function UserInterface {
     return $ReturnArray 
 
 }
+
+
+function PasswordChange {
+
+    $window = New-Object System.Windows.Forms.Form
+    $window.Text = "Neue Passwörter der Administratoren"
+    $window.Size = New-Object System.Drawing.Size(385, 300)
+    $window.StartPosition = "CenterScreen"
+
+    $OkButtonUi = New-Object System.Windows.Forms.Button
+    $OkButtonUi.Location = New-Object System.Drawing.Point(100, 230)
+    $OkButtonUi.Size = New-Object System.Drawing.Size(75, 23)
+    $OkButtonUi.Text = 'OK'
+    $OkButtonUi.DialogResult = [System.Windows.Forms.DialogResult]::OK
+    $window.AcceptButton = $OkButtonUi
+    $window.Controls.Add($OkButtonUi)
+
+    $CancelButtonUi = New-Object System.Windows.Forms.Button
+    $CancelButtonUi.Location = New-Object System.Drawing.Point(175, 230)
+    $CancelButtonUi.Size = New-Object System.Drawing.Size(75, 23)
+    $CancelButtonUi.Text = 'Cancel'
+    $CancelButtonUi.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
+    $window.CancelButton = $CancelButtonUi
+    $window.Controls.Add($CancelButtonUi)
+
+    $LAdminUserWindowDC = New-Object System.Windows.Forms.Label
+    $LAdminUserWindowDC.Location = New-Object System.Drawing.Point(55, 20)
+    $LAdminUserWindowDC.Size = New-Object System.Drawing.Size(280, 20)
+    $LAdminUserWindowDC.Text = "Neues Passwort des lokalen Admin (DC)"
+    $window.Controls.Add($LAdminUserWindowDC)
+
+    $LAdminUserTextDC = New-Object System.Windows.Forms.MaskedTextBox
+    $LAdminUserTextDC.Location = New-Object System.Drawing.Point(55, 40)
+    $LAdminUserTextDC.Size = New-Object System.Drawing.Size(260, 20)
+    $LAdminUserTextDC.PasswordChar = "*"
+    $window.Controls.Add($LAdminUserTextDC)
+
+    $LAdminUserWindowsFS = New-Object System.Windows.Forms.Label
+    $LAdminUserWindowsFS.Location = New-Object System.Drawing.Point(55, 70)
+    $LAdminUserWindowsFS.Size = New-Object System.Drawing.Size(280, 20)
+    $LAdminUserWindowsFS.Text = "Neues Passwort des lokalen Admin (FS)"
+    $window.Controls.Add($LAdminUserWindowsFS)
+
+    $LAdminUserTextFS = New-Object System.Windows.Forms.MaskedTextBox
+    $LAdminUserTextFS.Location = New-Object System.Drawing.Point(55, 90)
+    $LAdminUserTextFS.Size = New-Object System.Drawing.Size(260, 20)
+    $LAdminUserTextFS.PasswordChar = "*"
+    $window.Controls.Add($LAdminUserTextFS)
+
+    $LAdminUserWindowsTS = New-Object System.Windows.Forms.Label
+    $LAdminUserWindowsTS.Location = New-Object System.Drawing.Point(55, 120)
+    $LAdminUserWindowsTS.Size = New-Object System.Drawing.Size(280, 20)
+    $LAdminUserWindowsTS.Text = "Neues Passwort des lokalen Admin (TS)"
+    $window.Controls.Add($LAdminUserWindowsTS)
+
+    $LAdminUserTextTS = New-Object System.Windows.Forms.MaskedTextBox
+    $LAdminUserTextTS.Location = New-Object System.Drawing.Point(55, 140)
+    $LAdminUserTextTS.Size = New-Object System.Drawing.Size(260, 20)
+    $LAdminUserTextTS.PasswordChar = "*"
+    $window.Controls.Add($LAdminUserTextTS)
+
+    $DAdminUserWindows = New-Object System.Windows.Forms.Label
+    $DAdminUserWindows.Location = New-Object System.Drawing.Point(55, 170)
+    $DAdminUserWindows.Size = New-Object System.Drawing.Size(280, 20)
+    $DAdminUserWindows.Text = "Neues Passwort des Domain-Administators"
+    $window.Controls.Add($DAdminUserWindows)
+
+    $DAdminUserText = New-Object System.Windows.Forms.MaskedTextBox
+    $DAdminUserText.Location = New-Object System.Drawing.Point(55, 190)
+    $DAdminUserText.Size = New-Object System.Drawing.Size(260, 20)
+    $DAdminUserText.PasswordChar = "*"
+    $window.Controls.Add($DAdminUserText)
+
+
+
+    $window.TopMost = $true
+    $window.TopLevel = $true
+
+    if ($window.ShowDialog() -eq [System.Windows.Forms.DialogResult]::Cancel) { Exit }
+    $ReturnArray = @()
+    $ReturnArray += ConvertTo-SecureString $LAdminUserTextDC.Text -AsPlainText -Force
+    $ReturnArray += ConvertTo-SecureString $LAdminUserTextFS.Text -AsPlainText -Force
+    $ReturnArray += ConvertTo-SecureString $LAdminUserTextTS.Text -AsPlainText -Force
+    $ReturnArray += ConvertTo-SecureString $DAdminUserText.Text -AsPlainText -Force
+
+    
+
+    #Ueberpruefen einer fehlenden Eingabe im UserInterface
+    foreach ($item in $ReturnArray) { if ($null -eq $item) { return "Fehlende Eingabe" } }
+    #Ueberpruefen eines unsicheren Kennworts
+    foreach ($item in $ReturnArray) { if ($false -eq (TestPasswordPolicy -InputString $item)) { return "Ein Passwort entspricht nicht den Kennwortrichtlinien (Mind. 12 Zeichen, Zahlen,Sonderzeichen,Groß- und Kleinbuchstaben)" } }
+
+    return $ReturnArray
+}
+
