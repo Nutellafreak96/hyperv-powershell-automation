@@ -208,7 +208,8 @@ function DeployTSRole {
         [string]$DC,
         [string]$TS,
         [string]$RdpName,
-        [pscredential]$Credential
+        [pscredential]$Credential,
+        [string]$FQDN
     )
     
     # Step 1: Wait until VM is ready initially
@@ -217,6 +218,7 @@ function DeployTSRole {
     # Step 2: Install RDS roles with automatic reboot
     Invoke-Command -VMName $TS -ScriptBlock {
         Install-WindowsFeature -IncludeManagementTools -Name @( 
+            "Remote-Desktop-Services",
             "RDS-RD-Server", 
             "RDS-Connection-Broker", 
             "RDS-Web-Access"
@@ -224,33 +226,34 @@ function DeployTSRole {
     } -Credential $Credential
 
     # Step 2.5: Wait again after reboot
-    Wait-ForVM -VMName $TS -Credential $Credential -MaxRetries 100 -WaitSeconds 10 -IP $DCIPAdress
+    Wait-ForVM -VMName $TS -Credential $Credential -MaxRetries 15 -WaitSeconds 10
+    #Start-Sleep -Seconds 120
 
     # Step 3: Configure RDS deployment
     Invoke-Command -VMName $TS -ScriptBlock {
-        $FQDN = "TS." + $Using:DomainName
-        New-RDSessionDeployment -ConnectionBroker $FQDN -SessionHost $FQDN -WebAccessServer $FQDN | Out-Null
-        New-RDSessionCollection -CollectionName $Using:KundeRDP -SessionHost $FQDN -ConnectionBroker $FQDN | Out-Null
+        New-RDSessionDeployment -ConnectionBroker $Using:FQDN -SessionHost $Using:FQDN -WebAccessServer $Using:FQDN | Out-Null
     } -Credential $Credential
 
-    # Install RDS Licensing Feature and trigger reboot
     Invoke-Command -VMName $TS -ScriptBlock {
-        Install-WindowsFeature -Name "RDS-Licensing" -Restart | Out-Null
-    } -Credential $Credential
+    Restart-Computer -Force
+} -Credential $Credential
 
-    # Optional manual reboot
-    Invoke-Command -VMName $TS -ScriptBlock { Restart-Computer -Force } -Credential $Credential
 
-    #  Wait for VM to come back online
-    Wait-ForVM -VMName $TS -Credential $Credential -MaxRetries 100 -WaitSeconds 10 -IP $DCIPAdress
+    Wait-ForVM -VMName $TS -Credential $Credential -MaxRetries 6 -WaitSeconds 10 
 
     # Configure session collection user group
     Invoke-Command -VMName $TS -ScriptBlock {
-        Set-RDSessionCollectionConfiguration -UserGroup "TSUser" -CollectionName $Using:RdpName | Out-Null
+        $RDServer = Get-RDUserSession
+        if($null -eq $RDServer){
+            New-RDSessionDeployment -ConnectionBroker $Using:FQDN -SessionHost $Using:FQDN -WebAccessServer $Using:FQDN | Out-Null
+            New-RDSessionCollection -CollectionName $Using:KundeRDP -SessionHost $Using:FQDN -ConnectionBroker $Using:FQDN | Out-Null
+            Set-RDSessionCollectionConfiguration -UserGroup "TSUser" -CollectionName $Using:KundeRDP | Out-Null
+        }else{
+            New-RDSessionCollection -CollectionName $Using:KundeRDP -SessionHost $Using:FQDN -ConnectionBroker $Using:FQDN | Out-Null
+            Set-RDSessionCollectionConfiguration -UserGroup "TSUser" -CollectionName $Using:KundeRDP | Out-Null
+        }
     } -Credential $Credential
 
-    #  Wait again to make sure services are stable
-    Wait-ForVM -VMName $TS -Credential $Credential -MaxRetries 100 -WaitSeconds 10 -IP $DCIPAdress
 
     # Restart remote desktop management service
     Invoke-Command -VMName $TS -ScriptBlock {
@@ -369,7 +372,7 @@ DirPermissions
 Write-Output "$(Get-TimeStamp) -- Ordner Freigaben erstellt und NTFS Rechte bearbeitet" | Out-File $LogFilePath -append
 #Installieren der Remotedesktopdienste auf dem ts
 
-DeployTSRole -DC $VM_Name_DC -TS $VM_Name_TS -RdpName $KundeRDP -Credential $DCredential
+DeployTSRole -DC $VM_Name_DC -TS $VM_Name_TS -RdpName $KundeRDP -Credential $DCredential -FQDN $FQDN
 Write-Output "$(Get-TimeStamp) -- TS Rolle installiert und eingerichtet" | Out-File $LogFilePath -append
 #VMs neustarten
 RestartVMs
