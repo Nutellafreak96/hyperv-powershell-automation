@@ -124,15 +124,14 @@ function Wait-ForVM {
         [Parameter(Mandatory=$true)][string]$VMName,
         [Parameter(Mandatory=$true)][pscredential]$Credential,
         [int]$MaxRetries = 60,
-        [int]$WaitSeconds = 10,
-        [string] $IP
+        [int]$WaitSeconds = 10
     )
     $retryCount = 0
     $vmReady = $false
     
     while (-not $vmReady -and $retryCount -lt $MaxRetries) {
         try {
-            Invoke-Command -VMName $VMName -ScriptBlock { Test-Connection -ComputerName $ip -Quiet } -Credential $Credential -ErrorAction Stop | Out-Null
+            Invoke-Command -VMName $VMName -ScriptBlock { $PSVersionTable } -Credential $Credential -ErrorAction Stop
             $vmReady = $true
         } catch {
             Write-Output "VM $($VMName) not ready... retrying ($($retryCount)/$($MaxRetries))" 
