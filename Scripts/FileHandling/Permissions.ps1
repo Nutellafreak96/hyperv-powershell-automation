@@ -85,20 +85,9 @@ $ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity, 
 $WINDVSW1.AddaccessRule($ACE)
 Set-Acl -Path "D:\Freigaben\WINDVSW1\" -AclObject $WINDVSW1
 
-#Ersteller-Besitzer
-$WINDVSW1 = Get-Acl -Path "D:\Freigaben\WINDVSW1\"
-$identity = "ERSTELLER-BESITZER"
-$rights = "FullControl"											 
-$inheritance = "ContainerInherit, ObjectInherit"  				 
-$propagation = "InheritOnly" 											 
-$type = "Allow" 
-$ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity, $rights, $inheritance, $propagation, $type)
-$WINDVSW1.AddaccessRule($ACE)
-Set-Acl -Path "D:\Freigaben\WINDVSW1\" -AclObject $WINDVSW1
-
 #System
 $WINDVSW1 = Get-Acl -Path "D:\Freigaben\WINDVSW1\"
-$identity = "SYSTEM"
+$identity = "NT-AUTORITÄT\SYSTEM"
 $rights = "FullControl"											 
 $inheritance = "ContainerInherit, ObjectInherit"  				 
 $propagation = "None" 											 
@@ -139,20 +128,9 @@ $ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity, 
 $Scan.AddaccessRule($ACE)
 Set-Acl -Path "D:\Freigaben\Scan\" -AclObject $Scan
 
-#Ersteller-Besitzer
-$Scan = Get-Acl -Path "D:\Freigaben\Scan\"
-$identity = "ERSTELLER-BESITZER"
-$rights = "FullControl"											 
-$inheritance = "ContainerInherit, ObjectInherit"  				 
-$propagation = "InheritOnly" 											 
-$type = "Allow" 
-$ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity, $rights, $inheritance, $propagation, $type)
-$Scan.AddaccessRule($ACE)
-Set-Acl -Path "D:\Freigaben\Scan\" -AclObject $Scan
-
 #System
 $Scan = Get-Acl -Path "D:\Freigaben\Scan\"
-$identity = "SYSTEM"
+$identity = "NT-AUTORITÄT\SYSTEM"
 $rights = "FullControl"											 
 $inheritance = "ContainerInherit, ObjectInherit"  				 
 $propagation = "None" 											 
@@ -192,20 +170,10 @@ $ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity, 
 $GF.AddaccessRule($ACE)
 Set-Acl -Path "D:\Freigaben\GF\" -AclObject $GF
 
-#Ersteller-Besitzer
-$GF = Get-Acl -Path "D:\Freigaben\GF\"
-$identity = "ERSTELLER-BESITZER"
-$rights = "FullControl"											 
-$inheritance = "ContainerInherit, ObjectInherit"  				 
-$propagation = "InheritOnly" 											 
-$type = "Allow" 
-$ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity, $rights, $inheritance, $propagation, $type)
-$GF.AddaccessRule($ACE)
-Set-Acl -Path "D:\Freigaben\GF\" -AclObject $GF
 
 #System
 $GF = Get-Acl -Path "D:\Freigaben\GF\"
-$identity = "SYSTEM"
+$identity = "NT-AUTORITÄT\SYSTEM"
 $rights = "FullControl"											 
 $inheritance = "ContainerInherit, ObjectInherit"  				 
 $propagation = "None" 											 
@@ -245,20 +213,9 @@ $ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity, 
 $Daten.AddaccessRule($ACE)
 Set-Acl -Path "D:\Freigaben\Daten\" -AclObject $Daten
 
-#Ersteller
-$Daten = Get-Acl -Path "D:\Freigaben\Daten\"
-$identity = "ERSTELLER-BESITZER"
-$rights = "FullControl"											 
-$inheritance = "ContainerInherit, ObjectInherit"  				 
-$propagation = "InheritOnly" 											 
-$type = "Allow" 
-$ACE = New-Object System.Security.AccessControl.FileSystemAccessRule($identity, $rights, $inheritance, $propagation, $type)
-$Daten.AddaccessRule($ACE)
-Set-Acl -Path "D:\Freigaben\Daten\" -AclObject $Daten
-
 #System
 $Daten = Get-Acl -Path "D:\Freigaben\Daten\"
-$identity = "SYSTEM"
+$identity = "NT-AUTORITÄT\SYSTEM"
 $rights = "FullControl"											 
 $inheritance = "ContainerInherit, ObjectInherit"  				 
 $propagation = "None" 											 
