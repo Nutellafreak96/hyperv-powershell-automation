@@ -99,20 +99,20 @@ Set-GPRegistryValue @defaultApps | Out-Null
 
 # --- XML SID Update for Drive Mapping ---
 # Updates drive mapping XML to match current group SIDs
-
+<#
 # Load the XML file
 $xmlPath = "C:\temp\{812FABB7-FDB3-4A46-8E8D-85BD985BA327}\DomainSysvol\GPO\User\Preferences\Drives\Drives.xml"
 $xml = [xml](Get-Content -Path $xmlPath)
 
 # Fetch groups and their SIDs
-$groups = Get-ADGroup -Filter * -SearchBase "OU=kevinOU,DC=kevin,DC=local"
+$groups = Get-ADGroup -Filter * -SearchBase $Using:OUPathname
 
 # Create an array of group name and SID pairs
 $groupSidPairs = @()
 foreach ($group in $groups) {
     # Ensure the name format matches what's in the XML
     $groupSidPairs += [PSCustomObject]@{
-        GroupName = "$($Using:NetBIOSName)\" + $group.Name
+        GroupName =  $group.Name
         SID       = $group.SID.Value
     }
 }
@@ -136,8 +136,48 @@ foreach ($drive in $xml.Drives.Drive) {
 
 # Save the updated XML back to the same file
 $xml.Save($xmlPath)
+#>
+# Load the XML file
+$xmlPath = "C:\temp\{812FABB7-FDB3-4A46-8E8D-85BD985BA327}\DomainSysvol\GPO\User\Preferences\Drives\Drives.xml"
+$xml = [xml](Get-Content -Path $xmlPath)
 
+# Fetch groups and their SIDs from the new domain
+$groups = Get-ADGroup -Filter * -SearchBase $Using:OUPathname
 
+# Create an array of group name and SID pairs
+$groupSidPairs = @()
+foreach ($group in $groups) {
+    $groupSidPairs += [PSCustomObject]@{
+        GroupName = $group.Name  # Just the name, no domain prefix
+        SID       = $group.SID.Value
+    }
+}
+
+# Go through each Drive in the XML
+foreach ($drive in $xml.Drives.Drive) {
+    foreach ($filter in $drive.Filters.FilterGroup) {
+        $xmlGroupFullName = $filter.GetAttribute("name")  # e.g., kevin\Scan_LW
+
+        # Extract only the group name (after the backslash)
+        $xmlGroupName = $xmlGroupFullName -replace '^.*\\', ''
+
+        # Find matching group in the SID pairs (case-insensitive)
+        $matchingPair = $groupSidPairs | Where-Object { $_.GroupName -ieq $xmlGroupName }
+
+        if ($matchingPair) {
+            $filter.SetAttribute("sid", $matchingPair.SID)
+
+            # Optionally also update the domain prefix in the "name" attribute
+            $newGroupName = "$Using:NetBIOSName\$xmlGroupName"
+            $filter.SetAttribute("name", $newGroupName)
+        } else {
+            Write-Host "No matching group found for: $xmlGroupFullName"
+        }
+    }
+}
+
+# Save the updated XML back to the same file
+$xml.Save($xmlPath)
 
 
 # --- User Drive Mapping GPO ---
