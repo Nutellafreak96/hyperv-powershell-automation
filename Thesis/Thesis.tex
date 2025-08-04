@@ -98,7 +98,31 @@
 
 \newpage
 
+Theorie:
+- PowerShell
+- Hyper V 
+- Sysprep
 
+Ziel:
+- Automatisierung Servererstellung und Konfiguration (Chambionic)
+    - Testbenutzer
+    - adminbenutzer
+    - lokaler admin
+    - GPOs
+    - Freigaben
+    - Datev vorbereitungen
+
+Durchführung:
+- VHD(X) vorbeireiten
+    - Win Server 2025 iso runterladen
+    - VM erstellen mit der iso als boot option
+    - windows installieren, wie gewohnt (Windows Server 2025 Evaluation Datacenter [Desktopdarstellung])
+    - beim festlegen des Adminpasswortes Strg+Shift+F3 -> start in den audit modus
+    - unattend.xml unter C:\ ablegen (unattend.xml aus dem ordner "Serverpreparations")
+    - sysprep über admin cmd starten mit sysprep /oobe /generalize /shutdown /unattned:filepath
+    - vm nicht neustarten!!!
+    - vhd(x) der vm in ordner "Serverpreparations" speichern unter dem namen Serverprep.vhdx
+- Script starten
 
 % Refs
 \bibliography{ref}
