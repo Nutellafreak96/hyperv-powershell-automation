@@ -226,7 +226,7 @@ function DeployTSRole {
 
     # Step 2.5: Wait again after reboot
     #Wait-ForVM -VMName $TS -Credential $Credential -MaxRetries 15 -WaitSeconds 10 -Path $Path
-    Start-Sleep -Seconds 120
+    Start-Sleep -Seconds 150
 
     # Step 3: Configure RDS deployment
     #Invoke-Command -VMName $TS -FilePath ".\ConfigureRemoteDesktopDeployment.ps1" -Credential $Credential
@@ -256,10 +256,10 @@ function ChangeAdminPasswords {
         [pscredential]$Credential 
     )
 
-    Invoke-Command -VMName $DC -ScriptBlock { Get-LocalUser Admin | Set-LocalUser -Password $Using:LAdminDc } -Credential $Credential
-    Invoke-Command -VMName $FS -ScriptBlock { Get-LocalUser Admin | Set-LocalUser -Password $Using:LAdminFs } -Credential $Credential
-    Invoke-Command -VMName $TS -ScriptBlock { Get-LocalUser Admin | Set-LocalUser -Password $Using:LAdminTs } -Credential $Credential
-    Invoke-Command -VMName $DC -ScriptBlock { Get-ADUser -Identity Administrator | Set-ADAccountPassword -NewPassword $Using:DAdmin } -Credential $Credential
+    Invoke-Command -VMName $DC -ScriptBlock { Get-LocalUser Admin | Set-LocalUser -Password (ConvertFrom-SecureString $Using:LAdminDc) } -Credential $Credential
+    Invoke-Command -VMName $FS -ScriptBlock { Get-LocalUser Admin | Set-LocalUser -Password (ConvertFrom-SecureString $Using:LAdminFs) } -Credential $Credential
+    Invoke-Command -VMName $TS -ScriptBlock { Get-LocalUser Admin | Set-LocalUser -Password (ConvertFrom-SecureString $Using:LAdminTs) } -Credential $Credential
+    Invoke-Command -VMName $DC -ScriptBlock { Get-ADUser -Identity Administrator | Set-ADAccountPassword -NewPassword (ConvertFrom-SecureString $Using:DAdmin) } -Credential $Credential
 }
 
 
@@ -288,7 +288,8 @@ StartVMs
 Write-Output "$(Get-TimeStamp) -- VMs gestartet" | Out-File $LogFilePath -append
 
 
-Start-Sleep -Seconds 240 #4min warten damit Server online sind
+#Start-Sleep -Seconds 240 #4min warten damit Server online sind
+Wait-ForVM -VMName $VM_Name_DC -Credential $LCredential -MaxRetries 60 -WaitSeconds 10 -Path $LogFilePath 
 ###########################
 
 
@@ -347,7 +348,9 @@ Start-Sleep -Seconds 60
 DeployADDSRole
 Write-Output "$(Get-TimeStamp) -- DC wurde erstellt" | Out-File $LogFilePath -append
 
-Start-Sleep -Seconds 390 #6,5min warten auf Server neustart
+#Start-Sleep -Seconds 390 #6,5min warten auf Server neustart
+Wait-ForVM -VMName $DC -Credential $LCredential -MaxRetries 42 -WaitSeconds 10 -Path $LogFilePath 
+
 #Hinzufuegen der anderen server zu der Domaene 
 JoinDomain
 Write-Output "$(Get-TimeStamp) -- VMs treten der Domain bei" | Out-File $LogFilePath -append
