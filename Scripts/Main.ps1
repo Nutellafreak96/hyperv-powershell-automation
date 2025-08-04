@@ -23,6 +23,7 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
 
 
 #Script-Variablen
+$ErrorCount = 0 #Variable zum zählen der erhaltenen Errormeldungen
 $Daten = UserInterface #Speichert alle Eingaben in einem Array
 if ($Daten -is [string]) { Write-Host $Daten; Exit }
 $KundeSpeicherort = $Daten[0] #Speicherort der VM´s
@@ -115,7 +116,7 @@ $TS = @{
 }
 
 #Log Handling
-$LogFilePath = "$($KundeSpeicherort)\$($Kunde)\ErrorLog.txt"
+$LogFilePath = "$($KundeSpeicherort)\$($Kunde)\LOG_File.txt"
 #How to write to LogFile
 #Write-Output "$(Get-TimeStamp) -- Message" | Out-File $LogFilePath -append
 
@@ -232,32 +233,11 @@ function DeployTSRole {
     $TsSession2 = New-PSSession -VMName $TS -Credential $Credential
     if($null -eq $TsSession2){$TsSession2 = New-PSSession -VMName $TS -Credential $Credential}
     Invoke-Command -Session $TsSession2 -FilePath ".\ConfigureRemoteDesktopDeployment.ps1" -ArgumentList $KundeRDP, $DomainName
-    Invoke-Command -Session $TsSession2 -ScriptBlock{Restart-Computer}
+    Invoke-Command -Session $TsSession2 -ScriptBlock{Restart-Computer -Force}
 
     
 
     Wait-ForVM -VMName $TS -Credential $Credential -MaxRetries 6 -WaitSeconds 10 -Path $Path
-
-    # Restart remote desktop management service
-    <#
-    Invoke-Command -VMName $TS -ScriptBlock {
-    $svc = Get-Service -Name "Remotedesktopverwaltung"
-    
-    if ($svc.Status -eq 'Running') {
-        Stop-Service -Name $svc.Name -Force -ErrorAction SilentlyContinue
-        Start-Sleep -Seconds 5
-    }
-
-    $retry = 0
-    while ($retry -lt 5 -and (Get-Service -Name $svc.Name).Status -ne 'Running') {
-        try {
-            Start-Service -Name $svc.Name -ErrorAction Stop
-        } catch {
-            Start-Sleep -Seconds 3
-            $retry++
-        }
-    }
-    } -Credential $Credential#>
 
 
     Get-PSSession | Remove-PSSession
@@ -378,3 +358,8 @@ Write-Output "$(Get-TimeStamp) -- TS Rolle installiert und eingerichtet" | Out-F
 #VMs neustarten
 RestartVMs
 Write-Output "$(Get-TimeStamp) -- VMs neugestartet" | Out-File $LogFilePath -append
+
+#Ändern der Passwörter
+$PArray=PasswordChange
+ChangeAdminPasswords -DAdmin $PArray[3] -LAdminDc $PArray[0] -LAdminFs $PArray[1] -LAdminTs $PArray[2]
+Write-Output "$(Get-TimeStamp) -- Script finished | Errors:$($ErrorCount)" | Out-File $LogFilePath -append
