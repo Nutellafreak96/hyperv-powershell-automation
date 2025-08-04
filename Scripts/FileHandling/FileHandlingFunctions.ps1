@@ -37,7 +37,7 @@ function CreateCustomerDirectory {
     New-Item -Name "TS" -Path "$($CustomerPath)\$($CustomerName)" -ItemType Directory | Out-Null
 
     # Create the error log file
-    New-Item -Name "ErrorLog.txt" -Path "$($CustomerPath)\$($CustomerName)" -ItemType File | Out-Null
+    New-Item -Name "LOG.txt" -Path "$($CustomerPath)\$($CustomerName)" -ItemType File | Out-Null
 
     # Copy the prepared VHDX files to the customer directories
     Copy-Item -Path "$($SourcePath)\Serverprep.vhdx" -Destination "$($CustomerPath)\$($CustomerName)\DC\Serverprep.vhdx"
@@ -96,12 +96,12 @@ function CopyFilesToVMs {
     Invoke-Command -VMName $VmTs -ScriptBlock { New-Item -Path "C:\" -ItemType Directory -Name "temp" | Out-Null } -Credential $Credential
 
     # Copy configuration files to the appropriate VMs
-    Copy-VMFile -DestinationPath "C:\temp\FileServerConfig.xml" -FileSource Host -VMName $VmFs -SourcePath "$($SourcePath)\Bereitstellungskonfiguration.xml" -CreateFullPath | Out-Null
-    Copy-VMFile -DestinationPath "C:\temp\DefaultApps.xml" -FileSource Host -VMName $VmDc -SourcePath "$($SourcePath)\chromedefault.xml" -CreateFullPath | Out-Null
+    Copy-VMFile -DestinationPath "C:\temp\FileServerConfig.xml" -FileSource Host -VMName $VmFs -SourcePath "$($SourcePath)\InstallationFiles\ServerRole\Bereitstellungskonfiguration.xml" -CreateFullPath | Out-Null
+    Copy-VMFile -DestinationPath "C:\temp\DefaultApps.xml" -FileSource Host -VMName $VmDc -SourcePath "$($SourcePath)\InstallationFiles\GroupPolicies\chromedefault.xml" -CreateFullPath | Out-Null
 
     # Use a PowerShell session to copy a directory to the Domain Controller
     $dcSession = New-PSSession -VMName $VmDc -Credential $Credential
-    Copy-Item -ToSession $dcSession -Destination "C:\temp\" -Path "$($SourcePath)\{812FABB7-FDB3-4A46-8E8D-85BD985BA327}" -Recurse
+    Copy-Item -ToSession $dcSession -Destination "C:\temp\" -Path "$($SourcePath)\InstallationFiles\GroupPolicies\{812FABB7-FDB3-4A46-8E8D-85BD985BA327}" -Recurse
     Get-PSSession | Remove-PSSession
 }
 
