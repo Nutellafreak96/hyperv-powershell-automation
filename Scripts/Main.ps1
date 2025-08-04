@@ -243,6 +243,24 @@ function DeployTSRole {
     Get-PSSession | Remove-PSSession
 }
 
+#Funktion zum aendern der Passwoerter der lokalen Admins
+function ChangeAdminPasswords {
+    param(
+        [securestring]$DAdmin,
+        [securestring]$LAdminDc, 
+        [securestring]$LAdminFs,
+        [securestring]$LAdminTs,
+        [string]$DC,
+        [string]$FS,
+        [string]$TS,
+        [pscredential]$Credential 
+    )
+
+    Invoke-Command -VMName $DC -ScriptBlock { Get-LocalUser Admin | Set-LocalUser -Password $Using:LAdminDc } -Credential $Credential
+    Invoke-Command -VMName $FS -ScriptBlock { Get-LocalUser Admin | Set-LocalUser -Password $Using:LAdminFs } -Credential $Credential
+    Invoke-Command -VMName $TS -ScriptBlock { Get-LocalUser Admin | Set-LocalUser -Password $Using:LAdminTs } -Credential $Credential
+    Invoke-Command -VMName $DC -ScriptBlock { Get-ADUser -Identity Administrator | Set-ADAccountPassword -NewPassword $Using:DAdmin } -Credential $Credential
+}
 
 
 ############################################################
