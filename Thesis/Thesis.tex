@@ -102,7 +102,7 @@ Theorie:
 - PowerShell
 - Hyper V 
 - Sysprep
-
+- WinRM vs WindowsDirect (Powershell WindowsDirect)
 Ziel:
 - Automatisierung Servererstellung und Konfiguration (Chambionic)
     - Testbenutzer
@@ -110,10 +110,10 @@ Ziel:
     - lokaler admin
     - GPOs
     - Freigaben
-    - Datev vorbereitungen
+    - Datev vorbereitungen (ordner zugriffsrechte)
 
 Durchführung:
-- VHD(X) vorbeireiten
+- VHD(X) vorbereiten
     - Win Server 2025 iso runterladen
     - VM erstellen mit der iso als boot option
     - windows installieren, wie gewohnt (Windows Server 2025 Evaluation Datacenter [Desktopdarstellung])
@@ -122,7 +122,35 @@ Durchführung:
     - sysprep über admin cmd starten mit sysprep /oobe /generalize /shutdown /unattned:filepath
     - vm nicht neustarten!!!
     - vhd(x) der vm in ordner "Serverpreparations" speichern unter dem namen Serverprep.vhdx
-- Script starten
+- Skript starten
+    GUI
+    - Abfrage des Speicherortes der zu erstellenden VM
+    - Abfrage des Speicherortes der zu importierenden gpo, zu kopierenden vhdx,xml fs rollen installation, xml für die gpo
+    - Abfrage der Daten wie Kundenname, OU name, Domain name, NetBios name, Server Ip addressen, passwörter für drms, test user, admin user, standard admin
+    - Abfrage des zu verwendenden hyper v switch (netzwerkschnittstelle) 
+    - Abfrage der anzahl der kerne für die VMs
+    - Abfrage zur RAM Nutzung der VMs
+    Skript
+        - Aufteilung in Ordner 
+        - Main.ps1 ist, wie der Name schon sagt, das Main Skript zum ausführen der Befehle und Skripte 
+    - Ordner ActiveDirectoryHandling
+        - ADUserGroups -> Create 2 Users and a few standard groups -> puts users into groups
+        - OrganizationalUnitStructure -> Create OUs and move severs to correct OU
+        - RegistryGroupPolicies -> Create Registry based Grouppolicies and import changed gpo via xml
+    - Ordner FileHandling
+        - DirectoryPreparations -> initialising a new drive to the fs vm and creating directorys to later share in the network
+        - FilehandlingFunctions -> Create file structure, remove sensitive files needed to configure win installation, copy files to VMs
+        - Permissions -> handle directory permissions (set access permissions to different adgroups)
+    - Ordner VMhandling
+        - ChangeIpRenameDc -> disable ipv6, rename Computer and set static ipv4
+        - ChangeIpRenameTs -> disable ipv6, rename Computer and set static ipv4
+        - VmHandlingFunctions -> ckeck redyness of vm, change vm rescressources, active scripts and set static mac to networkadapter 
+    - Ordner UserInterfaceFunctions
+        - all userinterface functions to get information from the user
+    
+- Fehler oder Sonstiges
+- Verbesserungen/Erweiterungen/Ideen
+    - 
 
 % Refs
 \bibliography{ref}
