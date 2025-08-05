@@ -101,6 +101,15 @@
 Theorie:
 - PowerShell
 - Hyper V 
+    - %https://d1wqtxts1xzle7.cloudfront.net/67117145/Benchmarking_the_Performance_of_Microsof20210505-17699-j1sicg.pdf?1738414388=&response-content-disposition=inline%3B+filename%3DBenchmarking_the_Performance_of_Microsof.pdf&Expires=1754378862&Signature=RcQUcGdtIdVThfq~KQwpd1Mhlu1Gi7eJ0IHp-s3QmbQzw~IWOmBXHWxwhm7u-E8WV8BRwc39B13YzHA8qFK0~AdbZrPkfIzpR8uc-3WzoAa4NtFEUx0SMN~N7FYnls8y10jem9~FxcF6TszNB~j9SqSazGu2RjDbm3w09DbYWmmxE~2bJaAUU8cCSCZ9dMxGTVWkRPf68DcdPKp-NTvUdgMtPWVT~2O5SmrmWenthcI73SKH~D8SKrU3WZg8jNI731-B-Q8lxTeYDo8IBpf6J9r9atNdVYycWszi2hE2l0dXdJ8OQ-FBjR9SXcryqfrbkGvD6KhA9PWD0OlpL55NXQ__&Key-Pair-Id=APKAJLOHF5GGSLRBV4ZA
+    - two variants hyper v on windows and on windows server
+    - requires a processor with hardware assisted virtualizaton
+    - based on micro kernelized hypervisors 
+        - host os provides drivers
+        - virtualizaton runs in the parent partition and has access to hardware devices
+        - parent creates child
+            - childs have no access to hardware
+        - 
 - Sysprep
 - WinRM vs WindowsDirect (Powershell WindowsDirect)
 Ziel:
@@ -111,6 +120,10 @@ Ziel:
     - GPOs
     - Freigaben
     - Datev vorbereitungen (ordner zugriffsrechte)
+- zeitersparnis durch skriptgesteuerte Erstellung
+- umgehung nerviges durchklicken durch gui elemente
+- unnötiges eingeben von einzelnen daten umgehen
+- zeitersparnis bei der installation von windows da template
 
 Durchführung:
 - VHD(X) vorbereiten
