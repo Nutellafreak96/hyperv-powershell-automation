@@ -263,6 +263,7 @@ function ChangeAdminPasswords {
 }
 
 
+
 ############################################################
 #Main (Aufrufen von Funktionen und Abarbeitung des Scripts)#
 ############################################################
@@ -349,7 +350,7 @@ DeployADDSRole
 Write-Output "$(Get-TimeStamp) -- DC wurde erstellt" | Out-File $LogFilePath -append
 
 #Start-Sleep -Seconds 390 #6,5min warten auf Server neustart
-Wait-ForVM -VMName $DC -Credential $LCredential -MaxRetries 42 -WaitSeconds 10 -Path $LogFilePath 
+Wait-ForVM -VMName $VM_Name_DC -Credential $DCredential -MaxRetries 60 -WaitSeconds 10 -Path $LogFilePath  
 
 #Hinzufuegen der anderen server zu der Domaene 
 JoinDomain
