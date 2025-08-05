@@ -796,7 +796,7 @@ function TestPasswordPolicy {
     $hasUpper = $Password -match '[A-Z]'
     $hasLower = $Password -match '[a-z]'
     $hasDigit = $Password -match '\d'
-    $hasSpecial = $Password -match '[+-.,\\\?\(\)\!\$\%\&\*\/]'
+    $hasSpecial = $Password -match '[+-_.,\\\?\(\)\!\$\%\&\*\/]'
 
     if ($lengthValid -and $hasUpper -and $hasLower -and $hasDigit -and $hasSpecial) {
         return $true
@@ -1213,8 +1213,11 @@ function PasswordChange {
     #Ueberpruefen einer fehlenden Eingabe im UserInterface
     foreach ($item in $ReturnArray) { if ($null -eq $item) { return "Fehlende Eingabe" } }
     #Ueberpruefen eines unsicheren Kennworts
-    foreach ($item in $ReturnArray) { if ($false -eq (TestPasswordPolicy -InputString $item)) { return "Ein Passwort entspricht nicht den Kennwortrichtlinien (Mind. 12 Zeichen, Zahlen,Sonderzeichen,Groß- und Kleinbuchstaben)" } }
+    if ($false -eq (TestPasswordPolicy -Password $LAdminUserTextDC.Text)) { return "A password does not meet the password policy requirements (at least 12 characters, numbers, special characters, uppercase and lowercase letters)" }
+    if ($false -eq (TestPasswordPolicy -Password $LAdminUserTextFS.Text)) { return "A password does not meet the password policy requirements (at least 12 characters, numbers, special characters, uppercase and lowercase letters)" }
+    if ($false -eq (TestPasswordPolicy -Password $LAdminUserTextTS.Text)) { return "A password does not meet the password policy requirements (at least 12 characters, numbers, special characters, uppercase and lowercase letters)" }
+    if ($false -eq (TestPasswordPolicy -Password $DAdminUserText.Text)) { return "A password does not meet the password policy requirements (at least 12 characters, numbers, special characters, uppercase and lowercase letters)" }
+
 
     return $ReturnArray
 }
-
