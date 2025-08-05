@@ -37,7 +37,7 @@ function CreateCustomerDirectory {
     New-Item -Name "TS" -Path "$($CustomerPath)\$($CustomerName)" -ItemType Directory | Out-Null
 
     # Create the error log file
-    New-Item -Name "LOG.txt" -Path "$($CustomerPath)\$($CustomerName)" -ItemType File | Out-Null
+    New-Item -Name "LOG_File.txt" -Path "$($CustomerPath)\$($CustomerName)" -ItemType File | Out-Null
 
     # Copy the prepared VHDX files to the customer directories
     Copy-Item -Path "$($SourcePath)\Serverprep.vhdx" -Destination "$($CustomerPath)\$($CustomerName)\DC\Serverprep.vhdx"
@@ -89,6 +89,7 @@ function CopyFilesToVMs {
     Enable-VMIntegrationService -VMName $VmDc -Name $IntegrationServiceName
     Enable-VMIntegrationService -VMName $VmFs -Name $IntegrationServiceName
     Enable-VMIntegrationService -VMName $VmTs -Name $IntegrationServiceName
+
 
     # Create "temp" folder in each VM
     Invoke-Command -VMName $VmDc -ScriptBlock { New-Item -Path "C:\" -ItemType Directory -Name "temp" | Out-Null } -Credential $Credential
