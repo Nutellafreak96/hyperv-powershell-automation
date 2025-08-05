@@ -16,7 +16,6 @@
 *.cfg
 *.yaml
 *.dvi
-*/build/*
 .vscode
 *.metadata
 *.settings*
@@ -25,6 +24,4 @@
 *.bin
 *.hex
 *.map
-*.d
-*/Build/*
-*Debug*
+*.vhdx
