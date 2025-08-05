@@ -260,7 +260,7 @@ function ChangeAdminPasswords {
     Invoke-Command -VMName $DC -ScriptBlock { Get-LocalUser Admin | Set-LocalUser -Password (ConvertFrom-SecureString $Using:LAdminDc) } -Credential $LCredential
     Invoke-Command -VMName $FS -ScriptBlock { Get-LocalUser Admin | Set-LocalUser -Password (ConvertFrom-SecureString $Using:LAdminFs) } -Credential $LCredential
     Invoke-Command -VMName $TS -ScriptBlock { Get-LocalUser Admin | Set-LocalUser -Password (ConvertFrom-SecureString $Using:LAdminTs) } -Credential $LCredential
-    Invoke-Command -VMName $DC -ScriptBlock { Get-ADUser -Identity Administrator | Set-ADAccountPassword -NewPassword (ConvertFrom-SecureString $Using:DAdmin) } -Credential $DCredential
+    Invoke-Command -VMName $DC -ScriptBlock { Get-ADUser -Identity Administrator | Set-ADAccountPassword -NewPassword  $Using:DAdmin } -Credential $DCredential
 }
 
 
