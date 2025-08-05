@@ -253,13 +253,14 @@ function ChangeAdminPasswords {
         [string]$DC,
         [string]$FS,
         [string]$TS,
-        [pscredential]$Credential 
+        [pscredential]$DCredential,
+        [pscredential]$LCredential
     )
 
-    Invoke-Command -VMName $DC -ScriptBlock { Get-LocalUser Admin | Set-LocalUser -Password (ConvertFrom-SecureString $Using:LAdminDc) } -Credential $Credential
-    Invoke-Command -VMName $FS -ScriptBlock { Get-LocalUser Admin | Set-LocalUser -Password (ConvertFrom-SecureString $Using:LAdminFs) } -Credential $Credential
-    Invoke-Command -VMName $TS -ScriptBlock { Get-LocalUser Admin | Set-LocalUser -Password (ConvertFrom-SecureString $Using:LAdminTs) } -Credential $Credential
-    Invoke-Command -VMName $DC -ScriptBlock { Get-ADUser -Identity Administrator | Set-ADAccountPassword -NewPassword (ConvertFrom-SecureString $Using:DAdmin) } -Credential $Credential
+    Invoke-Command -VMName $DC -ScriptBlock { Get-LocalUser Admin | Set-LocalUser -Password (ConvertFrom-SecureString $Using:LAdminDc) } -Credential $LCredential
+    Invoke-Command -VMName $FS -ScriptBlock { Get-LocalUser Admin | Set-LocalUser -Password (ConvertFrom-SecureString $Using:LAdminFs) } -Credential $LCredential
+    Invoke-Command -VMName $TS -ScriptBlock { Get-LocalUser Admin | Set-LocalUser -Password (ConvertFrom-SecureString $Using:LAdminTs) } -Credential $LCredential
+    Invoke-Command -VMName $DC -ScriptBlock { Get-ADUser -Identity Administrator | Set-ADAccountPassword -NewPassword (ConvertFrom-SecureString $Using:DAdmin) } -Credential $DCredential
 }
 
 
@@ -290,7 +291,7 @@ Write-Output "$(Get-TimeStamp) -- VMs gestartet" | Out-File $LogFilePath -append
 
 
 #Start-Sleep -Seconds 240 #4min warten damit Server online sind
-Wait-ForVM -VMName $VM_Name_DC -Credential $LCredential -MaxRetries 60 -WaitSeconds 10 -Path $LogFilePath 
+Wait-ForVM -VMName $VM_Name_DC -Credential $LCredential -MaxRetries 100 -WaitSeconds 10 -Path $LogFilePath 
 ###########################
 
 
@@ -337,26 +338,27 @@ while ( ($DcState -eq "off") -or ($FsState -eq "off") -or ($TsState -eq "off") )
     $TsState = (Get-VM -Name $VM_Name_TS).State
 }
 #Aendern der IP-Adressen der Server auf statische IPs
-Start-Sleep -Seconds 30
+Wait-ForVM -VMName $VM_Name_DC -Credential $LCredential -MaxRetries 20 -WaitSeconds 10 -Path $LogFilePath 
 
 ChangeVMSettings -VmDC $VM_Name_DC -VmFs $VM_Name_FS -VmTs $VM_Name_TS -Credential $LCredential
 Write-Output "$(Get-TimeStamp) -- VMs haben eine feste IP erhalten und der virtuelle Computer bekommt einen neuen Namen | FS Rolle installiert" | Out-File $LogFilePath -append
 
 
-Start-Sleep -Seconds 60
+Wait-ForVM -VMName $VM_Name_DC -Credential $LCredential -MaxRetries 20 -WaitSeconds 10 -Path $LogFilePath 
 
 #Installieren der Active Direktory Rolle 
 DeployADDSRole
 Write-Output "$(Get-TimeStamp) -- DC wurde erstellt" | Out-File $LogFilePath -append
 
-#Start-Sleep -Seconds 390 #6,5min warten auf Server neustart
-Wait-ForVM -VMName $VM_Name_DC -Credential $DCredential -MaxRetries 60 -WaitSeconds 10 -Path $LogFilePath  
+Start-Sleep -Seconds 390 #6,5min warten auf Server neustart
+#Wait-ForVM -VMName $VM_Name_DC -Credential $DCredential -MaxRetries 60 -WaitSeconds 10 -Path $LogFilePath  
 
 #Hinzufuegen der anderen server zu der Domaene 
 JoinDomain
 Write-Output "$(Get-TimeStamp) -- VMs treten der Domain bei" | Out-File $LogFilePath -append
 
-Start-Sleep -Seconds 60 #1min warten auf Server neustart
+#Start-Sleep -Seconds 60 #1min warten auf Server neustart
+Wait-ForVM -VMName $VM_Name_FS -Credential $DCredential -MaxRetries 60 -WaitSeconds 10 -Path $LogFilePath  
 
 #Erstellen der wichtigsten Laufwerke und Ordner
 DirectoryPreparation
@@ -367,7 +369,8 @@ Write-Output "$(Get-TimeStamp) -- Ordnerstruktur auf der neuen Festplatte am FS 
 #Erstellen der Grundarbeitsstruktur (Organisationseinheit)
 BasicADStructure
 Write-Output "$(Get-TimeStamp) -- OU,User,Gruppen,GPO erstellt " | Out-File $LogFilePath -append
-Start-Sleep -Seconds 20 #20sec warten auf Server neustart
+Wait-ForVM -VMName $VM_Name_DC -Credential $DCredential -MaxRetries 60 -WaitSeconds 10 -Path $LogFilePath  
+#Start-Sleep -Seconds 20 #20sec warten auf Server neustart
 
 
 #Freigeben der Ordner und setzen der Zugriffsrechte
@@ -383,5 +386,6 @@ Write-Output "$(Get-TimeStamp) -- VMs neugestartet" | Out-File $LogFilePath -app
 
 #Ändern der Passwörter
 $PArray=PasswordChange
-ChangeAdminPasswords -DAdmin $PArray[3] -LAdminDc $PArray[0] -LAdminFs $PArray[1] -LAdminTs $PArray[2]
+
+ChangeAdminPasswords -DAdmin $PArray[3] -LAdminDc $PArray[0] -LAdminFs $PArray[1] -LAdminTs $PArray[2] -DC $VM_Name_DC -FS $VM_Name_FS -TS $VM_Name_TS -DCredential $DCredential -LCredential $LCredential
 Write-Output "$(Get-TimeStamp) -- Script finished | Errors:$($ErrorCount)" | Out-File $LogFilePath -append
