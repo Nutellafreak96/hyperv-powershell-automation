@@ -118,7 +118,7 @@ function ChangeVMSettings {
 }
 
 
-<##>
+<#Funktion zum warten auf das die VM gebootet ist bzw commands entgegennimmt#>
 function Wait-ForVM {
     param (
         [Parameter(Mandatory=$true)][string]$VMName,
@@ -132,7 +132,7 @@ function Wait-ForVM {
     
     while (-not $vmReady -and $retryCount -lt $MaxRetries) {
         try {
-            Invoke-Command -VMName $VMName -ScriptBlock { (Get-Service -Name "WSearch").Status } -Credential $Credential -ErrorAction Stop | Out-Null
+            Invoke-Command -VMName $VMName -ScriptBlock{ (Get-Service -Name "WSearch").Status } -Credential $Credential -ErrorAction Stop | Out-Null
             $vmReady = $true
         } catch {
             Write-Output "VM $($VMName) not ready... retrying ($($retryCount)/$($MaxRetries))" | Out-File $Path -Append
