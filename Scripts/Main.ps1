@@ -252,13 +252,21 @@ function ChangeAdminPasswords {
         [string]$DC,
         [string]$FS,
         [string]$TS,
-        [pscredential]$DCredential
+        [pscredential]$Credential
         )
 
-    Invoke-Command -VMName $DC -ScriptBlock { Get-LocalUser Admin | Set-LocalUser -Password  $Using:LAdminDc } -Credential $DCredential
-    Invoke-Command -VMName $FS -ScriptBlock { Get-LocalUser Admin | Set-LocalUser -Password  $Using:LAdminFs } -Credential $DCredential
-    Invoke-Command -VMName $TS -ScriptBlock { Get-LocalUser Admin | Set-LocalUser -Password  $Using:LAdminTs } -Credential $DCredential
-    Invoke-Command -VMName $DC -ScriptBlock { Get-ADUser -Identity Administrator | Set-ADAccountPassword -NewPassword  $Using:DAdmin -Reset } -Credential $DCredential
+    
+    Invoke-Command -VMName $FS -ScriptBlock { Get-LocalUser Admin | Set-LocalUser -Password  $Using:LAdminFs } -Credential $Credential
+    Invoke-Command -VMName $TS -ScriptBlock { Get-LocalUser Admin | Set-LocalUser -Password  $Using:LAdminTs } -Credential $Credential
+    $DcSession = New-PSSession -VMName $DC -Credential $DCredential
+    if ($null -eq $DcSession) {
+        $DcSession = New-PSSession -VMName $DC -Credential $DCredential
+    }
+    Invoke-Command -Session $DcSession -ScriptBlock{Get-LocalUser Admin | Set-LocalUser -Password  $Using:LAdminDc}
+    Invoke-Command -Session $DcSession -ScriptBlock{Get-ADUser -Identity Administrator | Set-ADAccountPassword -NewPassword  $Using:DAdmin}
+    
+
+    Get-PSSession | Remove-PSSession
 }
 
 
@@ -378,12 +386,14 @@ Write-Output "$(Get-TimeStamp) -- Ordner Freigaben erstellt und NTFS Rechte bear
 
 DeployTSRole -DC $VM_Name_DC -TS $VM_Name_TS -RdpName $KundeRDP -Credential $DCredential -FQDN $FQDN -Path $LogFilePath
 Write-Output "$(Get-TimeStamp) -- TS Rolle installiert und eingerichtet" | Out-File $LogFilePath -append
-#VMs neustarten
-RestartVMs
-Write-Output "$(Get-TimeStamp) -- VMs neugestartet" | Out-File $LogFilePath -append
+
 
 #Ändern der Passwörter
 $PArray=PasswordChange
 
-ChangeAdminPasswords -DAdmin $PArray[3] -LAdminDc $PArray[0] -LAdminFs $PArray[1] -LAdminTs $PArray[2] -DC $VM_Name_DC -FS $VM_Name_FS -TS $VM_Name_TS -DCredential $DCredential
+ChangeAdminPasswords -DAdmin $PArray[3] -LAdminDc $PArray[0] -LAdminFs $PArray[1] -LAdminTs $PArray[2] -DC $VM_Name_DC -FS $VM_Name_FS -TS $VM_Name_TS -Credential $DCredential
 Write-Output "$(Get-TimeStamp) -- Script finished | Errors:$($ErrorCount)" | Out-File $LogFilePath -append 
+
+#VMs neustarten
+RestartVMs
+Write-Output "$(Get-TimeStamp) -- VMs neugestartet" | Out-File $LogFilePath -append
