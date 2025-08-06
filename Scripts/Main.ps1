@@ -66,7 +66,7 @@ $CopyService = "Gastdienstschnittstelle"
 
 #String manipulation to setup the correct strings for the domain part of the script
 $DomainNameSplit = $DomainName -split "\." #Aufteilung des Domain namen in eintelteile
-$Global:DomainForGPO = "DC=$($DomainNameSplit[0]),DC=$($DomainNameSplit[1])" #Zusammensetzen zu einem Distinguished Name
+$Global:DomainForGPO = ($DomainNameSplit | ForEach-Object { "DC=$_" }) -join "," #Zusammensetzen zu einem Distinguished Name
 $Global:OUPathname = "OU=" + $OUName + "," + $DomainForGPO #Distinguished Name für die OU
 
 
@@ -204,7 +204,6 @@ function DirPermissions
 
 #Installiert die remoteDesktopService Rolle um aus der VM "TS" einen TerminalServer zu machen
 function DeployTSRole {
-
     param(
         [string]$DC,
         [string]$TS,
@@ -253,14 +252,13 @@ function ChangeAdminPasswords {
         [string]$DC,
         [string]$FS,
         [string]$TS,
-        [pscredential]$DCredential,
-        [pscredential]$LCredential
-    )
+        [pscredential]$DCredential
+        )
 
-    Invoke-Command -VMName $DC -ScriptBlock { Get-LocalUser Admin | Set-LocalUser -Password (ConvertFrom-SecureString $Using:LAdminDc) } -Credential $LCredential
-    Invoke-Command -VMName $FS -ScriptBlock { Get-LocalUser Admin | Set-LocalUser -Password (ConvertFrom-SecureString $Using:LAdminFs) } -Credential $LCredential
-    Invoke-Command -VMName $TS -ScriptBlock { Get-LocalUser Admin | Set-LocalUser -Password (ConvertFrom-SecureString $Using:LAdminTs) } -Credential $LCredential
-    Invoke-Command -VMName $DC -ScriptBlock { Get-ADUser -Identity Administrator | Set-ADAccountPassword -NewPassword  $Using:DAdmin } -Credential $DCredential
+    Invoke-Command -VMName $DC -ScriptBlock { Get-LocalUser Admin | Set-LocalUser -Password  $Using:LAdminDc } -Credential $DCredential
+    Invoke-Command -VMName $FS -ScriptBlock { Get-LocalUser Admin | Set-LocalUser -Password  $Using:LAdminFs } -Credential $DCredential
+    Invoke-Command -VMName $TS -ScriptBlock { Get-LocalUser Admin | Set-LocalUser -Password  $Using:LAdminTs } -Credential $DCredential
+    Invoke-Command -VMName $DC -ScriptBlock { Get-ADUser -Identity Administrator | Set-ADAccountPassword -NewPassword  $Using:DAdmin -Reset } -Credential $DCredential
 }
 
 
@@ -387,5 +385,5 @@ Write-Output "$(Get-TimeStamp) -- VMs neugestartet" | Out-File $LogFilePath -app
 #Ändern der Passwörter
 $PArray=PasswordChange
 
-ChangeAdminPasswords -DAdmin $PArray[3] -LAdminDc $PArray[0] -LAdminFs $PArray[1] -LAdminTs $PArray[2] -DC $VM_Name_DC -FS $VM_Name_FS -TS $VM_Name_TS -DCredential $DCredential -LCredential $LCredential
-Write-Output "$(Get-TimeStamp) -- Script finished | Errors:$($ErrorCount)" | Out-File $LogFilePath -append
+ChangeAdminPasswords -DAdmin $PArray[3] -LAdminDc $PArray[0] -LAdminFs $PArray[1] -LAdminTs $PArray[2] -DC $VM_Name_DC -FS $VM_Name_FS -TS $VM_Name_TS -DCredential $DCredential
+Write-Output "$(Get-TimeStamp) -- Script finished | Errors:$($ErrorCount)" | Out-File $LogFilePath -append 
