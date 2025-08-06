@@ -683,7 +683,13 @@ function CoreSelectorUi{
     #                                                                             #
     ###############################################################################
     #Get the number of possible processor cores
-    $NumProcessorCores = Get-CimInstance -ClassName Win32_Processor | Select-Object -ExpandProperty NumberOfLogicalProcessors
+    $pcore = Get-CimInstance -ClassName Win32_Processor | Select-Object -ExpandProperty NumberOfLogicalProcessors
+    $NumProcessorCores = 0
+
+    if($pcore -is [array]){ foreach($core in $pcore){$NumProcessorCores += $core}}
+    else {
+        $NumProcessorCores = $pcore
+    }
         
 
     $form = New-Object System.Windows.Forms.Form
