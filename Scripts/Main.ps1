@@ -3,7 +3,7 @@ Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
 #Funktionen zum Erstellen und Anzeigen der GUI Fenster.
-. .\UserInterfaceFunctions\UIFunctions.ps1
+. .\UserInterfaceFunctions\UiFunctions.ps1
 . .\FileHandling\FileHandlingFunctions.ps1
 . .\VMHandling\VmHandlingFunctions.ps1
 
