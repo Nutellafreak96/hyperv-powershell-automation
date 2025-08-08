@@ -266,7 +266,7 @@ function ChangeAdminPasswords {
         $DcSession = New-PSSession -VMName $DC -Credential $DCredential
     }
     Invoke-Command -Session $DcSession -ScriptBlock{Get-LocalUser Admin | Set-LocalUser -Password  $Using:LAdminDc}
-    Invoke-Command -Session $DcSession -ScriptBlock{Get-ADUser -Identity Administrator | Set-ADAccountPassword -NewPassword  $Using:DAdmin}
+    Invoke-Command -Session $DcSession -ScriptBlock{Get-ADUser -Identity Administrator | Set-ADAccountPassword -NewPassword  $Using:DAdmin -Reset}
     
 
     Get-PSSession | Remove-PSSession
