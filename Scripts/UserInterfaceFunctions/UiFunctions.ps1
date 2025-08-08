@@ -322,7 +322,7 @@ function RamSelectorUI {
     $label = New-Object System.Windows.Forms.Label
     $label.Location = New-Object System.Drawing.Point(10, 20)
     $label.Size = New-Object System.Drawing.Size(260, 20)
-    $label.Text = "Please select the RAM value to use(in MB):"
+    $label.Text = "Please select the RAM value to use(in GB):"
     $form.Controls.Add($label)
 
     $listBox = New-Object System.Windows.Forms.ListBox
@@ -1070,7 +1070,7 @@ function UserInterface {
     $window.TopMost = $true
     $window.TopLevel = $true
 
-    #ecept the RamSelectorUi every Ui window will be prompted here
+    #except the RamSelectorUi every Ui window will be prompted here
     if ($folderselection.ShowDialog($window) -eq [System.Windows.Forms.DialogResult]::Cancel) { Exit }    
     if ($filedirselection.ShowDialog($window) -eq [System.Windows.Forms.DialogResult]::Cancel) { Exit }
     if ($window.ShowDialog() -eq [System.Windows.Forms.DialogResult]::Cancel) { Exit }
@@ -1130,7 +1130,7 @@ function UserInterface {
 
 }
 
-
+<#UserInterface to change Adminpasswords#>
 function PasswordChange {
 
     $window = New-Object System.Windows.Forms.Form
@@ -1226,4 +1226,88 @@ function PasswordChange {
 
 
     return $ReturnArray
+}
+
+<#User interface to get vhdx size from the user#>
+function Get-VHDSizeBytes {
+
+    # Create the form
+    $form = New-Object System.Windows.Forms.Form
+    $form.Text = "Enter VHDX Size"
+    $form.Width = 300
+    $form.Height = 140
+    $form.StartPosition = "CenterScreen"
+
+    # Label for size input
+    $label = New-Object System.Windows.Forms.Label
+    $label.Text = "Enter size:"
+    $label.Left = 10
+    $label.Top = 20
+    $label.AutoSize = $true
+    $form.Controls.Add($label)
+
+    # TextBox for size number
+    $textBox = New-Object System.Windows.Forms.TextBox
+    $textBox.Left = 100
+    $textBox.Top = 18
+    $textBox.Width = 80
+    $form.Controls.Add($textBox)
+
+    # ComboBox for units
+    $comboBox = New-Object System.Windows.Forms.ComboBox
+    $comboBox.Left = 190
+    $comboBox.Top = 18
+    $comboBox.Width = 60
+    $comboBox.DropDownStyle = 'DropDownList'
+    $comboBox.Items.AddRange(@("MB", "GB", "TB"))
+    $comboBox.SelectedIndex = 1  # Default to GB
+    $form.Controls.Add($comboBox)
+
+    # OK button
+    $okButton = New-Object System.Windows.Forms.Button
+    $okButton.Text = "OK"
+    $okButton.Left = 60
+    $okButton.Top = 70
+    $okButton.Width = 80
+    $okButton.DialogResult = [System.Windows.Forms.DialogResult]::OK
+    $form.AcceptButton = $okButton
+    $form.Controls.Add($okButton)
+
+    # Cancel button
+    $cancelButton = New-Object System.Windows.Forms.Button
+    $cancelButton.Text = "Cancel"
+    $cancelButton.Left = 140
+    $cancelButton.Top = 70
+    $cancelButton.Width = 80
+    $cancelButton.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
+    $form.AcceptButton = $cancelButton
+    $form.Controls.Add($cancelButton)
+
+    # Show the form
+    
+    if ($form.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
+        $sizeInput = $textBox.Text
+        $unit = $comboBox.SelectedItem
+
+        if (-not [double]::TryParse($sizeInput, [ref]$null)) {
+            [System.Windows.Forms.MessageBox]::Show("Invalid number entered.", "Error", "OK", "Error")
+            return $null
+        }
+
+        $sizeValue = [double]$sizeInput
+        switch ($unit) {
+            "MB" { $multiplier = 1MB }
+            "GB" { $multiplier = 1GB }
+            "TB" { $multiplier = 1TB }
+            default {
+                [System.Windows.Forms.MessageBox]::Show("Invalid unit selected.", "Error", "OK", "Error")
+                return $null
+            }
+        }
+
+        $sizeBytes = [UInt64]($sizeValue * $multiplier)
+        return $sizeBytes
+    } else {
+        Exit
+    }
 }
