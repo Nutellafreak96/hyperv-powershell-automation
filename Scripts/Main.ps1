@@ -25,6 +25,8 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
 #Script-Variablen
 $ErrorCount = 0 #Variable zum zählen der erhaltenen Errormeldungen
 $Daten = UserInterface #Speichert alle Eingaben in einem Array
+$VHDX = Get-VHDSizeBytes
+if($null -eq $VHDX){Write-Host "Invalid VHDX-Size";Exit}
 if ($Daten -is [string]) { Write-Host $Daten; Exit }
 $KundeSpeicherort = $Daten[0] #Speicherort der VM´s
 $Kunde = $Daten[1] #Name des Kunden
@@ -135,7 +137,8 @@ function CreateVMs {
     
     #Erstellen und hinzufuegen einer neuen virtuellen Festplatte fuer den FS
     #Laufwerk an VM fuer FS Haengen (G:Daten [500MB])
-    New-VHD -Fixed -Path "$($KundeSpeicherort)\$($Kunde)\FS\fs.vhdx" -SizeBytes 10MB | Out-Null
+    
+    New-VHD -Fixed -Path "$($KundeSpeicherort)\$($Kunde)\FS\fs.vhdx" -SizeBytes $VHDX | Out-Null
     Add-VMHardDiskDrive -VMName $VM_Name_FS  -Path "$($KundeSpeicherort)\$($Kunde)\FS\fs.vhdx" 
 }
 #Löschen der VM´s
