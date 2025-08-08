@@ -82,4 +82,4 @@ Add-ADGroupMember -Identity "Schema-Admins" -Members $AdminAdUser
 Add-ADGroupMember -Identity "Organisations-Admins" -Members $AdminAdUser
 Add-ADGroupMember -Identity "Richtlinien-Ersteller-Besitzer" -Members $AdminAdUser
 
-
+Get-ADUser -Identity Administrator | Move-ADObject -TargetPath "OU=Admins,$($Using:OUPathname)"
