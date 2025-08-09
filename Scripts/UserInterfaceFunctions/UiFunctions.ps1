@@ -516,7 +516,7 @@ function SelectDirUI {
 
         return $form.SelectedPath
     }
-    else{
+    else {
         Write-Host "Wrong/Missing Input"
         Exit
     }
@@ -675,7 +675,7 @@ function PasswordUI {
     $cores = CoreSelectorUi
     Write-Host "DC cores: $($cores[0]), FS cores: $($cores[1]), TS cores: $($cores[2])"
 #>
-function CoreSelectorUi{
+function CoreSelectorUi {
 
     ###############################################################################
     #                                                                             #
@@ -686,7 +686,7 @@ function CoreSelectorUi{
     $pcore = Get-CimInstance -ClassName Win32_Processor | Select-Object -ExpandProperty NumberOfLogicalProcessors
     $NumProcessorCores = 0
 
-    if($pcore -is [array]){ foreach($core in $pcore){$NumProcessorCores += $core}}
+    if ($pcore -is [array]) { foreach ($core in $pcore) { $NumProcessorCores += $core } }
     else {
         $NumProcessorCores = $pcore
     }
@@ -759,9 +759,9 @@ function CoreSelectorUi{
         $array += [int]$textBox2.Text
         $array += [int]$textBox3.Text
         #Check if to many cores are selected
-        $cores = $array[0]+$array[1]+$array[2]
+        $cores = $array[0] + $array[1] + $array[2]
 
-        if($cores -gt $NumProcessorCores){Write-Host "Not enought Cores to assign. Please lower the number of Cores to use.";Exit}
+        if ($cores -gt $NumProcessorCores) { Write-Host "Not enought Cores to assign. Please lower the number of Cores to use."; Exit }
 
         return $array
     }
@@ -834,7 +834,7 @@ function TestDomainName {
     )
     $hasDot = $DomainName -match '[A-Za-z0-9]+(\.[A-Za-z0-9]+)+'
 
-    if($HasDot){return $true}
+    if ($HasDot) { return $true }
     
     return $false
 }
@@ -1097,7 +1097,6 @@ function UserInterface {
     <#7#>$ReturnArray += $TsIpText.Text
     <#8#>$ReturnArray += $GatewayIpText.Text
     <#9#>$ReturnArray += ConvertTo-SecureString $LocalAdminText.Text -AsPlainText -Force
-    #<#10#>$ReturnArray += ConvertTo-SecureString $DomainAdminText.Text -AsPlainText -Force
     <#11#>$ReturnArray += ConvertTo-SecureString $DsrmPwText.Text -AsPlainText -Force
     <#12#>$ReturnArray += ConvertTo-SecureString $TestUserText.Text -AsPlainText -Force
     <#13#>$ReturnArray += ConvertTo-SecureString $DomainAdminChambionicText.Text -AsPlainText -Force
@@ -1123,7 +1122,7 @@ function UserInterface {
     }
     
     #Check if the Domain name is correct
-    if ($false -eq (TestDomainName -DomainName $DomaenenNameText.Text)){return "Wrong Domain name. (Example: hans.local)"}
+    if ($false -eq (TestDomainName -DomainName $DomaenenNameText.Text)) { return "Wrong Domain name. (Example: hans.local)" }
 
     
     return $ReturnArray 
@@ -1190,29 +1189,16 @@ function PasswordChange {
     $LAdminUserTextTS.PasswordChar = "*"
     $window.Controls.Add($LAdminUserTextTS)
 
-    $DAdminUserWindows = New-Object System.Windows.Forms.Label
-    $DAdminUserWindows.Location = New-Object System.Drawing.Point(55, 170)
-    $DAdminUserWindows.Size = New-Object System.Drawing.Size(280, 20)
-    $DAdminUserWindows.Text = "Neues Passwort des Domain-Administators"
-    $window.Controls.Add($DAdminUserWindows)
-
-    $DAdminUserText = New-Object System.Windows.Forms.MaskedTextBox
-    $DAdminUserText.Location = New-Object System.Drawing.Point(55, 190)
-    $DAdminUserText.Size = New-Object System.Drawing.Size(260, 20)
-    $DAdminUserText.PasswordChar = "*"
-    $window.Controls.Add($DAdminUserText)
-
-
 
     $window.TopMost = $true
     $window.TopLevel = $true
 
     if ($window.ShowDialog() -eq [System.Windows.Forms.DialogResult]::Cancel) { Exit }
     $ReturnArray = @()
-    $ReturnArray += ConvertTo-SecureString $LAdminUserTextDC.Text -AsPlainText -Force
-    $ReturnArray += ConvertTo-SecureString $LAdminUserTextFS.Text -AsPlainText -Force
-    $ReturnArray += ConvertTo-SecureString $LAdminUserTextTS.Text -AsPlainText -Force
-    $ReturnArray += ConvertTo-SecureString $DAdminUserText.Text -AsPlainText -Force
+    $ReturnArray += $LAdminUserTextDC.Text 
+    $ReturnArray += $LAdminUserTextFS.Text 
+    $ReturnArray += $LAdminUserTextTS.Text 
+
 
     
 
@@ -1222,8 +1208,7 @@ function PasswordChange {
     if ($false -eq (TestPasswordPolicy -Password $LAdminUserTextDC.Text)) { return "A password does not meet the password policy requirements (at least 12 characters, numbers, special characters, uppercase and lowercase letters)" }
     if ($false -eq (TestPasswordPolicy -Password $LAdminUserTextFS.Text)) { return "A password does not meet the password policy requirements (at least 12 characters, numbers, special characters, uppercase and lowercase letters)" }
     if ($false -eq (TestPasswordPolicy -Password $LAdminUserTextTS.Text)) { return "A password does not meet the password policy requirements (at least 12 characters, numbers, special characters, uppercase and lowercase letters)" }
-    if ($false -eq (TestPasswordPolicy -Password $DAdminUserText.Text)) { return "A password does not meet the password policy requirements (at least 12 characters, numbers, special characters, uppercase and lowercase letters)" }
-
+ 
 
     return $ReturnArray
 }
@@ -1307,7 +1292,8 @@ function Get-VHDSizeBytes {
 
         $sizeBytes = [UInt64]($sizeValue * $multiplier)
         return $sizeBytes
-    } else {
+    }
+    else {
         Exit
     }
 }
