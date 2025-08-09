@@ -26,7 +26,7 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
 $ErrorCount = 0 #Variable zum zählen der erhaltenen Errormeldungen
 $Daten = UserInterface #Speichert alle Eingaben in einem Array
 $VHDX = Get-VHDSizeBytes
-if($null -eq $VHDX){Write-Host "Invalid VHDX-Size";Exit}
+if ($null -eq $VHDX) { Write-Host "Invalid VHDX-Size"; Exit }
 if ($Daten -is [string]) { Write-Host $Daten; Exit }
 $KundeSpeicherort = $Daten[0] #Speicherort der VM´s
 $Kunde = $Daten[1] #Name des Kunden
@@ -41,8 +41,8 @@ $Global:DefaultGateway = $Daten[8]  #DefaultGateway fuer die Server [in der Rege
 $LPWord = $Daten[9] #password for the local Administrator
 $DPWord = $Daten[9]  #password for the domain Administrator
 $Global:Dsrm = $Daten[10] #Passwort für den DSRM-Administrators
-$Global:BSPW = $Daten[11] #Passwort des lokalen Admins (extra lokaler User angelegt durch unattend.xml für Windows)
-$Global:ASPW = $Daten[12] #Passwort des Domain-Administrators (gleich wie das Passwort für den lokalen Benutzer)
+$Global:BSPW = $Daten[11] #Passwort des Test Users
+$Global:ASPW = $Daten[12] #Passwort des Chambionic Domain-Administrators 
 $RamDc = $Daten[13] #Variable um den Ausgewaehlten RAM den VM´s zuzuweisen
 $RamFs = $Daten[14] #Variable um den Ausgewaehlten RAM den VM´s zuzuweisen
 $RamTs = $Daten[15] #Variable um den Ausgewaehlten RAM den VM´s zuzuweisen
@@ -89,6 +89,7 @@ $DCredentialParams = @{
     ArgumentList = $DUser, $DPWord
 }
 $DCredential = New-Object @DCredentialParams
+
 
 <#hashtables mit Daten für die VM´s#>
 
@@ -181,10 +182,13 @@ function DeployADDSRole {
 }
 
 #Fuegt die VM�s FS und TS zu der Domain des DC hinzu
+
 function JoinDomain {
     Invoke-Command -VMName $VM_Name_FS -ScriptBlock { Add-Computer -DomainName $Using:DomainName -Credential $Using:DCredential -Restart } -Credential $LCredential
     Invoke-Command -VMName $VM_Name_TS -ScriptBlock { Add-Computer -DomainName $using:DomainName -Credential $Using:DCredential -Restart } -Credential $LCredential
 }
+
+
 
 #Haengt eine virtuelle Festplatte an f�r die Daten und erstellt die notwendigsten Ordner
 function DirectoryPreparation {
@@ -200,8 +204,7 @@ function BasicADStructure {
 }
 
 #Legt die Zugriffsrechte fuer verschiedene Ordner fest
-function DirPermissions 
-{
+function DirPermissions {
     Invoke-Command -VMName $VM_Name_FS -FilePath ".\FileHandling\Permissions.ps1" -Credential $DCredential
 }
 
@@ -233,9 +236,9 @@ function DeployTSRole {
     # Step 3: Configure RDS deployment
     #Invoke-Command -VMName $TS -FilePath ".\ConfigureRemoteDesktopDeployment.ps1" -Credential $Credential
     $TsSession2 = New-PSSession -VMName $TS -Credential $Credential
-    if($null -eq $TsSession2){$TsSession2 = New-PSSession -VMName $TS -Credential $Credential}
+    if ($null -eq $TsSession2) { $TsSession2 = New-PSSession -VMName $TS -Credential $Credential }
     Invoke-Command -Session $TsSession2 -FilePath ".\ConfigureRemoteDesktopDeployment.ps1" -ArgumentList $KundeRDP, $DomainName
-    Invoke-Command -Session $TsSession2 -ScriptBlock{Restart-Computer -Force}
+    Invoke-Command -Session $TsSession2 -ScriptBlock { Restart-Computer -Force }
 
     
 
@@ -248,30 +251,39 @@ function DeployTSRole {
 #Funktion zum aendern der Passwoerter der lokalen Admins
 function ChangeAdminPasswords {
     param(
-        [securestring]$DAdmin,
-        [securestring]$LAdminDc, 
-        [securestring]$LAdminFs,
-        [securestring]$LAdminTs,
+        [string]$LAdminDc,   # Plain text Local Admin password (DC)
+        [string]$LAdminFs,   # Plain text Local Admin password (FS)
+        [string]$LAdminTs,   # Plain text Local Admin password (TS)
         [string]$DC,
         [string]$FS,
         [string]$TS,
         [pscredential]$Credential
-        )
+    )
 
-    
-    Invoke-Command -VMName $FS -ScriptBlock { Get-LocalUser Admin | Set-LocalUser -Password  $Using:LAdminFs } -Credential $Credential
-    Invoke-Command -VMName $TS -ScriptBlock { Get-LocalUser Admin | Set-LocalUser -Password  $Using:LAdminTs } -Credential $Credential
-    $DcSession = New-PSSession -VMName $DC -Credential $DCredential
-    if ($null -eq $DcSession) {
-        $DcSession = New-PSSession -VMName $DC -Credential $DCredential
-    }
-    Invoke-Command -Session $DcSession -ScriptBlock{Get-LocalUser Admin | Set-LocalUser -Password  $Using:LAdminDc}
-    Invoke-Command -Session $DcSession -ScriptBlock{Get-ADUser -Identity Administrator | Set-ADAccountPassword -NewPassword  $Using:DAdmin -Reset}
-    
+    # File Server local admin password
+    Invoke-Command -VMName $FS -Credential $Credential -ScriptBlock {
+        param($pw)
+        $secPw = ConvertTo-SecureString $pw -AsPlainText -Force
+        Get-LocalUser -Name "Admin" | Set-LocalUser -Password $secPw
+    } -ArgumentList $LAdminFs
 
-    Get-PSSession | Remove-PSSession
+    # Terminal Server local admin password
+    Invoke-Command -VMName $TS -Credential $Credential -ScriptBlock {
+        param($pw)
+        $secPw = ConvertTo-SecureString $pw -AsPlainText -Force
+        Get-LocalUser -Name "Admin" | Set-LocalUser -Password $secPw
+    } -ArgumentList $LAdminTs
+
+    # Domain Controller: local admin password
+    Invoke-Command -VMName $DC -Credential $Credential -ScriptBlock {
+        param($localPw, $domainPw)
+
+        $localSec = ConvertTo-SecureString $localPw -AsPlainText -Force
+        Get-LocalUser -Name "Admin" | Set-LocalUser -Password $localSec
+
+    } -ArgumentList $LAdminDc
+
 }
-
 
 
 ############################################################
@@ -360,7 +372,7 @@ DeployADDSRole
 Write-Output "$(Get-TimeStamp) -- DC wurde erstellt" | Out-File $LogFilePath -append
 
 Start-Sleep -Seconds 390 #6,5min warten auf Server neustart
-#Wait-ForVM -VMName $VM_Name_DC -Credential $DCredential -MaxRetries 60 -WaitSeconds 10 -Path $LogFilePath  
+
 
 #Hinzufuegen der anderen server zu der Domaene 
 JoinDomain
@@ -392,9 +404,9 @@ Write-Output "$(Get-TimeStamp) -- TS Rolle installiert und eingerichtet" | Out-F
 
 
 #Ändern der Passwörter
-$PArray=PasswordChange
+$PArray = PasswordChange
 
-ChangeAdminPasswords -DAdmin $PArray[3] -LAdminDc $PArray[0] -LAdminFs $PArray[1] -LAdminTs $PArray[2] -DC $VM_Name_DC -FS $VM_Name_FS -TS $VM_Name_TS -Credential $DCredential
+ChangeAdminPasswords -LAdminDc $PArray[0] -LAdminFs $PArray[1] -LAdminTs $PArray[2] -DC $VM_Name_DC -FS $VM_Name_FS -TS $VM_Name_TS -Credential $DCredential
 Write-Output "$(Get-TimeStamp) -- Script finished | Errors:$($ErrorCount)" | Out-File $LogFilePath -append 
 
 #VMs neustarten
