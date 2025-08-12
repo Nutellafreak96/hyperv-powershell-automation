@@ -204,7 +204,31 @@ Für die Vorbereitung wird zunächst eine VM mit Windows Server installiert und 
 sysprep.exe /oobe /shutdown /generalize /unattend:C:\Windows\System32\Sysprep\unattend.xml
 \end{verbatim}
 durchgeführt werden. Die resultierende VHDX-Datei (\texttt{Serverprep.vhdx}) dient als Template für die automatisierte Erstellung der zukünftigen VMs.
+---
 
+\section*{Weitere technische Erkenntnisse}
+
+Während der Entwicklung und Umsetzung des Automatisierungsskripts für Hyper-V traten eine Vielzahl technischer Besonderheiten und Fallstricke auf, die bei zukünftigen Projekten berücksichtigt werden sollten. Eine grundlegende Voraussetzung für bestimmte Aktionen, wie beispielsweise den Domänenbeitritt, ist die Verwendung eindeutiger SIDs. Dies wurde durch den Einsatz von \texttt{sysprep} in Verbindung mit einer funktionierenden Antwortdatei sichergestellt. Dabei zeigte sich, dass die Antwortdatei strikt in der Reihenfolge von oben nach unten abgearbeitet wird, weshalb der \texttt{OOBE}-Abschnitt möglichst früh platziert werden sollte.  
+
+Im Bereich der Skripterstellung mit PowerShell war besonders bei der Arbeit mit GUIs und Benutzerinteraktionen Aufmerksamkeit erforderlich. So erwies es sich als sinnvoll, beim Aufbau einer RAM-Auswahl Integer-Werte in Byte-Form anzugeben, da Strings in Arrays nicht zuverlässig verarbeitet wurden. Das Rückgabeverhalten wurde über \texttt{return} angepasst, um korrekte Werte zu liefern. Außerdem zeigte sich, dass in PowerShell die Überprüfung auf \texttt{NULL} konsistent mit der Schreibweise \texttt{NULL -eq \$Variable} erfolgen sollte, um logische Fehler -- insbesondere bei Array-Prüfungen -- zu vermeiden.  
+
+GUI-Fenster verhielten sich in Bezug auf die Anzeige im Vordergrund nicht immer wie erwartet, selbst wenn die Eigenschaft \texttt{TopMost} gesetzt war. Dieses Problem wurde durch die Definition eines Mutterfensters und die gezielte Anzeige untergeordneter Fenster mit \texttt{.Add\_Shown()} gelöst. Passworteingaben ließen sich in der GUI zwar ausblenden, mussten jedoch für die weitere Verarbeitung mittels \texttt{ConvertTo-SecureString -PlainText} in ein SecureString-Format konvertiert werden. Beim Auswählen von Verzeichnissen war zu beachten, dass der Pfad über die Eigenschaft \texttt{InitialDirectory} und nicht \texttt{RootFolder} festgelegt werden muss.  
+
+Für die Eingabevalidierung, beispielsweise bei IP-Adressen, bot sich die Nutzung regulärer Ausdrücke wie \texttt{"[0-9]+\textbackslash.[0-9]+\textbackslash.[0-9]+\textbackslash.[0-9]+"} an. Variablen, die innerhalb von Remote-Jobs oder Sessions genutzt werden, mussten mit dem Präfix \texttt{Using:} übergeben werden -- auch dann, wenn sie zuvor global deklariert wurden. Innerhalb von Strings war eine Variablenersetzung nur mit der Schreibweise \texttt{\$(Variable)} möglich. Bei Abfragen, die einen String erfordern, erwies sich die Verwendung des Parameters \texttt{-ExpandProperty} als notwendig, um Objektrückgaben zu vermeiden.  
+
+Das Ausführen von Befehlen mit dem Parameter \texttt{-AsJob} startete Prozesse im Hintergrund, was problematisch sein konnte, wenn das Ergebnis sofort benötigt wurde. In solchen Fällen war es erforderlich, den Job aktiv zu überwachen, das Ende der Ausführung abzuwarten und anschließend den Job zu entfernen. Beim Einsatz von \texttt{Invoke-Command} konnte entweder direkt mit VM-Namen oder mit zuvor erstellten Sessions gearbeitet werden; letztere mussten nach Abschluss wieder geschlossen werden. Um Anmeldevorgänge zu vermeiden, konnten Anmeldeinformationen als \texttt{PSCredential}-Objekte hinterlegt werden. Diese wurden über \texttt{New-Object} erstellt, wobei das Passwort als SecureString abgefragt und zusammen mit dem Benutzernamen in einer Variablen gespeichert wurde.  
+
+Vor der Ausführung des Skripts wurde geprüft, ob es in einer administrativen Sitzung lief. Falls nicht, wurde es über \texttt{Start-Process} mit dem Verb \texttt{RunAs} neu gestartet. Für eine einheitliche Protokollierung wurde eine Log-Funktion erstellt, die Zeitstempel im Format \texttt{"[dd/MM/yy HH:mm:ss]"} generierte. Nicht benötigte Ausgaben wurden konsequent mit \texttt{| Out-Null} unterdrückt.  
+
+Netzwerkanpassungen innerhalb von Windows-VMs erfolgten mit \texttt{New-NetIPAddress} anstelle von \texttt{Set-NetIPAddress}. Um Dateien vom Hyper-V-Host auf eine VM zu übertragen, musste die Gastdienstschnittstelle aktiviert werden, was über \texttt{Enable-VMIntegrationService} möglich war. Anschließend konnte der Kopiervorgang mit \texttt{Copy-VMFile} durchgeführt werden, wobei Systempfade nur indirekt beschreibbar waren.  
+
+Die Installation bestimmter Serverrollen, wie des Dateiservers, war nur über XML-basierte Konfigurationen möglich. Remote Desktop Services (RDS) konnten vom Domänencontroller auf den Terminalserver installiert werden, wobei zusätzliche Konfigurationen -- etwa Session Collections, RDS-Lizenzierung und Neustarts des Verwaltungsdienstes -- direkt auf dem TS erfolgten.  
+
+Weitere Besonderheiten betrafen die Handhabung von Strings, Hash-Tabellen und VM-Eigenschaften: Beim Splitten eines Strings am Punkt musste der Punkt mit \texttt{"\textbackslash."} escaped werden. VMs konnten vollständig aus Hash-Tabellen heraus erstellt werden, wobei CPU-Anpassungen erst nach der Erstellung und MAC-Adressänderungen nur nach dem ersten Start möglich waren. Neue virtuelle Festplatten wurden per \texttt{Add-VMHardDiskDrive} angebunden, anschließend online geschaltet, benannt, mit einem Laufwerksbuchstaben versehen und formatiert.  
+
+Passwörter von Active-Directory-Konten ließen sich nicht ohne Weiteres zurücksetzen, während lokale Passwörter per Remote- oder PowerShell-Direct-Zugriff problemlos geändert werden konnten. Bestimmte Installationsfehlermeldungen bei RDS ließen sich möglicherweise auf fehlende Lizenzserverkonfigurationen zurückführen.
+
+---
 
 Skript:
 
