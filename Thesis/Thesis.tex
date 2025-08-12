@@ -109,6 +109,15 @@ Theorie:
         - virtualizaton runs in the parent partition and has access to hardware devices
         - parent creates child
             - childs have no access to hardware
+    -%https://acta.fih.upt.ro/pdf/2016-2/ACTA-2016-2-15.pdf (performance analysis of server system virtualization implemented using hyper v hypervisor)
+        - works on the os. 
+        - runs on the hardware, under the os
+    - % https://www.fujitsu.com/global/documents/about/resources/publications/fstj/archives/vol47-3/paper16.pdf(Windows Server 2008 R2 Hyper-V Server Virtualization)
+        - microkernel-based hypervisor 
+        - lies above the hardware under the os
+        - windows driver stack is embedded in the management os (parent partition)
+        - driver compatible with the os can be embedded in the virtualization platform
+        - I/O opperations are communications between guest os and management os vis VMBus
         - 
 - Sysprep
 - WinRM vs WindowsDirect (Powershell WindowsDirect)
@@ -167,15 +176,24 @@ Durchführung:
 
 \section{Projektidee und Ausgangssituation}
 
-Die Idee zu diesem Projekt entstand aus der praktischen Arbeit im Bereich Windows-Server-Administration, in dem nahezu ausschließlich mit Windows Server und Hyper-V gearbeitet wird. In der bisherigen Vorgehensweise erfolgt die Erstellung neuer virtueller Maschinen (VMs) in einem Failover-Cluster (Hyper-V) vollständig manuell – beginnend bei der VM-Anlage bis hin zur vollständigen Konfiguration des Betriebssystems und der benötigten Rollen.
-
-Ein typisches Szenario tritt auf, wenn ein neuer Kunde im Rechenzentrum eingerichtet wird und in der Standardkonfiguration einen Domänencontroller (DC), einen Dateiserver (FS) sowie einen Terminalserver (TS) erhält. In diesem Fall müssen drei VMs erstellt und jeweils mit Windows Server installiert werden. Bei kleineren Kunden kann es vorkommen, dass nur eine oder zwei VMs eingesetzt werden, jedoch wird in dieser Arbeit der Drei-VM-Ansatz betrachtet. Diese Trennung der Rollen hat den Vorteil einer klaren Aufgabenverteilung, einer besseren Übersicht und einer optimierten Lastverteilung zwischen den Systemen.
-
-Die manuelle Einrichtung umfasst zahlreiche wiederkehrende Arbeitsschritte. Auf dem Dateiserver werden Festplatten für den Speicherplatz angebunden, Ordnerstrukturen angelegt, Freigaben erstellt und NTFS-Berechtigungen vergeben. Auf dem Terminalserver erfolgt die Installation und Konfiguration der Remotedesktopdienste, wobei im betrachteten Szenario eine sitzungsbasierte Bereitstellung umgesetzt wird. Dies umfasst die Installation der benötigten Rollenkomponenten wie Connection Broker, Lizenzserver und Session Host. Zusätzlich wird eine Session Collection für den Kunden angelegt und einer Active-Directory-Gruppe zugewiesen, die für den Zugriff per Remote Desktop autorisiert ist. Die Lizenzierung muss dabei der geplanten Benutzeranzahl entsprechen.
-
-Eine häufig genutzte Ausnahme stellt die DATEV-Anwendung dar, die in vielen Kundenszenarien eingesetzt wird. Diese wird aus technischen Gründen meist auf dem Dateiserver installiert, kann jedoch bei größeren Anforderungen auch auf einer dedizierten VM betrieben werden, da sie SQL-Datenbanken mitbringt und entsprechende Ressourcen benötigt. Die Aktualisierung von DATEV erfordert eine koordinierte Vorgehensweise auf allen beteiligten Systemen und kann zu temporären Verbindungsunterbrechungen führen.
-
-Der Domänencontroller nimmt in diesem Aufbau eine zentrale Rolle ein, da er Benutzer, Gruppen und Gruppenrichtlinien für alle Systeme der Domäne bereitstellt und verwaltet. Erst nach seiner vollständigen Einrichtung können die anderen VMs der Domäne beitreten, sodass Zugriffsrechte und Gruppenrichtlinien wie vorgesehen greifen. Zudem bietet er die Möglichkeit, organisatorische Einheiten (OUs) anzulegen, um die Verwaltung von Computern, Servern und Benutzern zu strukturieren.
+Die Idee zu diesem Projekt entstand aus der praktischen Arbeit im Bereich Windows-Server-Administration, in dem nahezu ausschließlich mit Windows Server und Hyper-V gearbeitet wird.
+In der bisherigen Vorgehensweise erfolgt die Erstellung neuer virtueller Maschinen (VMs) in einem Failover-Cluster (Hyper-V) vollständig manuell – beginnend bei der VM-Anlage bis hin zur vollständigen Konfiguration des Betriebssystems und der benötigten Rollen.
+Ein typisches Szenario tritt auf, wenn ein neuer Kunde im Rechenzentrum eingerichtet wird und in der Standardkonfiguration einen Domänencontroller (DC), einen Dateiserver (FS) sowie einen Terminalserver (TS) erhält.
+In diesem Fall müssen drei VMs erstellt und jeweils mit Windows Server installiert werden.
+Bei kleineren Kunden kann es vorkommen, dass nur eine oder zwei VMs eingesetzt werden, jedoch wird in dieser Arbeit der Drei-VM-Ansatz betrachtet.
+Diese Trennung der Rollen hat den Vorteil einer klaren Aufgabenverteilung, einer besseren Übersicht und einer optimierten Lastverteilung zwischen den Systemen.
+Die manuelle Einrichtung umfasst zahlreiche wiederkehrende Arbeitsschritte.
+Auf dem Dateiserver werden Festplatten für den Speicherplatz angebunden, Ordnerstrukturen angelegt, Freigaben erstellt und NTFS-Berechtigungen vergeben.
+Auf dem Terminalserver erfolgt die Installation und Konfiguration der Remotedesktopdienste, wobei im betrachteten Szenario eine sitzungsbasierte Bereitstellung umgesetzt wird.
+Dies umfasst die Installation der benötigten Rollenkomponenten wie Connection Broker, Lizenzserver und Session Host.
+Zusätzlich wird eine Session Collection für den Kunden angelegt und einer Active-Directory-Gruppe zugewiesen, die für den Zugriff per Remote Desktop autorisiert ist.
+Die Lizenzierung muss dabei der geplanten Benutzeranzahl entsprechen.
+Eine häufig genutzte Ausnahme stellt die DATEV-Anwendung dar, die in vielen Kundenszenarien eingesetzt wird.
+Diese wird aus technischen Gründen meist auf dem Dateiserver installiert, kann jedoch bei größeren Anforderungen auch auf einer dedizierten VM betrieben werden, da sie SQL-Datenbanken mitbringt und entsprechende Ressourcen benötigt.
+Die Aktualisierung von DATEV erfordert eine koordinierte Vorgehensweise auf allen beteiligten Systemen und kann zu temporären Verbindungsunterbrechungen führen.
+Der Domänencontroller nimmt in diesem Aufbau eine zentrale Rolle ein, da er Benutzer, Gruppen und Gruppenrichtlinien für alle Systeme der Domäne bereitstellt und verwaltet.
+Erst nach seiner vollständigen Einrichtung können die anderen VMs der Domäne beitreten, sodass Zugriffsrechte und Gruppenrichtlinien wie vorgesehen greifen.
+Zudem bietet er die Möglichkeit, organisatorische Einheiten (OUs) anzulegen, um die Verwaltung von Computern, Servern und Benutzern zu strukturieren.
 
 Die bisherige manuelle Vorgehensweise erfordert eine Vielzahl von Einzelschritten, darunter: Vergabe statischer IP-Adressen, Umbenennung der Rechner, Einbindung zusätzlicher Festplatten, Erstellung von Standard-Benutzern und -Gruppen, Konfiguration von Gruppenrichtlinien sowie Vergabe und Freigabe von Ordnerberechtigungen. Zwar können Gruppenrichtlinien importiert werden, jedoch müssen deren Sicherheitskennungen (SIDs) an die neue Domäne angepasst werden, um die korrekte Funktionsweise sicherzustellen.
 
@@ -187,7 +205,19 @@ sysprep.exe /oobe /shutdown /generalize /unattend:C:\Windows\System32\Sysprep\un
 \end{verbatim}
 durchgeführt werden. Die resultierende VHDX-Datei (\texttt{Serverprep.vhdx}) dient als Template für die automatisierte Erstellung der zukünftigen VMs.
 
+
+Skript:
+
+
+fazit:
 Je nach Systemleistung kann so in 20--40 Minuten eine vollständige, funktionsfähige Basisumgebung bereitgestellt werden, die bisher mehrere Stunden manueller Arbeit erforderte.
+
+
+Verbesserungen:
+Das Skript kann noch angepasst werden damit man auch nur 2 oder 1 Server erstellen kann für sehr kleine Kunden. 
+Zudem würde eine Anpassung im hinblick auf zusätzlichen Speicher einer VM noch angenehm. Das könnte man ebenfalls über ein GUI lösen.
+Weitere Anpassungen am Terminalserver z.B. Lizenzserver konfigurieren etc.
+Anpassung des Skripts an den Failovercluster da es bis jetzt nur an einfachen hyper V getestet bzw entwickelt wurde.(vms fehlt eine rolle bzw eigenschafft)
 
 
 
