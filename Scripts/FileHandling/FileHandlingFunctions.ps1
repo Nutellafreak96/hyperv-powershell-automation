@@ -1,4 +1,9 @@
-﻿<#
+﻿#Funktion um einen Zeitstempel zu erstellen z.B. für Logs
+function Get-TimeStamp {
+    return "[{0:dd/MM/yy} {0:HH:mm:ss}]" -f (Get-Date)
+}
+
+<#
 .SYNOPSIS
 Creates directories for a customer's virtual machines and copies the prepared VHDX files.
 
@@ -22,7 +27,8 @@ function CreateCustomerDirectory {
     param(
         [string]$CustomerPath,
         [string]$CustomerName,
-        [string]$SourcePath
+        [string]$SourcePath,
+        [string]$Path
     )
 
 
@@ -38,6 +44,8 @@ function CreateCustomerDirectory {
 
     # Create the error log file
     New-Item -Name "LOG_File.txt" -Path "$($CustomerPath)\$($CustomerName)" -ItemType File | Out-Null
+
+    Write-Output "$(Get-TimeStamp) -- Skript startet mit dem kopieren der VHD(X)" | Out-File $Path -append
 
     # Copy the prepared VHDX files to the customer directories
     Copy-Item -Path "$($SourcePath)\Serverprep.vhdx" -Destination "$($CustomerPath)\$($CustomerName)\DC\Serverprep.vhdx"
