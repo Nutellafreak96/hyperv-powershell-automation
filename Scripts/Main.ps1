@@ -125,10 +125,7 @@ $LogFilePath = "$($KundeSpeicherort)\$($Kunde)\LOG_File.txt"
 
 <#Functions to Handle small things about VMs#>
 
-#Funktion um einen Zeitstempel zu erstellen z.B. für Logs
-function Get-TimeStamp {
-    return "[{0:dd/MM/yy} {0:HH:mm:ss}]" -f (Get-Date)
-}
+
 
 #Erstellen der VM´s
 function CreateVMs {
@@ -292,7 +289,7 @@ function ChangeAdminPasswords {
 
 
 #Erstellen des Ordners fuer die Vms des Kunden
-CreateCustomerDirectory  -CustomerPath $KundeSpeicherort -CustomerName $Kunde -SourcePath $DateienSpeicherort 
+CreateCustomerDirectory  -CustomerPath $KundeSpeicherort -CustomerName $Kunde -SourcePath $DateienSpeicherort  -Path $LogFilePath 
 Write-Output "$(Get-TimeStamp) -- Skript nach dem Erstellen der Ordnerstruktur und Kopieren der vhdx" | Out-File $LogFilePath -append
 
 #Erstelln der VMs
