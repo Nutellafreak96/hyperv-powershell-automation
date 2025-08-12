@@ -100,7 +100,7 @@
 
 Theorie:
 - PowerShell
-- Hyper V 
+- Hyper V / Failovercluster
     - %https://d1wqtxts1xzle7.cloudfront.net/67117145/Benchmarking_the_Performance_of_Microsof20210505-17699-j1sicg.pdf?1738414388=&response-content-disposition=inline%3B+filename%3DBenchmarking_the_Performance_of_Microsof.pdf&Expires=1754378862&Signature=RcQUcGdtIdVThfq~KQwpd1Mhlu1Gi7eJ0IHp-s3QmbQzw~IWOmBXHWxwhm7u-E8WV8BRwc39B13YzHA8qFK0~AdbZrPkfIzpR8uc-3WzoAa4NtFEUx0SMN~N7FYnls8y10jem9~FxcF6TszNB~j9SqSazGu2RjDbm3w09DbYWmmxE~2bJaAUU8cCSCZ9dMxGTVWkRPf68DcdPKp-NTvUdgMtPWVT~2O5SmrmWenthcI73SKH~D8SKrU3WZg8jNI731-B-Q8lxTeYDo8IBpf6J9r9atNdVYycWszi2hE2l0dXdJ8OQ-FBjR9SXcryqfrbkGvD6KhA9PWD0OlpL55NXQ__&Key-Pair-Id=APKAJLOHF5GGSLRBV4ZA
     - two variants hyper v on windows and on windows server
     - requires a processor with hardware assisted virtualizaton
@@ -211,14 +211,27 @@ Skript:
 
 fazit:
 Je nach Systemleistung kann so in 20--40 Minuten eine vollständige, funktionsfähige Basisumgebung bereitgestellt werden, die bisher mehrere Stunden manueller Arbeit erforderte.
+Skript hat eine Fehlermeldung, welche vom einrichten der Sessioncollection kommt. Das ändert erstmal nichts an der funktionalität des Terminal servers (bei tests mit dem dmain und test user nichts aufgefallen)
+ab und zu gibt es fehlermeldungen, dass remote verbindungen abbrechen. Jedoch ist bis jetzt keine merkbare änderung deswegen aufgefallen.
 
+Testserver 1:
+CPU INtel Xenon 1230v5 4/8 Kerne 3,7 GHz
+RAM  64GB (4x16) DIMM 2133 MHz
+SSD RAID (FTS PRAID EP400i SCSI)
+
+Konfig Zuhause:
+7800x3D (4,3-4,5 GHz)  8/16
+32GB DDR5 6000MT RAM
+2 TB M2 NVMe SSD PCIe 3 - 3500/3000 MB/s lesen/schreiben
 
 Verbesserungen:
 Das Skript kann noch angepasst werden damit man auch nur 2 oder 1 Server erstellen kann für sehr kleine Kunden. 
 Zudem würde eine Anpassung im hinblick auf zusätzlichen Speicher einer VM noch angenehm. Das könnte man ebenfalls über ein GUI lösen.
 Weitere Anpassungen am Terminalserver z.B. Lizenzserver konfigurieren etc.
 Anpassung des Skripts an den Failovercluster da es bis jetzt nur an einfachen hyper V getestet bzw entwickelt wurde.(vms fehlt eine rolle bzw eigenschafft)
-
+Anpassen der Wartezeit nach der installation des Domain Controller. im moment gelöst durch einen sleep, jedoch ist das unprofessionell und müsste anders gelöst werden.
+jedoch ist es schwer den boot einer windows maschine zu beobachten bzw abzuschätzen, weswegen es eine wartezeit von 6,5min gibt.
+Anlegen von usern über eine xml datei, sodass es direkt nach dem erstellen abgearbeitet werden kann.
 
 
 % Refs
