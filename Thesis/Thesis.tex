@@ -235,29 +235,29 @@ Passwörter von Active-Directory-Konten ließen sich nicht ohne Weiteres zurück
 Skript:
 
 
-fazit:
-Je nach Systemleistung kann so in 20--40 Minuten eine vollständige, funktionsfähige Basisumgebung bereitgestellt werden, die bisher mehrere Stunden manueller Arbeit erforderte.
-Skript hat eine Fehlermeldung, welche vom einrichten der Sessioncollection kommt. Das ändert erstmal nichts an der funktionalität des Terminal servers (bei tests mit dem dmain und test user nichts aufgefallen)
-ab und zu gibt es fehlermeldungen, dass remote verbindungen abbrechen. Jedoch ist bis jetzt keine merkbare änderung deswegen aufgefallen.
+\chapter{Fazit und Ausblick}
 
-Testserver 1:
-CPU INtel Xenon 1230v5 4/8 Kerne 3,7 GHz
-RAM  64GB (4x16) DIMM 2133 MHz
-SSD RAID (FTS PRAID EP400i SCSI)
+Im Rahmen dieser Arbeit wurde ein PowerShell-basiertes Automatisierungsskript entwickelt, das die Erstellung und Konfiguration von Windows-basierten virtuellen Maschinen in einer Hyper-V-Umgebung ermöglicht.  
+Die Ergebnisse der praktischen Tests zeigen, dass mit dem Skript eine vollständige und funktionsfähige Basisumgebung innerhalb von 20 bis 40 Minuten bereitgestellt werden kann – abhängig von der verfügbaren Systemleistung.  
+Damit konnte die für die manuelle Bereitstellung übliche Dauer von mehreren Stunden deutlich reduziert werden.  
+Während der Testphase traten lediglich kleinere Fehlermeldungen auf, beispielsweise im Zusammenhang mit der Einrichtung der Session Collection oder gelegentlichen Abbrüchen von Remoteverbindungen.  
+Diese hatten jedoch weder in den Testumgebungen mit Domänenanbindung noch im Betrieb mit Testbenutzern spürbare Auswirkungen auf die Funktionalität.
 
-Konfig Zuhause:
-7800x3D (4,3-4,5 GHz)  8/16
-32GB DDR5 6000MT RAM
-2 TB M2 NVMe SSD PCIe 3 - 3500/3000 MB/s lesen/schreiben
+Die durchgeführten Tests auf unterschiedlichen Hardwarekonfigurationen – sowohl auf einem Server mit Intel Xeon~E3-1230\,v5, 64\,GB RAM und SSD-RAID als auch auf einem leistungsstarken Desktop-System mit AMD~Ryzen~7\,7800X3D, 32\,GB DDR5-RAM und NVMe-SSD – bestätigen die hohe Flexibilität und Anpassungsfähigkeit des Skripts.  
+Dabei zeigte sich, dass die Ausführungszeit maßgeblich von CPU- und Speicherperformance sowie der I/O-Leistung des Speichersystems beeinflusst wird.
 
-Verbesserungen:
-Das Skript kann noch angepasst werden damit man auch nur 2 oder 1 Server erstellen kann für sehr kleine Kunden. 
-Zudem würde eine Anpassung im hinblick auf zusätzlichen Speicher einer VM noch angenehm. Das könnte man ebenfalls über ein GUI lösen.
-Weitere Anpassungen am Terminalserver z.B. Lizenzserver konfigurieren etc.
-Anpassung des Skripts an den Failovercluster da es bis jetzt nur an einfachen hyper V getestet bzw entwickelt wurde.(vms fehlt eine rolle bzw eigenschafft)
-Anpassen der Wartezeit nach der installation des Domain Controller. im moment gelöst durch einen sleep, jedoch ist das unprofessionell und müsste anders gelöst werden.
-jedoch ist es schwer den boot einer windows maschine zu beobachten bzw abzuschätzen, weswegen es eine wartezeit von 6,5min gibt.
-Anlegen von usern über eine xml datei, sodass es direkt nach dem erstellen abgearbeitet werden kann.
+Trotz des erreichten Funktionsumfangs bestehen mehrere Potenziale für zukünftige Verbesserungen.  
+Hierzu zählt die Möglichkeit, für kleinere Kundenumgebungen nur ein oder zwei Server bereitzustellen, wodurch Ressourcen und Zeit eingespart werden könnten.  
+Eine flexible Anpassung des der virtuellen Maschine zugewiesenen Speichers – idealerweise über eine grafische Benutzeroberfläche (\textit{GUI}) – würde zudem die Bedienbarkeit und den Einsatzbereich erweitern.  
+Auch die vollständige Automatisierung zusätzlicher Terminalserver-Konfigurationen, wie etwa die Lizenzserver-Einrichtung, könnte den manuellen Administrationsaufwand weiter reduzieren.  
+
+Für den Einsatz in hochverfügbaren Umgebungen wäre eine Anpassung an Failover-Cluster-Architekturen erforderlich.  
+Dies erfordert die Erweiterung des Skripts um clusterrelevante Rollen und Eigenschaften, da es bislang ausschließlich in Einzelhost-Szenarien getestet wurde.  
+Ein weiteres Optimierungspotenzial liegt in der Ablösung der derzeitigen statischen Wartezeit nach der Installation des Domänencontrollers durch ein dynamisches, ereignisgesteuertes Verfahren, um die Bereitstellungsdauer zu verkürzen und die Professionalität der Umsetzung zu erhöhen.  
+Darüber hinaus könnte die Benutzeranlage durch den Import vordefinierter XML-Dateien automatisiert werden, was die Konsistenz und Wiederholbarkeit der Konfiguration verbessern würde.
+
+Insgesamt zeigt die Arbeit, dass durch den gezielten Einsatz von PowerShell-Skripten in Verbindung mit Hyper-V eine deutliche Effizienzsteigerung in der Serverbereitstellung erreicht werden kann.  
+Die skizzierten Verbesserungsansätze bieten darüber hinaus ein hohes Potenzial für zukünftige Entwicklungen, insbesondere im Hinblick auf Flexibilität, Skalierbarkeit und Integration in komplexere IT-Infrastrukturen.
 
 
 % Refs
