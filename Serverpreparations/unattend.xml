@@ -61,5 +61,5 @@
             <UILanguageFallback>en-US</UILanguageFallback>
         </component>
     </settings>
-    <cpi:offlineImage cpi:source="wim:g:/winserver2025/sources/install.wim#Windows Server 2025 SERVERDATACENTERCORE" xmlns:cpi="urn:schemas-microsoft-com:cpi" />
+    <cpi:offlineImage cpi:source="wim:d:/hyperv/win%20server%202025/sources/install.wim#Windows Server 2025 SERVERSTANDARD" xmlns:cpi="urn:schemas-microsoft-com:cpi" />
 </unattend>
