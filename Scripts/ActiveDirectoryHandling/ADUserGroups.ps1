@@ -66,7 +66,7 @@ New-ADGroup -Name "TSUser" -GroupScope DomainLocal -DisplayName "TSUSer" -Path "
 New-ADGroup -Name "Daten_LW" -GroupScope DomainLocal -DisplayName "Daten_LW" -Path "OU=Groups,$($Using:OUPathname)"
 New-ADGroup -Name "Scan_LW" -GroupScope DomainLocal -DisplayName "Scan_LW" -Path "OU=Groups,$($Using:OUPathname)"
 New-ADGroup -Name "GF" -GroupScope DomainLocal -DisplayName "GF" -Path "OU=Groups,$($Using:OUPathname)"
-New-ADGroup -Name "GF_LW" -GroupScope DomainLocal -DisplayName "GF_LW" -Path "OU=Groups,$($Using:OUPathname)"
+#New-ADGroup -Name "GF_LW" -GroupScope DomainLocal -DisplayName "GF_LW" -Path "OU=Groups,$($Using:OUPathname)"
 
 
 # --- Assign Users to Groups ---
