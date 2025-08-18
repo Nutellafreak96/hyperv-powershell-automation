@@ -160,8 +160,9 @@ $GF.AddaccessRule($ACE)
 Set-Acl -Path "D:\Freigaben\GF\" -AclObject $GF
 
 #Group: GF_LW
+
 $GF = Get-Acl -Path "D:\Freigaben\GF\"
-$identity = "GF_LW"
+$identity = "GF"
 $rights = "Modify, Synchronize"											 
 $inheritance = "ContainerInherit, ObjectInherit" 				 
 $propagation = "None" 											 
