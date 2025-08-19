@@ -257,9 +257,6 @@ Das vorbereitete VHD(X)-Template wird an den vorgesehenen Speicherort kopiert, a
 
 Vor dem Einstieg in weitere Schritte war eine zusätzliche Anpassung hinsichtlich der Netzwerkadapter erforderlich. Da die Systeme über TeamViewer verwaltet werden, musste für den Netzwerkadapter jeder VM eine statische MAC-Adresse vergeben werden. Dies verhindert, dass die Systeme aus der Geräteliste in TeamViewer verschwinden. Um die MAC-Adresse zuweisen zu können, wird die VM einmalig gestartet, sodass Windows eine temporäre Adresse generiert. Anschließend wird die Maschine heruntergefahren und in Hyper-V die MAC-Adresse auf statisch gesetzt. Danach kann der reguläre Arbeitsablauf fortgesetzt werden.
 
-Perfekt, ich sehe worauf du hinauswillst 👍. Ich habe auch diesen Text so umformuliert, dass er wissenschaftlich-nüchtern, aus der Perspektive einer Prozessbeschreibung wirkt, gleichzeitig aber weiterhin dein Vorgehen beschreibt. Das Ziel ist, dass es wie ein kohärenter Abschnitt in einer wissenschaftlichen Arbeit klingt, nicht wie eine Schritt-für-Schritt-Anleitung.
-Wissenschaftlich überarbeitete Fassung
-
 Zur Verwaltung der Kunden-VMs wurde eine einheitliche Ordnerstruktur implementiert. Hierfür wurde ein eigenes Skript (FilehandlingFunctions) entwickelt, das für jeden Kunden automatisch identische Verzeichnisse anlegt, wobei die Struktur jeweils unter dem individuellen Kundennamen eingetragen wird. Innerhalb dieser Hierarchie werden die vorbereiteten VHD(X)-Dateien aus dem zentralen Vorbereitungsverzeichnis in die entsprechenden Kundenordner kopiert. Vor der Erstellung überprüft das Skript, ob die betreffende Struktur bereits vorhanden ist, um redundante Duplikate zu vermeiden. Die Umsetzung basiert auf einfachem File Handling, wobei neue Verzeichnisse mit dem PowerShell-Befehl New-Item erzeugt werden.
 
 Neben der Verzeichnisstruktur wird für jeden Kunden zusätzlich ein Logfile eingerichtet. Dieses ermöglicht sowohl die Nachverfolgung des Skriptablaufs als auch die Identifikation möglicher Fehlerquellen oder Prozessunterbrechungen. Da das VHD(X)-Template für die VM-Erstellung standardmäßig die Datei unattend.xml enthält, in der Administratorpasswörter hinterlegt sind, entsteht ein nicht zu vernachlässigendes Sicherheitsrisiko. Um dies zu vermeiden, wird die unattend.xml nach erfolgreicher Erstellung der Kundenordner sowie der zugehörigen VM mithilfe einer im Skript implementierten Funktion wieder gelöscht.
@@ -296,6 +293,7 @@ Die Installation der dazugehörigen Rollen konnte nicht vollständig über Power
 
 Zum Abschluss wurden sämtliche VMs einmalig neu gestartet, um einen einheitlichen Betriebszustand herzustellen und alle Konfigurationen sowie Änderungen, die einen Neustart erforderten, gültig zu machen. Lediglich beim Terminalserver besteht eine geringe Wahrscheinlichkeit, dass ein Dienst nach dem Neustart nicht ordnungsgemäß ausgeführt wird. Da im Anschluss an die Grundkonfiguration jedoch weitere Installationen und Anpassungen erfolgen, wird dieses Restrisiko als vernachlässigbar eingestuft.
 
+Das Skript verfügt darüber hinaus über ein grafisches Benutzerinterface (GUI), welches die zu Beginn der Einrichtung erforderlichen Eingaben für die Erstellung der virtuellen Maschinen zentral abfragt. Dadurch werden die notwendigen Informationen bereits im Vorfeld gesammelt und automatisch in den weiteren Prozess eingebunden. Dies führt zu einer deutlichen Zeitersparnis im Vergleich zur manuellen Erstellung, da Verzögerungen durch unbeaufsichtigte Eingabefenster, beispielsweise wenn parallel andere Tätigkeiten ausgeführt werden, vermieden werden können.
 ---
 Test:
 
@@ -414,21 +412,7 @@ Für den Einsatz in hochverfügbaren Umgebungen wäre eine Anpassung an Failover
 Insgesamt zeigt die Arbeit, dass durch den gezielten Einsatz von PowerShell-Skripten in Verbindung mit Hyper-V eine deutliche Effizienzsteigerung in der Serverbereitstellung erreicht werden kann. Die durchgeführten Tests auf unterschiedlichen Hardwarekonfigurationen belegen dabei die Flexibilität und Anpassungsfähigkeit des Skripts. Die skizzierten Verbesserungsansätze bieten darüber hinaus ein hohes Potenzial für zukünftige Entwicklungen, insbesondere im Hinblick auf Flexibilität, Skalierbarkeit und Integration in komplexere IT-Infrastrukturen.
 \newpage
 
-Text:\\
 
-Idee:
-Automatisierung einer Serverstruktur in Hyper-V. Dabei wird berücksichtigt, dass es einen Domain Controller, einen Fileserver und einen Terminalserver gibt. Die Erstellung soll außerdem das Anlegen von freigegebenen Ordnern und Gruppenrichtlinien sowie die Einrichtung eines Domain Admins und eines Test Users für die Firma beinhalten. Zudem soll die Installation von Windows durch ein VM-Template umgangen werden.
-
-Stand in der Firma:
-Derzeit wird alles manuell über die GUI in Windows erledigt. Zusätzlich wird auf jeder VM Windows separat installiert. Selbst Gruppenrichtlinien, die man per PowerShell erstellen kann, oder das Anlegen von Usern und Gruppen werden über die GUI durchgeführt. Das ist insbesondere heutzutage unprofessionell, da Windows zahlreiche Möglichkeiten zur Automatisierung bietet.
-
-Vorgehensweise:
-Der erste Schritt für das Skript ist die Erstellung eines VM-Templates. Dieses wird einmalig manuell erstellt, und dabei muss Windows Server nur ein einziges Mal installiert werden. Wichtig ist außerdem die Erstellung einer Antwortdatei (unattend.xml) im XML-Format. Diese lässt sich problemlos mit der ISO von Windows Server und dem Windows-eigenen Windows System Image Manager erzeugen. Dazu mountet man die ISO und lädt im Windows System Image Manager das Image (install.wim) aus der ISO. Anschließend wählt man die gewünschte Version von Windows Server, zum Beispiel Server Standard oder Server Datacenter. Für die Kunden-VMs wählen wir Server Standard. Bevor wir eine Antwortdatei erstellen können, muss zunächst eine Katalogdatei erzeugt werden. Sobald diese vorliegt, kann die Antwortdatei erstellt werden.
-
-Alle relevanten Optionen finden sich im Windows Image Fenster unter „Microsoft-Windows-Shell-Setup“. Wichtig ist vor allem der Unterpunkt „OOBE“, um viele Schritte bei der Ersteinrichtung von Windows zu überspringen. Zusätzlich lässt sich dort auch ein weiterer lokaler Benutzer im Abschnitt „UserAccounts“ anlegen. Um eine Option in die Antwortdatei einzufügen, wählt man per Rechtsklick den passenden Teil der Antwortdatei aus. Dies ist wichtig, da OOBE verschiedene Phasen hat, in denen unterschiedliche Konfigurationen greifen. Den OOBE-Abschnitt können wir nur unter oobeSystem einordnen, daher haben wir hier keine Wahl.
-
-Tests:
-Beim testen der Geschwindigkeit auf verschiedenen Maschinen wird die VM mit 2 Kernen und 2GB ram erstellt.
 
 % Refs
 \bibliography{ref}
