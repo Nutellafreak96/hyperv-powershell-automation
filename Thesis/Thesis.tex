@@ -237,68 +237,137 @@ Passwörter von Active-Directory-Konten ließen sich nicht ohne Weiteres zurück
 
 ---
 
-Skript:
+Test:
 
+\chapter{Testumgebungen}
+
+Zur Validierung des entwickelten Skripts wurden Testdurchläufe in zwei unterschiedlichen Umgebungen durchgeführt. Dadurch kann die Stabilität und Portabilität der Lösung besser eingeschätzt werden, da sowohl die eingesetzte Hardware als auch die Software variieren.
+
+\section{Hardware- und Softwarekonfiguration}
+
+\begin{table}[H]
+\centering
+\caption{Hardware- und Softwarekonfiguration der Testumgebungen}
+\label{tab:hardware_config}
+\begin{tabular}{|l|l|l|}
+\hline
+\textbf{Komponente} & \textbf{Testumgebung Zuhause} & \textbf{Testumgebung Server} \ \hline
+CPU & AMD Ryzen 7 7800X3D, 8 Kerne / 16 Threads, 4,3--4,5GHz & Intel Xeon E3-1230 v5, 4 Kerne / 8 Threads, 3,7GHz \ \hline
+RAM & 32GB DDR5-6000 & 64GB DDR4-2133 (4 $\times$ 16GB) \ \hline
+Speicher & NVMe-SSD, 2TB, PCIe 3.0, 3500MB/s Lesen, 3000MB/s Schreiben & SSD-RAID (Fujitsu PRAID EP400i, SCSI-Interface) \ \hline
+PowerShell-Version & 7.5.2 (Core Edition) & 5.1 \ \hline
+Windows-Version & Windows 11 Pro & Windows Server 2025 Standard \ \hline
+\end{tabular}
+\end{table}
+
+\section{Virtuelle Maschinen}
+
+Die virtuellen Maschinen wurden in beiden Testumgebungen identisch konfiguriert:
+
+\begin{itemize}
+\item \textbf{CPU-Kerne:} 2
+\item \textbf{RAM:} 2GB pro VM
+\item \textbf{Zusätzliche VHDX:} 35MB auf dem File Server
+\end{itemize}
+
+\chapter{Testmethodik}
+
+Zur Überprüfung des entwickelten Skripts wurden mehrere Testdurchläufe auf den beschriebenen Umgebungen durchgeführt. Ziel war die Validierung der Funktionsfähigkeit, Stabilität und Ausführungsdauer des Automatisierungsprozesses. Der Fokus lag dabei nicht auf einer detaillierten funktionalen Prüfung der konfigurierten Dienste, sondern auf der wiederholbaren und automatisierten Erstellung der virtuellen Maschinen.
+
+\section{Vorgehensweise}
+
+\begin{itemize}
+\item Das Skript wurde in beiden Umgebungen jeweils \textbf{fünfmal} ausgeführt.
+\item Während der Ausführung wurde das integrierte Logging verwendet, um die Dauer der Testläufe zu protokollieren.
+\item Fehler und Auffälligkeiten im Ablauf wurden dokumentiert.
+\end{itemize}
+
+\section{Bewertungskriterien}
+
+Die Testdurchläufe wurden anhand folgender Kriterien bewertet:
+
+\begin{itemize}
+\item \textbf{Ausführungsdauer:} Zeit, die das Skript für Erstellung und Grundkonfiguration der VMs benötigt.
+\item \textbf{Stabilität:} Fähigkeit des Skripts, aufeinanderfolgende Durchläufe fehlerfrei zu absolvieren.
+\item \textbf{Reproduzierbarkeit:} Konsistenz der Ergebnisse zwischen den Durchläufen und Umgebungen.
+\end{itemize}
+
+\section{Zielsetzung}
+
+Die Testmethodik dient primär der Validierung des Automatisierungsprozesses und nicht einer funktionalen Überprüfung der konfigurierten Rollen und Dienste. Mehrfache Durchläufe ermöglichen die Erfassung von Abweichungen in der Ausführungsdauer und die Bewertung der Zuverlässigkeit des Skripts.
+
+\chapter{Testergebnisse}
+
+\section{Testumgebung Zuhause}
+
+\begin{table}[h!]
+\centering
+\caption{Zeitübersicht der Testdurchläufe – Home (relative Zeiten)}
+\label{tab:home_times}
+\begin{tabular}{|l|l|l|l|l|l|}
+\hline
+\textbf{Schritt} & \textbf{Log 1} & \textbf{Log 2} & \textbf{Log 3} & \textbf{Log 4} & \textbf{Log 5} \ \hline
+Start & 15:44:20 & 17:30:04 & 18:16:06 & 18:47:11 & 20:53:45 \
+Kopieren fertig & 0:00:26 & 0:00:31 & 0:00:32 & 0:00:31 & 0:00:32 \
+VMs erstellt & 0:00:30 & 0:00:36 & 0:00:36 & 0:00:34 & 0:00:36 \
+VMs angepasst & 0:00:31 & 0:00:36 & 0:00:36 & 0:00:35 & 0:00:37 \
+VMs gestartet & 0:00:34 & 0:00:39 & 0:00:39 & 0:00:37 & 0:00:40 \
+Windows initialisierung fertig & 0:01:13 & 0:01:34 & 0:01:30 & 0:01:28 & 0:01:32 \
+... & ... & ... & ... & ... & ... \
+\textbf{Gesamtzeit} & 0:18:40 & 0:18:43 & 0:19:10 & 0:18:33 & 0:19:04 \ \hline
+\end{tabular}
+\end{table}
+
+\section{Testumgebung Server}
+
+\begin{table}[H]
+\centering
+\caption{Zeitübersicht der Testdurchläufe – Server (relative Zeiten)}
+\label{tab:server_times}
+\begin{tabular}{|l|l|l|l|l|l|}
+\hline
+\textbf{Schritt} & \textbf{Log 1} & \textbf{Log 2} & \textbf{Log 3} & \textbf{Log 4} & \textbf{Log 5} \ \hline
+Start & 09:24:01 & 08:46:27 & 09:42:02 & 11:24:36 & 12:37:53 \
+Kopieren fertig & 0:06:02 & 0:06:03 & 0:04:53 & 0:04:53 & 0:04:52 \
+VMs erstellt & 0:06:15 & 0:06:14 & 0:05:03 & 0:05:04 & 0:05:04 \
+VMs angepasst & 0:06:15 & 0:06:14 & 0:05:04 & 0:05:04 & 0:05:04 \
+VMs gestartet & 0:06:20 & 0:06:19 & 0:05:09 & 0:05:09 & 0:05:09 \
+Windows initialisierung fertig & 0:10:52 & 0:12:12 & 0:09:52 & 0:11:17 & 0:10:21 \
+... & ... & ... & ... & ... & ... \
+\textbf{Gesamtzeit} & 0:43:11 & 0:43:29 & 1:09:41 & 0:43:08 & 0:41:37 \ \hline
+\end{tabular}
+\end{table}
 
 \chapter{Fazit und Ausblick}
 
-Im Rahmen dieser Arbeit wurde ein PowerShell-basiertes Automatisierungsskript entwickelt, das die Erstellung und Konfiguration von Windows-basierten virtuellen Maschinen in einer Hyper-V-Umgebung ermöglicht.  
-Die Ergebnisse der praktischen Tests zeigen, dass mit dem Skript eine vollständige und funktionsfähige Basisumgebung innerhalb von 20 bis 40 Minuten bereitgestellt werden kann – abhängig von der verfügbaren Systemleistung.  
-Damit konnte die für die manuelle Bereitstellung übliche Dauer von mehreren Stunden deutlich reduziert werden.  
-Während der Testphase traten lediglich kleinere Fehlermeldungen auf, beispielsweise im Zusammenhang mit der Einrichtung der Session Collection oder gelegentlichen Abbrüchen von Remoteverbindungen.  
-Diese hatten jedoch weder in den Testumgebungen mit Domänenanbindung noch im Betrieb mit Testbenutzern spürbare Auswirkungen auf die Funktionalität.
+Im Rahmen dieser Arbeit wurde ein PowerShell-basiertes Automatisierungsskript entwickelt, das die Erstellung und Konfiguration von Windows-basierten virtuellen Maschinen in einer Hyper-V-Umgebung ermöglicht.
+Die Ergebnisse der durchgeführten Testdurchläufe bestätigen die Funktionsfähigkeit und Stabilität des Skripts. Die Tests erfolgten in zwei unterschiedlichen Umgebungen: einer leistungsstarken Desktop-Konfiguration mit AMD Ryzen 7 7800X3D, 32 GB RAM und NVMe-SSD sowie einem Server mit Intel Xeon E3-1230 v5, 64 GB RAM und SSD-RAID. Die VMs wurden in beiden Umgebungen identisch mit 2 CPU-Kernen, 2 GB RAM und einer zusätzlichen 35 MB VHDX-Datei konfiguriert.
 
-Die durchgeführten Tests auf unterschiedlichen Hardwarekonfigurationen – sowohl auf einem Server mit Intel Xeon~E3-1230\,v5, 64\,GB RAM und SSD-RAID als auch auf einem leistungsstarken Desktop-System mit AMD~Ryzen~7\,7800X3D, 32\,GB DDR5-RAM und NVMe-SSD – bestätigen die hohe Flexibilität und Anpassungsfähigkeit des Skripts.  
-Dabei zeigte sich, dass die Ausführungszeit maßgeblich von CPU- und Speicherperformance sowie der I/O-Leistung des Speichersystems beeinflusst wird.
+Die Testdurchläufe zeigten, dass die Bereitstellung der Basisumgebung in der Desktop-Umgebung innerhalb von etwa 18 bis 19 Minuten abgeschlossen werden konnte. Auf dem Server variierte die Dauer aufgrund der unterschiedlichen Hardware und PowerShell-Version zwischen ca. 41 und 69 Minuten, wobei die meisten Durchläufe um 43 Minuten lagen. Die Unterschiede erklären sich vor allem durch die I/O-Leistung des Speichersystems, die CPU-Auslastung und die PowerShell-Version.
 
-Trotz des erreichten Funktionsumfangs bestehen mehrere Potenziale für zukünftige Verbesserungen.  
-Hierzu zählt die Möglichkeit, für kleinere Kundenumgebungen nur ein oder zwei Server bereitzustellen, wodurch Ressourcen und Zeit eingespart werden könnten.  
-Eine flexible Anpassung des der virtuellen Maschine zugewiesenen Speichers – idealerweise über eine grafische Benutzeroberfläche (\textit{GUI}) – würde zudem die Bedienbarkeit und den Einsatzbereich erweitern.  
-Auch die vollständige Automatisierung zusätzlicher Terminalserver-Konfigurationen, wie etwa die Lizenzserver-Einrichtung, könnte den manuellen Administrationsaufwand weiter reduzieren.  
+Während der Tests traten lediglich kleinere Fehlermeldungen auf, beispielsweise im Zusammenhang mit der Einrichtung der Session Collection oder gelegentlichen Abbrüchen von Remoteverbindungen. Diese hatten jedoch weder in den Testumgebungen mit Domänenanbindung noch im Betrieb mit Testbenutzern spürbare Auswirkungen auf die Funktionalität. Insgesamt zeigten die mehrfachen Durchläufe eine hohe Reproduzierbarkeit und Stabilität des Skripts.
 
-Für den Einsatz in hochverfügbaren Umgebungen wäre eine Anpassung an Failover-Cluster-Architekturen erforderlich.  
-Dies erfordert die Erweiterung des Skripts um clusterrelevante Rollen und Eigenschaften, da es bislang ausschließlich in Einzelhost-Szenarien getestet wurde.  
-Ein weiteres Optimierungspotenzial liegt in der Ablösung der derzeitigen statischen Wartezeit nach der Installation des Domänencontrollers durch ein dynamisches, ereignisgesteuertes Verfahren, um die Bereitstellungsdauer zu verkürzen und die Professionalität der Umsetzung zu erhöhen.  
-Darüber hinaus könnte die Benutzeranlage durch den Import vordefinierter XML-Dateien automatisiert werden, was die Konsistenz und Wiederholbarkeit der Konfiguration verbessern würde.
+Trotz des erreichten Funktionsumfangs bestehen mehrere Potenziale für zukünftige Verbesserungen. Hierzu zählt die Möglichkeit, für kleinere Kundenumgebungen nur ein oder zwei Server bereitzustellen, wodurch Ressourcen und Zeit eingespart werden könnten. Eine flexible Anpassung des der virtuellen Maschine zugewiesenen Speichers – idealerweise über eine grafische Benutzeroberfläche (\textit{GUI}) – würde zudem die Bedienbarkeit und den Einsatzbereich erweitern. Auch die vollständige Automatisierung zusätzlicher Terminalserver-Konfigurationen, wie etwa die Lizenzserver-Einrichtung, könnte den manuellen Administrationsaufwand weiter reduzieren.
 
-Insgesamt zeigt die Arbeit, dass durch den gezielten Einsatz von PowerShell-Skripten in Verbindung mit Hyper-V eine deutliche Effizienzsteigerung in der Serverbereitstellung erreicht werden kann.  
-Die skizzierten Verbesserungsansätze bieten darüber hinaus ein hohes Potenzial für zukünftige Entwicklungen, insbesondere im Hinblick auf Flexibilität, Skalierbarkeit und Integration in komplexere IT-Infrastrukturen.
+Für den Einsatz in hochverfügbaren Umgebungen wäre eine Anpassung an Failover-Cluster-Architekturen erforderlich. Dies erfordert die Erweiterung des Skripts um clusterrelevante Rollen und Eigenschaften, da es bislang ausschließlich in Einzelhost-Szenarien getestet wurde. Ein weiteres Optimierungspotenzial liegt in der Ablösung der derzeitigen statischen Wartezeit nach der Installation des Domänencontrollers durch ein dynamisches, ereignisgesteuertes Verfahren, um die Bereitstellungsdauer zu verkürzen und die Professionalität der Umsetzung zu erhöhen. Darüber hinaus könnte die Benutzeranlage durch den Import vordefinierter XML-Dateien automatisiert werden, was die Konsistenz und Wiederholbarkeit der Konfiguration verbessern würde.
 
+Insgesamt zeigt die Arbeit, dass durch den gezielten Einsatz von PowerShell-Skripten in Verbindung mit Hyper-V eine deutliche Effizienzsteigerung in der Serverbereitstellung erreicht werden kann. Die durchgeführten Tests auf unterschiedlichen Hardwarekonfigurationen belegen dabei die Flexibilität und Anpassungsfähigkeit des Skripts. Die skizzierten Verbesserungsansätze bieten darüber hinaus ein hohes Potenzial für zukünftige Entwicklungen, insbesondere im Hinblick auf Flexibilität, Skalierbarkeit und Integration in komplexere IT-Infrastrukturen.
 \newpage
 
 Text:\\
 
 Idee:
-Automatisieren einer Serverstruktur in Hyper V. Dabei wird bedacht, dass es einen Domain Controller, ein Fileserver und ein Terminalserver gibt. Die Erstellung soll ebenfalls das erstellen von freigegebenen Ordnern und Gruppenrichtlinien sowie ein Domain Admin und Test User für die Firma beinhalten. Zudem soll die Installation von Windows durch ein VM Template umgangen werden.
+Automatisierung einer Serverstruktur in Hyper-V. Dabei wird berücksichtigt, dass es einen Domain Controller, einen Fileserver und einen Terminalserver gibt. Die Erstellung soll außerdem das Anlegen von freigegebenen Ordnern und Gruppenrichtlinien sowie die Einrichtung eines Domain Admins und eines Test Users für die Firma beinhalten. Zudem soll die Installation von Windows durch ein VM-Template umgangen werden.
 
 Stand in der Firma:
-Alles wird händisch über die GUI in Windows gemacht. Zudem wird auf jeder VM Windows installiert. Selbst Gruppenrichtlinien, welche man über Powershell erstellen kann oder User/Gruppen werden über Powershell erstellt. Das ist, vor allem, heutzutage unprofessionell mit den Möglichkeiten die Windows einem Bietet. 
+Derzeit wird alles manuell über die GUI in Windows erledigt. Zusätzlich wird auf jeder VM Windows separat installiert. Selbst Gruppenrichtlinien, die man per PowerShell erstellen kann, oder das Anlegen von Usern und Gruppen werden über die GUI durchgeführt. Das ist insbesondere heutzutage unprofessionell, da Windows zahlreiche Möglichkeiten zur Automatisierung bietet.
 
 Vorgehensweise:
-Der erste Schritt für das Skript ist natürlich die Erstellung eines VM Templates. Das wird einmalig händisch erstellt und dabei muss man auch nur einmal Windows Server installieren. Was ebenfalls wichtig ist, ist das erstellen einer Antwortdatei (unattend file) im XML Format. Das kann man ohne Problem mit der ISO von Windows Server und dem Windows eigenen Windows System Image manager machen. Man mountet die Iso und kann dann im Windows System Image Manager das Image (install.wim) aus der iso laden. Mann muss nur seine Gewünsch Version von Windows Srer auswählen wi z.b. ServerStandard oder Server Datavcenter. ir wälen für die Knden VM ServerStandard und müssen nun eine Kaqtalogdatei erstellen lassn bevor wir eine Antwortdatei erstellen können. Ist die KAalogdatei fertig können wir eine neue antwort datei erstellen.  Alles was wir brauchen finden wir im Windows Image Fester unter Microsoft-Shell-Stup. Wichtig ist der utnerpunkt OOBe um viele Sachen bei der Window ersteinrichtung zu überspringen. Zusätzlich können wir auch noch einen zusätzlcihen lokalen user erstellen im unterpunkt UserAccouts. Um die Optionen der Antwortdatei hinzuzufügen muss man mit rechtsklick auswählen in welchen teil der antwortdatei man das schreiben möchte. Das ist wichtig, denn der oobe von Windows ha verschiedene stadien in denen verschiedene sachen eingerichtet werden. OOBE können wir jedoch nur unter oobeSystem einordnen, deswegen haben wir da auch keine Wahl.
-Hat man die XML erstellt, was man neben der Installation von Windows Server hervorragend machen kann, so muss man nach der Installation von Windows Server die Vergabe des Adminpasswortes mit der Tastenkombination STRG+Shift+F3 umgehen. Damit startet man Windows in den Audit Modus. In diesem Modus kann man sich die Windows-Installation so anpassen wie man es benötigt. Für das Skript ist es nur wichtig, dass der lokale Administrator ein Passwort hat, man zusätzlich einen lokalen Admin erstellt und man jegliche Einstellungen bei der ersten Benutzung mit der XML Datei überspringt. In der XML des GitHub Projekts wird noch zusätzlich das Sprachenlayout auf Deutsch gestellt. Das einmalige installieren auf einem guten Rechner oder Server dauert dann einmalig 5-10min.
-Diese XML schreibt man dann in den Pfad indem auch das Systemvorbereitungstool Sysprep von Windows liegt. Dieses liegt in der Regel unter  c-windows-system32-sysprep. Wenn dort die unattend.xml (anderer Name kann auch gewählt werden) abgelegt oder angelegt wurde, dann kann mit der Administrator Eingabeaufforderung (CMD)  Sysprep mit den Parametern oobe, shutdown, generalize und unattend:(Pfad der XML) ausgeführt werden. Die erstellte VM wird die Installation generalisieren d.h. die Installation unabhängig von der VM machen. Somit kann die VM oder besser gesagt die vhd(x) der VM kopiert und wiederverwendet werden ohne das später Probleme zwischen den SID der Adminbenutzer der einzelnen VM auftreten. Nachdem die Installation generalisiert wurde sollte man die zugehörige VM nicht starten solange man die vhd(x) nicht kopiert hat. Denn sonst macht man seine Generalisierung zunichte.
-Nun gehen wir in den nächsten Schritt: die Erstellung von VMS mittels Powershell. Den Ablauf zum manuellen erstellen kennt man schon sehr gut auch durch andere Virtualisierungs Möglichkeiten. Man gibt der VM einen Namen, einen Speicherort, die Menge an RAM, einen Netzwerkadapter, die Anzahl an CPU Kernen.und die größe der Festplatte die für die Bootpartition, Windows etc. Da wir schon eine vhdx für die Bootpartition haben können wir das überspringen. Der Fileserver braucht noch zusätzlich eine Festplatte um die Daten der Nutzer zu speichern. Diese wird beim erstellen der VM miterstellt und beim FS gemountet. Sonst müssen wir über Powershell nur das machen was wir auch mit der GUI machen würden. Wir kopieren das vhd(x) Template an den Ort wo die VM gespeichert werden soll und geben den Pfad, sowie einen Namen für die VM an. Nachdem erstellen weisen wir der VM die Menge an RAM und CPU Kernen hinzu und dann ist die Erstellung fertig und die VM kann gestartet werden. 
-Nun können wir alles was wir brauchen in einer VM erstelllen und Testen. Dabei ist das vorgehen immer das selbe. Wir testen wie man das manuell macht und dann schauen wir wie wir genau das selbe Ergebnis erzielen nur mit PowerShell.
-Bevor wir zum nächsten Schritt voranschreiten muss noch eine kleine Sache für die NEtzwerkadapter der Vm eingestellt werden. Da die Maschinen über TeamViewer angesteuert werden muss die MAC Adresse des Netzwerkadapters der VM statisch sein. Sonst verschwindet der Server in der Liste der Hinzugefügten Geräte in TeamViewer. Dafür muss die VM einmal gestartet werden und in Windows booten damit der NEtzwerkadapter eine MAC addresse bekommt. Dann wird die VM heruntergefahren in Hyperv die mac addresse auf statisch gesetzt und dann kann man wieder normal damit weiter arbeiten.
-So nachdem wir nun wissen wie man eine VM mit PowerShell erstellt müssen wir auch für die Kunden eine Ordnerstruktur erschaffen damit man die VM ordentlich trennen kann. Dafür schreiben wir ein kleines Skript(FilehandlingFunctions), was wir aufrufen um für jeden Kunden die gleiche Ordnerstruktur aufzubauen nur mit dem unterschied, dass jeder Kunde seine eigene Struktur unter seinem namen hat. In der Struktur werden die vhd(x) aus dem Vorbereitungsordner in die unterordner der Kundenstruktur kopiert. Bevor jedoch diese Ordnerstruktur errichtet wird muss überprüft werden ob diese nicht schon existiert. Das ist recht simples file handling und mit NEw-Item können wir auch ganz einfach neue Ordner erstellen. Zudem bekommt jede Kundenstruktur auch ihr eigenes Logfile in das wir schreiben können um fehler zu entdecken oder zu wissen wo das SKript gerade ist oder es hängen bleibt. 
-Da wir ein vhd(x) template nutzen um VM zu erstellen wird es in diesen Installationen auch immer die unattend.xml mit den Adminpasswörtern geben. Diese sind ein Sicherheitsrisiko, welches vermieden werden können und deswegen wird nach dem Erstellen der Ordnerstruktur des Kunden und nach dem erstellen der VM die unattend Datei in den VMs, mithilfe einer Function aus dem Skript FileHandlingFunctions, gelöscht.
-Bei der Erstellung des Skripts habe ich mich mit variablen und ihrem Wirkungsbereich. Dabei fällt auf, dass man variablen vom hauptskript in das unterskript mitnehmen kann, diese jedoch mit "Using" kennzeichnen muss. Deswegen ist es einfacher functionen mit Parametern zu schrieben um die variablen mitzunehmen. So handhabt man das Quasi wie in C7C++ mit den headerfiles und codefiles, nur das man keine wirklichen Header hat. Man hat ein Skript das man einbindet um die Functionen daraus zu verwenden oder um es mit invoke-command remote in einer Maschine auszuführen. Da kommen  wir jedoch zum nächsten Problem. Der Befehl invoke-command kann, von hyperv host, ohne Probleme befehle in der VMs ausführen. DAs funktioniert über PowerShell Direct. Jedoch gibt es auch die Möglichkeit über das Netzwerk mit WindowsRemoteManagement (WinRM) befehle auszuführen und da kann man auf das Kerberus doublehop Problem stoßen.
+Der erste Schritt für das Skript ist die Erstellung eines VM-Templates. Dieses wird einmalig manuell erstellt, und dabei muss Windows Server nur ein einziges Mal installiert werden. Wichtig ist außerdem die Erstellung einer Antwortdatei (unattend.xml) im XML-Format. Diese lässt sich problemlos mit der ISO von Windows Server und dem Windows-eigenen Windows System Image Manager erzeugen. Dazu mountet man die ISO und lädt im Windows System Image Manager das Image (install.wim) aus der ISO. Anschließend wählt man die gewünschte Version von Windows Server, zum Beispiel Server Standard oder Server Datacenter. Für die Kunden-VMs wählen wir Server Standard. Bevor wir eine Antwortdatei erstellen können, muss zunächst eine Katalogdatei erzeugt werden. Sobald diese vorliegt, kann die Antwortdatei erstellt werden.
 
-Bevor wir die Rollen in den VMs installieren können wollen/müssen wir den VM bzw den installationen eine statische ip geben und dem FS sowie dem TS den DC als DNS Server geben. Zudem wollen wir ebenfalls den Computernamen anpassen um zu wissen um was für ein Computer es sich handelt. Dafür haben wir dann für jede VM ein kleines Skript.(ChangeIpRenameTs bzw ChangeIpRenameDc)
-Nun zum nächsten Schritt der Domain Controller. Wenn man diesen manuell einrichtet, kann man sich, bevor man diesen hochstuft, ein Skript ausgeben lassen, welches das gleiche machen würde wie man es manuell getan hat. Das Skript gibt uns kleine Einblicke über das was wir brauchen, aber auch Microsoft hat eine Seite dafür und dort finden wir alles was wir benötigen. Wir erstellen eine Hashmap mit allen nötigen Informationen wie Domainname,Netbiosname,DSRM Password, Pfaden für Systemdateien und Logdateien. Dann installieren wir die notwendige rolle und mit Install ADDSForest und unserer Hashmap können wir den Domaincontroller hochstufen und nach einem Neustart haben wir die Grundkonfiguration fertig. Vor dem Neustart fügen wir noch den Google dns Server (8.8.8.8) in die liste der DNS Weiterleitungen.
-Beim Fileserver müssen wir jedoch anders vorgehen, da es eine unterrolle ist, ist es nicht so einfach mit Powershell zu installieren. Jedoch kann man auch hier xml Dateien verwenden und bei der manuelles installation bekommt man am ende eine xml datei die man dafür verwenden kann. Da es auch keine speziellen Einstellungen bei der Manuellen installation gibt ist es auch irrelevant denn die Rolleninstallation ist auf jedem System gleich. Das einzige Problem ist, dass die XMl auf dem Zielsystem sein muss. Dafür gibt muss in der VM die "Gastdienstschnittstelle" aktiviert werden um dann die Datein in die Vm kopieren zu können. Bevor wir notwendige Dateien kopieren erstellen wir einen Ordner in den VMs in denen wir die Dateien dann kopieren. Für den DC sind es später eine Gruppenrichtlinie und eine Datei für eine Gruppenrichlinie. Für den FS die xml zum installieren der Rolle. Das installieren der Rolle passiert zusammen mit dem einstellen der statischen IP addresse, da es eine vom DomainController unabhängige Rolle ist.(DeployFileServerRole)
-Im jetzigen Stand des Skriptes haben wir 3 Vms und auf zweien ist schon die Richtige Rollle installiert und wir haben auch einen funktionierenden Domain Controller. Der nächste SChritt ist es, nachdem der Domain Controller bzw das Windows des DC gebootet hat die anderen Server in die Domäne aufzunehmen. Das lässt isch ganz einfach über eine kleine Funktion lösen, welche mit dem invoke-command befehl von der VM aus der Domäne beitreten. Durch rumprobieren mit dem VM Template weiß ich auch, dass beim falschen generalisieren oder fehlerhaften unattend files das problem besteht, dass der lokale Administrrator immer die gleiche ID hat und deswegen könnte es fehlschlagen der Domäne des DC beizutreten. Somit muss man acht geben wenn man die unattended anlegt. Nach dem erstellen der VMs kann man mit "Get-LcoalUser -Name ADministrator | FL" die SID der Administratoren verlgeichen. Sind diese gleich so hat die generalisierung mit sysprep nciht funktioniert und das Skript wird fehlschlagen. Langsam kommen wir zu den kniffligen Sachen. WEnn die Computer der Domaine beigetreten sind fehlt uns nur noch eine Rolleninstallation und dann eine Grundstructur für die Active Directory sowie Freigegebene Ordner für Benutzer und Gruppenrichtlininen. 
-Jetzt bereiten wir den FS mit der hinzugefügten Festplatte vor (DirectoryPreparations). Diese muss in der Windowsinstallation des Fileservers auf online gestellt und mit dem Partitionsstil GPT initialisiert werden. Danach wird eine Partition mit der gesamten größe der Festplatte erstellt und mit einem Namen und einem Laufwersbuchstaben versehen. Im Skript ist das der Buchstabe D und dazu den passende Name Daten. Danach werden noch alle wichtigen Standardordner erstellt.
-Nun fehlen für die Ordner nur noch die Freigaben und Zugrifssrechte. Das ist wiederum an Ad-Gruppen geknüpft und deswegen müssen wir erstmal eine Grundstruktur in der Active Directory erstellen. Das heißt wir brauchen einen testuser und einen adminuser für uns selbst (Chambionic), die Standardgruppen wie Scan_Lw, Datevuser, Daten_LW, GF für Geschäftsführung, eine struktur für die einzelnen Objekte in verschiedenen Unterorganisationseinheiten (Benutzer,Gruppen,Computer etc). Die nutzer legen wir dabei über hashmaps an, so ähnlich wie bei der Rolleninstallation des DomainControllers, und die gruppen einfach über den befehl New-AdGroup. 
-Wenn erstellt fügen wir die zwei Benutzern in den erstellten Gruppen hinzu. Zu einer grundstruktur der active Directory zählen auch die Standard Richtlininen wie netzlaufwerke, remotedesktop einstellungen, sperren der Eingabeaufforderung/ ausführen von skripten und das deaktivieren von new outlook. Die meisten dieser Gruppenrichlininen sind Registry basierend und man kann diese mit Hashmaps erstellen. Um die Registry Keys zu finden kann man auf einem Server ein Skript nutzen um die Registryeinträge mit Get-GPPrefRegistryValue zu finden oder man nutzt das Internet und Seiten wie https://gpsearch.azurewebsites.net/. Dort findet man die Gruppenrichtlinien und die dazugehörige Registry einträge. 
-Tricky wird es bei Netzlaufwerken. Fügt man ein Netzlaufwerk mit einer GPo hinzu oder fügt man es über den Windows Explorer hinzu werden mehrere Einträge in der Registry erstellt. Versucht man jedoch über diese Registry Einträge eine GPO zu erstelllen schlägt dies fehl und die Netzlaufwerke werden nicht im Explorer angezeigt, was dem User erschwierigt diese zu Nutzen. Deswegen ist das einfachste Vorgehen, eine schon fertige GPO mit den Netzlaufwerken zu exportieren, in die VM des DC zu kopieren, die SID der Gruppen an die neue DOmäne anzupassen und die GPo zu importieren. So funktioniert die GPo wie als würde man sie manuell erstellen. Zudem muss man auch nicht die ganzen Registry Einträge zu setzen sondern nur mit einer Schleife die xml, der GPO,  durcharbeiten und die Gruppen finden und die SID ändern.
-WEnn das geschafft ist haben wir das Active Directory grundgerüst erstellt und es fehlt nicht mehr viel bis zum fertigen Skript zur Automatisierung der Serverstruktur.
-Um auf die Ordner vom Terminalserver einfach zugriefen zu können nutzen wir eine Gruppenrichtlinie. Dafür müssen die Ordner jedoch freigegeben werden und mit den Richtigen Rechten versehen werden. Die Freigabe ist dabei der einfache PArt und kann mit dem Befehl New-smbshare realisiert werden. Über eine Hashmap und eine Schleife kann man mit dem Pfad, dem Freigabe Namen und die Berechtigungen die Freigaben einfahc erstellen.
-MIt den Freigaben können wir nun auch die NTFS Berechtigungen auf den Ordnern setzen, um die Zugriffsrechte der ordner und DAteien in den Ordnern zu bearbeiten. Das geht mit dem Befehl Set-Acl. Bevor wir jedoch die Rechte setzen könnne müssen wir die Rechte des Ordners in einer Variablen speichern. Das machen wir mit GEt-ACL. Dann können wir über eine hashmap neue Rechte hinzufügen. Wichtig ist dabei die Gruppe doer der Benutzer der diese Rechte bekommen soll, was für Rechte er bekommt und für welchen bereich diese Rechte zählen, also Nur dieser Ordner oder auch unterordner und dateien. Haben wir dies in einer Hashmap gespeichert können wir diese in ein ACl Objekt umwandelkn, es an den Ordner hängen und mit set-acl dem ordner zuweisen bzw die rechte neu setzen. Das Problem bei dieser herangehnsweise ist, dass wir das für jeden Ordner und für jede Gruppe einzeln amchen. 
-Holt man sich einmal die REchte eines Ordners kann man nicht mehrere Rechte anhängen um sie danach zu setzen. Wenn man das verwsucht kommt entweder keine Fehlermeldung oder die Rechte werden nciht richtig gesetzt. 
+Alle relevanten Optionen finden sich im Windows Image Fenster unter „Microsoft-Windows-Shell-Setup“. Wichtig ist vor allem der Unterpunkt „OOBE“, um viele Schritte bei der Ersteinrichtung von Windows zu überspringen. Zusätzlich lässt sich dort auch ein weiterer lokaler Benutzer im Abschnitt „UserAccounts“ anlegen. Um eine Option in die Antwortdatei einzufügen, wählt man per Rechtsklick den passenden Teil der Antwortdatei aus. Dies ist wichtig, da OOBE verschiedene Phasen hat, in denen unterschiedliche Konfigurationen greifen. Den OOBE-Abschnitt können wir nur unter oobeSystem einordnen, daher haben wir hier keine Wahl.
 
-
+Tests:
 Beim testen der Geschwindigkeit auf verschiedenen Maschinen wird die VM mit 2 Kernen und 2GB ram erstellt.
 
 % Refs
