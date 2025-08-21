@@ -8,7 +8,7 @@
 % Math packages
 \usepackage{amsmath,amssymb,amsfonts}
 
-
+\usepackage{hyperref}
 
 
 % Figures and graphics
@@ -27,7 +27,6 @@
 
 % Colors
 \usepackage{xcolor}         % For color definitions
-
 
 \usepackage{listings}
 \lstset{
@@ -135,7 +134,7 @@ Besonders kleine und mittelständische Unternehmen sind jedoch häufig damit aus
 
 \section{Praxis}
 
-Die Idee zu dieser Arbeit entstand aus praktischen Erfahrungen in der Windows-Server-Administration, insbesondere im Umgang mit Hyper-V in Failover-Cluster-Umgebungen. In der bisherigen Vorgehensweise erfolgt die Bereitstellung neuer virtueller Maschinen (VMs) vollständig manuell – von der Erstellung der VM über die Installation des Betriebssystems bis hin zur Konfiguration der benötigten Rollen und Dienste.\\
+Die Idee zu dieser Arbeit entstand aus praktischen Erfahrungen in der Windows Server-Administration, insbesondere im Umgang mit Hyper-V in Server Umgebungen. In der bisherigen Vorgehensweise erfolgt die Bereitstellung neuer virtueller Maschinen (VMs) vollständig manuell – von der Erstellung der VM über die Installation des Betriebssystems bis hin zur Konfiguration der benötigten Rollen und Dienste.\\
 
 Ein typisches Szenario ergibt sich bei der Einrichtung eines neuen Kunden im Rechenzentrum. Standardmäßig werden dabei drei VMs eingerichtet: ein Domänencontroller (DC), ein Dateiserver (FS) sowie ein Terminalserver (TS). Diese klare Trennung der Rollen bietet Vorteile hinsichtlich Übersichtlichkeit, Lastverteilung und Sicherheit.
 Die manuelle Einrichtung umfasst jedoch zahlreiche wiederkehrende Arbeitsschritte, wie die Vergabe statischer IP-Adressen, die Umbenennung der Rechner, die Einbindung zusätzlicher Festplatten, die Erstellung von Standard-Benutzern und -Gruppen sowie die Konfiguration von Gruppenrichtlinien und Ordnerberechtigungen.
@@ -150,16 +149,63 @@ Als Grundlage dient ein mit dem Windows-Tool Sysprep generalisiertes VM-Template
 Ziel dieser Arbeit ist es daher, ein strukturiertes, skriptbasiertes Vorgehen für die automatisierte Erstellung und Konfiguration von Windows-Server-VMs in Hyper-V zu entwickeln und zu evaluieren. Dadurch soll gezeigt werden, wie sich typische Administrationsaufgaben standardisieren und effizienter gestalten lassen.\\
 
 \section{Theorie}
-\subsection{Sysprep}
+
+
 \subsection{Windows Hyper-V}
+
+
+Hyper-V ist eine unter Windows verfügbare Virtualisierungsplattform, die als optionale Server- bzw. Client-Rolle bereitgestellt werden kann (z. B. in Windows 10/11 Pro oder Windows Server-Versionen). Nach der Installation stellt Hyper-V eine hardware­nahe Virtualisierungstechnologie bereit, die es ermöglicht, mehrere virtuelle Maschinen (VMs) parallel auf einem Hostsystem auszuführen. Dabei können unterschiedliche Betriebssysteme als Gastbetriebssysteme installiert werden.
+
+Der Hypervisor von Microsoft ist als sogenannte Typ‑1-Hypervisor-Architektur realisiert. Treiber sind dabei nicht direkt im Hypervisor selbst integriert, sondern im Management-Betriebssystem, der sogenannten Parent Partition. Gastbetriebssysteme, die in Child Partitions laufen, kommunizieren mit der Hardware nicht unmittelbar, sondern über den VMBus. Dieser Mechanismus überträgt Ein- und Ausgaben (I/O-Operationen) effizient zwischen Host und Gast und reduziert potenzielle Treiberkonflikte, da der Hypervisor isoliert unterhalb des Betriebssystems, aber oberhalb der Hardware arbeitet.
+
+Hyper-V unterstützt verschiedene Formate virtueller Festplatten (VHD/VHDX), die entweder mit fester Größe oder dynamisch wachsend bereitgestellt werden können. Dynamische Datenträger bieten den Vorteil, dass der Speicher auch im laufenden Betrieb der virtuellen Maschine erweitert werden kann. Zusätzlich können physische Festplatten direkt eingebunden werden; die dabei auftretenden Performanceverluste sind vergleichsweise gering.\cite{}\\
+
+
+
+
 \subsection{Windows Powershell}
-\subsubsection{Gültigkeitsbereich von Variablen}
-\subsubsection{Powershell Direct}
-\subsubsection{Kerberos Double Hop Problem}
+
+Die erste Veröffentlichung von PowerShell erfolgte im Jahr 2006 mit Version 1.0. Mit Windows 10 wurde PowerShell 5.0 standardmäßig in das Betriebssystem integriert, ebenso in Windows Server 2012. Bis heute ist in aktuellen Windows-Versionen, wie Windows 11 sowie Windows Server 2025, PowerShell 5.1 weiterhin als Bestandteil enthalten. Parallel dazu wird die plattformübergreifende Weiterentwicklung unter der Bezeichnung „PowerShell“ (früher „PowerShell Core“) aktiv gepflegt; die derzeit aktuelle Version ist 7.5.2.
+
+PowerShell stellt für Windows-Systeme eine funktionale Entsprechung zur klassischen Shell in Unix/Linux-Umgebungen dar und hat sich in den letzten Jahren von einem Administrationswerkzeug zu einer vollwertigen Automatisierungsplattform entwickelt. Die Befehle, sogenannte „Cmdlets“, folgen einem objektorientierten Ansatz, da sie .NET-Objekte zurückgeben. Dies ermöglicht eine direkte Weiterverarbeitung über die Pipeline, die funktional an Unix-Shells erinnert, jedoch nicht mit Textströmen, sondern mit Objekten arbeitet. Dadurch können Eigenschaften und Methoden von Objekten mit dem Punkt-Operator gezielt angesprochen werden.
+
+PowerShell gilt als Skriptsprache mit besonderem Fokus auf die Automatisierung, Überwachung und Konfiguration von Systemen und wird daher intensiv von Administratoren eingesetzt. Zusätzlich zur lokalen Nutzung unterstützt PowerShell auch die Ausführung von Befehlen auf entfernten Systemen („Remoting“). Dies kann entweder in Form von Einmalbefehlen oder als persistente Remote-Sitzung erfolgen, setzt jedoch gültige Benutzeranmeldedaten auf dem Zielsystem voraus.
+
+Eine besondere Funktion stellt „PowerShell Direct“ dar, die im Kontext von Hyper-V eingesetzt wird. Hierbei kann ein virtueller Computer direkt über den Hyper-V-Host verwaltet werden, ohne dass eine Netzwerkverbindung erforderlich ist. Voraussetzung bleibt auch hier ein gültiger Benutzeraccount auf dem jeweiligen virtuellen System.
+
+Durch diese Eigenschaften vereint PowerShell klassische Skriptmöglichkeiten mit moderner Objektorientierung und systemübergreifender Automatisierung.\cite{garren2025utilizing,microsoft2025-powershell-direct}\\
+
+\subsection{Sysprep}
+Sysprep ist ein in Windows integriertes Systemwerkzeug, das sich im Verzeichnis %windir%\System32\Sysprep befindet. Es dient der Vorbereitung einer Windows-Installation auf die Verteilung in Form von Referenzabbildern. Mithilfe von Sysprep kann ein Windows-Image generalisiert werden, wodurch system- und hardware­spezifische Informationen – wie die Sicherheitskennung (SID) – entfernt werden. Das ermöglicht eine sichere Wiederverwendung des Images auf unterschiedlichen Computern.
+Eine erweiterte Konfiguration ist über sogenannte Unattend‑Antwortdateien möglich, wodurch sich bestimmte Einstellungen beim ersten Start automatisch anwenden lassen. Allerdings bestehen auch Einschränkungen: Auf Systemen mit mehreren Betriebssystemen muss für jede Installation separat eine Generalisierung durchgeführt werden. Zudem werden nicht alle Serverrollen durch Sysprep vollständig unterstützt.\cite{microsoft2021-sysprep-generalize,microsoft2021-sysprep-overview}
 
 
 
 \section{Entwicklung des Skripts zur Automatisierung}
+
+Für die Umsetzung der automatisierten Erstellung und Konfiguration der virtuellen Maschinen
+wurden verschiedene PowerShell-Module eingesetzt, die spezifische Verwaltungs- und
+Konfigurationsaufgaben unterstützen. 
+Die grundlegende Funktionalität von PowerShell wird dabei über die Kernmodule
+
+\lstinline|Microsoft.PowerShell.Core|, \lstinline|Microsoft.PowerShell.Management|,
+
+\lstinline|Microsoft.PowerShell.Security| sowie \lstinline|Microsoft.PowerShell.Utility| 
+bereitgestellt \cite{microsoft2025-pscore,microsoft2025-psmanagement,microsoft2025-pssecurity,microsoft2025-psutility}. 
+Darüber hinaus ermöglichen Module wie \lstinline|NetTCPIP|, \lstinline|NetAdapter|,
+ 
+\lstinline|DnsServer| und \lstinline|DnsClient| die Konfiguration und Verwaltung der 
+Netzwerkumgebung \cite{microsoft2025-nettcpip,microsoft2025-netadapter,microsoft2025-dnsserver,microsoft2025-dnsclient}. 
+Die Einbindung in eine Active-Directory-Infrastruktur und Gruppenrichtlinien-Infrastruktur erfolgt über die Module 
+\lstinline|ActiveDirectory| und \lstinline|GroupPolicy| \cite{microsoft2025-activedirectory,microsoft2025-grouppolicy}. 
+Für die Speicher- und Serverkonfiguration wurden die Module \lstinline|Storage| und\\ \lstinline|ServerManager| 
+verwendet \cite{microsoft2025-storage,microsoft2025-servermanager}. 
+Die Erstellung und Verwaltung der virtuellen Maschinen selbst basiert auf dem 
+\lstinline|Hyper-V|-Modul \cite{microsoft2025-hyperv}. 
+Zusätzlich kamen Module wie \lstinline|RemoteDesktop| und verschiedene PowerShell-Beispiele 
+(z. B. zur Erstellung von Eingabedialogen) zum Einsatz 
+\cite{microsoft2025-remotedesktop,microsoft2025-custominputbox}.
+
 
 \subsection{Vorbereitung des VM-Templates}
 
@@ -175,14 +221,14 @@ Nach Erstellung der XML-Datei wurde diese, der Installation im Audit-Modus hinzu
 Die vollständige XML-Datei wurde im Sysprep Verzeichnis (Sysprep, i.d.R. unter \verb|C:\Windows\System32\Sysprep|
 ) gespeichert. Sysprep ist ein Windows eigenes Tool, welches zur Vorbereitung von Windowssystemen dient.
 Anschließend erfolgte die Ausführung von Sysprep mit den Parametern \lstinline|/oobe, /generalize, /shutdown /unattend:(Pfad zur XML-Datei)|. 
-Dadurch wurde die Windows-Installation generalisiert und von der spezifischen VM-Umgebung entkoppelt. 
+Dadurch wurde die Windows-Installation generalisiert und von der spezifischen VM Umgebung entkoppelt. 
 Die einmalige Erstellung und Konfiguration beanspruchte auf einem leistungsfähigen System etwa fünf bis zehn Minuten.
 Das ist die Zeit um Windows-Server auf der VM zu installieren und mit der Tastenkombination STRG+Shift+F3, während der Abfrage des Administratorpassworts, in den Audit-Modus zu wechseln.
 Dies ermöglichte individuelle Anpassungen sowie die Absicherung des lokalen Administratorkontos während des Bootens in die Windows Umgebung und überspringt die Ersteinrichtung.\\
 
-Für das Skript war ausschließlich relevant, dass die Passwortvergabe gewährleistet, ein zusätzlicher lokaler Administrator angelegt und Einrichtungsdialoge durch die XML-Datei übersprungen wurden. Ergänzend wurde das Tastaturlayout auf Deutsch gesetzt.
+Für das Skript war ausschlie\ss lich relevant, dass die Passwortvergabe gewährleistet, ein zusätzlicher lokaler Administrator angelegt und Einrichtungsdialoge durch die XML-Datei übersprungen wurden. Ergänzend wurde das Tastaturlayout auf Deutsch gesetzt.
 Durch die Generalisierung der Windows-Installation wird erreicht, dass die virtuelle Festplatte (VHD/X) einer erstellten VM kopiert und mehrfach wiederverwendet werden kann, ohne dass Konflikte zwischen den Sicherheits-IDs (SIDs) der Administratorbenutzer verschiedener VMs auftreten. 
-Entscheidend ist hierbei, dass die betreffende VM nach der Generalisierung nicht erneut gestartet wird, bevor die VHD(X)-Datei kopiert wurde, da ansonsten die Generalisierung ihre Gültigkeit verliert.
+Entscheidend ist hierbei, dass die betreffende VM nach der Generalisierung nicht erneut gestartet wird, bevor die VHD(X)-Datei kopiert wurde, da ansonsten die Generalisierung ihre Gültigkeit verliert.\\
 
 Im Zuge der Experimente mit den VM-Templates zeigte sich jedoch, dass Fehler in der Generalisierung (z. B. durch fehlerhafte Unattend-Dateien) dazu führen können, dass lokale Administratoren auf unterschiedlichen Systemen identische Sicherheits-IDs (SIDs) erhalten. 
 In diesem Fall schlägt der Domänenbeitritt fehl. Daher ist bei der Erstellung der Unattend-Datei besondere Sorgfalt erforderlich. 
@@ -232,7 +278,7 @@ Für den Domain Controller waren dies Gruppenrichtlinien-Dateien, während für 
 
 Vor der Installation von Rollen ist es notwendig, den VMs statische IP-Adressen zuzuweisen und sowohl dem Fileserver als auch dem Terminalserver den Domain Controller als DNS-Server einzutragen. 
 Darüber hinaus erfolgt eine Anpassung der Computernamen zur eindeutigen Identifikation. 
-Für diesen Zweck wurden spezifische kleine Skripte (ChangeIpRenameTs bzw. ChangeIpRenameDc) entwickelt, die die Konfiguration automatisieren.
+Für diesen Zweck wurden spezifische kleine Skripte (ChangeIpRenameTs bzw. ChangeIpRenameDc) entwickelt, die die Konfiguration automatisieren.\\
 Die Installation der Fileserver-Rolle erfolgt gemeinsam mit der Konfiguration einer statischen IP-Adresse, da diese Rolle unabhängig vom Domain Controller eingerichtet wird (DeployFileServerRole).\\
 
 Die Einrichtung des Domain Controllers basiert ebenfalls auf PowerShell. 
@@ -279,7 +325,7 @@ Ein Problem dieser Vorgehensweise besteht darin, dass Rechte jeweils nur für ei
 Der Versuch, mehrere Einträge parallel zu übernehmen, führte entweder zu fehlerhaften Berechtigungen oder zu fehlenden Fehlermeldungen, sodass die Rechtevergabe stets einzeln vorgenommen werden musste. 
 Nach der Umsetzung der Freigaben und NTFS-Berechtigungen verblieb als letzter Bestandteil die Einrichtung des Terminalservers.\\
 
-Die Installation der dazugehörigen Rollen konnte nicht vollständig über PowerShell-Kommandos innerhalb des Gastesystems erfolgen. 
+Die Installation der dazugehörigen Rollen konnte nicht vollständig innerhalb des Gastesystems über PowerShell-Befehle erfolgen. 
 Stattdessen wurden die Rollen mithilfe von PowerShell Direct über den Hyper-V-Host remote in die VM installiert und anschließend konfiguriert. 
 Damit konnte eine funktionsfähige Terminalserver-Umgebung bereitgestellt werden, wenngleich die Lizenzierungskonfiguration nicht Teil des Skripts war. 
 Auch ohne diese Konfiguration ist eine Anmeldung mittels Remotedesktop für einzelne Benutzer möglich, wodurch Kernfunktionen des Terminalservers zur Verfügung stehen.\\
@@ -472,9 +518,9 @@ Während der Entwicklung und Umsetzung des Automatisierungsskripts für Hyper-V 
 
 Im Bereich der Skripterstellung mit PowerShell war besonders bei der Arbeit mit GUIs und Benutzerinteraktionen Aufmerksamkeit erforderlich. So erwies es sich als sinnvoll, beim Aufbau einer RAM-Auswahl Integer-Werte in Byte-Form anzugeben, da Strings in Arrays nicht zuverlässig verarbeitet wurden. Das Rückgabeverhalten wurde über \lstinline|return| angepasst, um korrekte Werte zu liefern. Außerdem zeigte sich, dass in PowerShell die Überprüfung auf \lstinline|NULL| konsistent mit der Schreibweise \lstinline|NULL -eq \$Variable| erfolgen sollte, um logische Fehler, insbesondere bei Array-Prüfungen,zu vermeiden. \\ 
 
-GUI-Fenster verhielten sich in Bezug auf die Anzeige im Vordergrund nicht immer wie erwartet, selbst wenn die Eigenschaft \lstinline|TopMost| gesetzt war. Dieses Problem wurde durch die Definition eines Mutterfensters und die gezielte Anzeige untergeordneter Fenster mit \lstinline|.Add\_Shown()| gelöst. Passworteingaben ließen sich in der GUI zwar ausblenden, mussten jedoch für die weitere Verarbeitung mittels \lstinline|ConvertTo-SecureString -PlainText| in ein SecureString-Format konvertiert werden. Beim Auswählen von Verzeichnissen war zu beachten, dass der Pfad über die Eigenschaft \lstinline|InitialDirectory| und nicht \lstinline|RootFolder| festgelegt werden muss.\\  
+GUI-Fenster verhielten sich in Bezug auf die Anzeige im Vordergrund nicht immer wie erwartet, selbst wenn die Eigenschaft \lstinline|TopMost| gesetzt war. Dieses Problem wurde durch die Definition eines Mutterfensters und die gezielte Anzeige untergeordneter Fenster mit \lstinline|.Add\_Shown()| gelöst. Passworteingaben ließen sich in der GUI zwar ausblenden, mussten jedoch für die weitere Verarbeitung mittels \lstinline|ConvertTo-SecureString -PlainText| in ein SecureString-Format konvertiert werden. Beim Auswählen von Verzeichnissen war zu beachten, dass der Pfad über die Eigenschaft \lstinline|InitialDirectory| und nicht \lstinline|Root Folder| festgelegt werden muss.\\  
 
-Für die Eingabevalidierung, beispielsweise bei IP-Adressen, bot sich die Nutzung regulärer Ausdrücke wie \lstinline|"[0-9]+\textbackslash.[0-9]+\textbackslash.[0-9]+\textbackslash.[0-9]+"| an. Variablen, die innerhalb von Remote-Jobs oder Sessions genutzt werden, mussten mit dem Präfix \lstinline|Using:| übergeben werden -- auch dann, wenn sie zuvor global deklariert wurden. Innerhalb von Strings war eine Variablenersetzung nur mit der Schreibweise \lstinline|\$(Variable)| möglich. Bei Abfragen, die einen String erfordern, erwies sich die Verwendung des Parameters \lstinline|-ExpandProperty| als notwendig, um Objektrückgaben zu vermeiden.\\  
+Für die Eingabevalidierung, beispielsweise bei IP-Adressen, bot sich die Nutzung regulärer Ausdrücke wie \lstinline|"[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+"| an. Variablen, die innerhalb von Remote-Jobs oder Sessions genutzt werden, mussten mit dem Präfix \lstinline|Using:| übergeben werden -- auch dann, wenn sie zuvor global deklariert wurden. Innerhalb von Strings war eine Variablenersetzung nur mit der Schreibweise \lstinline|\$(Variable)| möglich. Bei Abfragen, die einen String erfordern, erwies sich die Verwendung des Parameters \lstinline|-ExpandProperty| als notwendig, um Objektrückgaben zu vermeiden.\\  
 
 Das Ausführen von Befehlen mit dem Parameter \lstinline|-AsJob| startete Prozesse im Hintergrund, was problematisch sein konnte, wenn das Ergebnis sofort benötigt wurde. In solchen Fällen war es erforderlich, den Job aktiv zu überwachen, das Ende der Ausführung abzuwarten und anschließend den Job zu entfernen. Beim Einsatz von \lstinline|Invoke-Command| konnte entweder direkt mit VM-Namen oder mit zuvor erstellten Sessions gearbeitet werden; letztere mussten nach Abschluss wieder geschlossen werden. Um Anmeldevorgänge zu vermeiden, konnten Anmeldeinformationen als \lstinline|PSCredential|-Objekte hinterlegt werden. Diese wurden über \lstinline|New-Object| erstellt, wobei das Passwort als SecureString abgefragt und zusammen mit dem Benutzernamen in einer Variablen gespeichert wurde. \\ 
 
@@ -522,13 +568,77 @@ Dieses Vorgehen ist zwar funktional, jedoch unflexibel und wenig professionell.
 Eine zuverlässigere Methode zur Erkennung des erfolgreichen Systemstarts wäre hier wünschenswert, auch wenn die Beobachtung und zeitliche Abschätzung des Bootvorgangs von Windows-Servern eine gewisse Herausforderung darstellt.\\
 
 Schließlich könnte die Benutzerverwaltung verbessert werden, indem Benutzerkonten und Gruppen über eine XML-Datei definiert und direkt nach der Erstellung automatisch verarbeitet werden. 
-Auf diese Weise ließe sich der Grad der Standardisierung und Automatisierung nochmals erhöhen.
+Auf diese Weise ließe sich der Grad der Standardisierung und Automatisierung nochmals erhöhen.\\
+
+\newpage
+
+\section*{Erklärung zum Einsatz von KI-Werkzeugen}
+
+Während der Erstellung dieser Bachelorarbeit wurden KI-gestützte Hilfsmittel zur Optimierung des sprachlichen Ausdrucks und der Textstruktur verwendet. Der Einsatz beschränkte sich ausschließlich auf Aspekte der Lesbarkeit und Formulierung. Eine eigenständige inhaltliche Generierung oder Erweiterung der wissenschaftlichen Ergebnisse durch KI erfolgte nicht.
+
+
+Die folgenden Prompts wurden im Zuge der Bearbeitung eingesetzt:
+
+\subsection*{Perplexity AI}
+\begin{quote}
+Act like a professional academic editor and scientific writing assistant. You specialize in transforming raw, unstructured descriptive text into a polished, logically structured, and academically styled document suitable for a bachelor’s thesis, research report, or academic article. 
+
+Objective: 
+Your task is to take unstructured input text (such as everyday experiences, descriptive reports, or freeform notes) and convert it into a refined, scientific-style output text. The resulting text must be logically structured, written in a formal academic tone, and formatted consistently. The original meaning and content must remain unchanged, but the phrasing, clarity, and structure should be optimized. 
+
+Instructions: 
+1. Input format: You will receive an unstructured, descriptive text (e.g., an everyday report or narrative).  
+2. Output format: Provide the revised text in one of the following styles:  
+   - LaTeX syntax with \textbackslash section, \textbackslash subsection, and \textbackslash paragraph blocks for clear structuring  
+   - OR a polished academic continuous text formatted like a bachelor’s thesis or scientific report.  
+   Choose the style most appropriate for the input text unless explicitly instructed otherwise.  
+3. Writing style requirements:  
+   - Use formal academic language.  
+   - Ensure clarity, conciseness, and logical flow.  
+   - Apply a passive writing style (third-person perspective).  
+   - Remove redundancies and improve readability.  
+   - Correct grammar, spelling, and syntax errors.  
+4. Structure guidelines:  
+   - Introduce a clear title or heading structure.  
+   - Divide the text into logical sections and subsections (e.g., Introduction, Methods, Results, Discussion, Conclusion) when suitable.  
+   - Ensure coherent transitions between sections.  
+5. Content requirements:  
+   - Do not alter the factual meaning of the text.  
+   - Improve the logical order and argumentative flow.  
+   - Highlight cause-effect relationships and analytical depth where appropriate.  
+6. Output length: The revised academic text should be at least as long as the input, ideally more detailed and better structured.  
+7. Example structure (if LaTeX is used):  
+   \textbackslash section\{Introduction\}  
+   \textbackslash subsection\{Background\}  
+   \textbackslash subsection\{Objective\}  
+   \textbackslash section\{Methods\}  
+   \textbackslash section\{Results\}  
+   \textbackslash section\{Discussion\}  
+   \textbackslash section\{Conclusion\}  
+
+Final Step: Always deliver the rewritten output in the chosen academic structure without adding commentary or meta-explanations.  
+
+Take a deep breath and work on this problem step-by-step.
+\end{quote}
+
+\subsection*{ChatGPT (GPT-5)}
+\begin{quote}
+Kannst du mir aus diesen Angaben einen Promt erstellen? 
+
+Was die Eingabe ist: unstrukturierter beschreibender Text, evtl. Alltags-/Erfahrungsbericht aus der Ich-Perspektive.
+
+Was die Ausgabe sein soll: ein wissenschaftlich strukturierter, sprachlich verbesserter Text mit Kapiteln/Abschnitten.
+
+Wie die Form sein soll: z. B. LaTeX-Syntax mit \textbackslash section-Blöcken oder ein formatierter Fließtext für eine Bachelorarbeit o. Ä.
+
+Worauf beim Umschreiben geachtet werden soll: keine inhaltliche Veränderung, aber sprachliche Straffung, logischere Struktur, passiver Schreibstil (3. Person).
+\end{quote}
 
 
 
 
-
-
+\newpage
+\bibliographystyle{plain} 
 % Refs
 \bibliography{ref}
 \end{document}
