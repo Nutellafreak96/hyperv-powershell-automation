@@ -25,3 +25,5 @@
 *.hex
 *.map
 *.vhdx
+*.bbl
+*.blg
