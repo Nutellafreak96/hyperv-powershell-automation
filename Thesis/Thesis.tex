@@ -361,7 +361,7 @@ Skript-Ende & 0:18:40 & 0:18:43 & 0:19:10 & 0:18:33 & 0:19:04 \\ \hline
 \begin{table}[H]
 \centering
 \caption{Zeitübersicht der Testdurchläufe – Server 1}
-\label{tab:server_times}
+\label{tab:server_times1}
 \resizebox{\linewidth}{!}{%
 \begin{tabular}{|l|l|l|l|l|l|}
 \hline
@@ -389,11 +389,63 @@ Skript-Ende & 0:43:11 & 0:43:29 & 1:09:41 & 0:43:08 & 0:41:37 \\ \hline
 \end{table}
 
 
+\subsection{Testumgebung Server 2}
+
+\begin{table}[H]
+\centering
+\caption{Zeitübersicht der Testdurchläufe – Server 2}
+\label{tab:server_times2}
+\resizebox{\linewidth}{!}{%
+\begin{tabular}{|l|l|l|l|l|l|}
+\hline
+\textbf{Schritt} & \textbf{Log 1 (hh:mm:ss)} & \textbf{Log 2 (hh:mm:ss)} & \textbf{Log 3 (hh:mm:ss)} & \textbf{Log 4 (hh:mm:ss)} & \textbf{Log 5 (hh:mm:ss)} \\ \hline
+Skript-Start & 0:00:00 & 0:00:00 & 0:00:00 & 0:00:00 & 0:00:00 \\ \hline
+Kopieren fertig & 0:00:30 & 0:00:30 & 0:00:30 & 0:01:53 & 0:00:29 \\ \hline
+VMs erstellt & 0:03:05 & 0:02:35 & 0:03:46 & 0:05:58 & 0:03:25 \\ \hline
+VMs angepasst & 0:03:05 & 0:02:35 & 0:03:46 & 0:05:58 & 0:03:25 \\ \hline
+VMs gestartet & 0:03:12 & 0:02:44 & 0:03:54 & 0:06:07 & 0:03:34 \\ \hline
+Windows initialisierung fertig & 0:04:19 & 0:04:19 & 0:05:31 & 0:06:51 & 0:05:02 \\ \hline
+Kopieren fertig & 0:05:10 & 0:05:13 & 0:06:31 & 0:07:41 & 0:06:07 \\ \hline
+Löschen von Dateien fertig & 0:05:52 & 0:05:41 & 0:07:13 & 0:08:10 & 0:06:49 \\ \hline
+MAC umgestellt & 0:06:12 & 0:06:22 & 0:07:56 & 0:08:58 & 0:07:35 \\ \hline
+static IP & 0:06:51 & 0:07:08 & 0:08:40 & 0:09:44 & 0:08:28 \\ \hline
+DC installiert & 0:10:50 & 0:10:31 & 0:12:15 & 0:13:16 & 0:11:50 \\ \hline
+Domain beigetreten & 0:17:38 & 0:17:16 & 0:19:37 & 0:20:02 & 0:18:36 \\ \hline
+Ordnerstruktur FS & 0:18:22 & 0:17:56 & 0:20:03 & 0:21:07 & 0:19:42 \\ \hline
+AD Struktur erstellt & 0:18:32 & 0:18:30 & 0:20:43 & 0:21:44 & 0:19:50 \\ \hline
+Freigaben Ordner & 0:18:58 & 0:18:40 & 0:20:53 & 0:21:54 & 0:20:00 \\ \hline
+TS installiert & 0:29:00 & 0:29:02 & 0:31:24 & 0:31:53 & 0:31:02 \\ \hline
+Skript-Ende & 0:32:01 & 0:29:31 & 0:32:35 & 0:54:02 & 0:31:29 \\ \hline
+\textbf{Gesamtzeit} & 0:32:01 & 0:29:31 & 0:32:35 & 0:54:02 & 0:31:29 \\ \hline
+\end{tabular}%
+}
+\end{table}
+
+
+
+
+Die Messungen der Skriptausführungszeiten in den drei unterschiedlichen Testumgebungen zeigen deutliche Unterschiede in der Performance, die auf die jeweiligen Hardware- und Netzwerkkonfigurationen zurückzuführen sein dürften. 
+In der häuslichen Testumgebung lagen die Gesamtdauern der Skriptdurchläufe zwischen 18:33 und 19:10 Minuten \citep{tab:server_times}. 
+Die einzelnen Schritte, wie das Erstellen und Anpassen der VMs oder die Initialisierung von Windows, dauerten hier nur wenige Sekunden bis wenige Minuten, was auf eine schnelle lokale Verarbeitung und geringe Latenzen hinweist.
+
+Im Vergleich dazu zeigten die Tests auf Server 1 signifikant längere Ausführungszeiten. 
+Die Gesamtdauer bewegte sich zwischen 41:37 und 1:09:41 Stunden \citep{tab:server_times1}, was insbesondere bei den Schritten „Domain beigetreten“ und „TS installiert“ deutlich sichtbar wird. 
+Die erhöhte Dauer lässt sich vermutlich durch Netzwerkverzögerungen, höhere Serverlast oder parallele Prozesse erklären, die die Skriptausführung verlangsamen.
+
+Die Testumgebung auf Server 2 zeigte hingegen eine moderate Ausführungszeit zwischen 29:00 und 31:53 Minuten \citep{tab:server_times2}. 
+Die Schritte „VMs erstellt“ und „Windows Initialisierung fertig“ beanspruchten hier vergleichsweise mehr Zeit als in der häuslichen Umgebung, jedoch deutlich weniger als auf Server 1. 
+Dies deutet auf eine Serverkonfiguration hin, die effizienter arbeitet als Server 1, jedoch langsamer ist als die lokale Umgebung.
+
+Zusammenfassend lässt sich festhalten, dass die Ausführungszeiten stark von der Testumgebung abhängen. 
+Die lokale Umgebung zeigt die kürzesten Zeiten, Server 2 liegt im mittleren Bereich, während Server 1 aufgrund von längeren Wartezeiten und möglichen Performance-Engpässen die längsten Zeiten aufweist. 
+Diese Ergebnisse unterstreichen die Bedeutung von Hardware- und Netzwerkfaktoren bei der automatisierten Skriptausführung und sollten bei der Planung und Optimierung von Deployment-Strategien berücksichtigt werden.\\
+
 Ebenfalls wurde die Einrichtung der VMs auf der Testumgebung mit dem Server 1 manuell getestet. Der erste, manuelle, Test wurde von einer Praktikantin mit begleitender Unterstützung durchgeführt.
 In etwas 2 Stunden war das System aus 3 VMs genauso einsatzfähig wie die Serverstruktur, die durch das Skript automatisiert erstellt wurde. Drei weitere manuelle Test wurden vom Autor dieser Arbeit durchgeführt.
 Durch die Erfahrungen, die während der Entwicklung des Skripts gesammelt wurden, konnte die Zeit der manuelle Einrichtung merkbar reduziert werden.
 Anfangs war die manuelle Einrichtung der VMs langsamer und mit 1 Stunde und 33 Minuten deutlisch länger als die automatisierte Variante.
-Doch mit der wachsenden Routine, durch die gleichen Abläufe, konnte die Zeit im dritten Durchlauf auf 1 Stunde und 8 Minuten reduziert werden.\\
+Doch mit der wachsenden Routine, durch die gleichen Abläufe, konnte die Zeit im dritten Durchlauf auf 1 Stunde und 8 Minuten reduziert werden.
+Das ist jedoch kein Vergleich zu der Automatisierung durch das Skript\\
 
 \section{Technische Erkenntnisse der Skripterstellung}
 
