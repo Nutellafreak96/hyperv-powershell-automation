@@ -1,24 +1,42 @@
 %\documentclass[conference]{IEEEtran}
 %\IEEEoverridecommandlockouts
-\documentclass[a4paper,11pt]{article}
+\documentclass[a4paper,12pt]{article}
+
+% Schriftart (Skalierbar, nötig für microtype)
+\usepackage{lmodern}
 
 % Math packages
 \usepackage{amsmath,amssymb,amsfonts}
 
-% Algorithms
-\usepackage{algorithmic}
+
+
 
 % Figures and graphics
 \usepackage{graphicx}       % For including graphics
 \usepackage{float}          % For figure placement control
+
 \usepackage{subcaption}     % For subfigures
 \usepackage{tabularx} 
 
 % Text and fonts
 \usepackage{textcomp}       % For special symbols like °
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[ngerman]{babel}
+\usepackage{microtype}
 
 % Colors
 \usepackage{xcolor}         % For color definitions
+
+
+\usepackage{listings}
+\lstset{
+  basicstyle=\mdseries\itshape,     % Fett + Kursiv
+  columns=fullflexible,             % Für besseres Minus-Zeichen
+  breaklines=true,
+  keepspaces=true,
+  showstringspaces=false
+}
 
 % Tables
 \usepackage{booktabs}       % For professional-looking tables
@@ -28,11 +46,11 @@
 \bibliographystyle{unsrtnat}
 
 % Encoding and spacing
-\usepackage[utf8]{inputenc} % UTF-8 support
 \usepackage{titlesec}       % For customizing section titles
 \usepackage{setspace}       % For line spacing control
 
-\definecolor{HKS66}{RGB}{118,185,0}
+\definecolor{HTW}{RGB}{118,185,0}
+
 
 %verbesserte Datums ausgabe
 \usepackage[ddmmyyyy]{datetime}
@@ -57,14 +75,14 @@
     \end{minipage}
 
     \vspace{0.5em}
-    \textcolor{HKS66}{\rule{\linewidth}{0.4mm}}
+    \textcolor{HTW}{\rule{\linewidth}{0.4mm}}
 
     \vspace*{\stretch{0.5}}
 
     % === TITEL UND ART DER ARBEIT ===
     \begin{center}
-        {\LARGE\bfseries\color{HKS66} Skriptgesteuerte Erstellung und Konfiguration von Windows-basierten virtuellen Maschinen in Hyper-V mittels PowerShell} \\[1em]
-        \textcolor{HKS66}{\rule{\linewidth}{0.4mm}}\\[1.5em]
+        {\LARGE\bfseries\color{HTW} Skriptgesteuerte Erstellung und Konfiguration von Windows-basierten virtuellen Maschinen in Hyper-V mittels PowerShell} \\[1em]
+        \textcolor{HTW}{\rule{\linewidth}{0.4mm}}\\[1.5em]
         {\LARGE\bfseries Bachelorarbeit}
     \end{center}
 
@@ -99,7 +117,7 @@
 
     \vspace*{\stretch{2}}
 
-    \textcolor{HKS66}{\rule{\linewidth}{0.4mm}}
+    \textcolor{HTW}{\rule{\linewidth}{0.4mm}}
 
 \end{titlepage}
 
@@ -127,7 +145,7 @@ Hinzu kommt, dass kundenspezifische Anwendungen wie DATEV besondere Anforderunge
 
 Um diesen Herausforderungen zu begegnen, wurde im Rahmen dieser Arbeit ein PowerShell-Skript entwickelt, das die wiederkehrenden Arbeitsschritte bei der Bereitstellung von Windows-Server-VMs weitgehend automatisiert. Das Skript übernimmt unter anderem die Erstellung und Konfiguration von drei VMs (DC, FS, TS), die Einrichtung der grundlegenden Rollen, die Anlage von Standard-Benutzern und -Gruppen, die Vergabe von NTFS-Berechtigungen sowie die Konfiguration von Netzwerkparametern.\\
 
-Als Grundlage dient ein mit dem Windows-Tool Sysprep generalisiertes VM-Template, das mithilfe einer vorbereiteten Antwortdatei (\texttt{unattend.xml}) erstellt wird. Dieses Template ermöglicht es, alle weiteren Konfigurationsschritte skriptgesteuert durchzuführen, wodurch einsatzbereite Systeme mit minimalem manuellem Aufwand bereitgestellt werden können.\\
+Als Grundlage dient ein mit dem Windows-Tool Sysprep generalisiertes VM-Template, das mithilfe einer vorbereiteten Antwortdatei (\lstinline|unattend.xml|) erstellt wird. Dieses Template ermöglicht es, alle weiteren Konfigurationsschritte skriptgesteuert durchzuführen, wodurch einsatzbereite Systeme mit minimalem manuellem Aufwand bereitgestellt werden können.\\
 
 Ziel dieser Arbeit ist es daher, ein strukturiertes, skriptbasiertes Vorgehen für die automatisierte Erstellung und Konfiguration von Windows-Server-VMs in Hyper-V zu entwickeln und zu evaluieren. Dadurch soll gezeigt werden, wie sich typische Administrationsaufgaben standardisieren und effizienter gestalten lassen.\\
 
@@ -154,9 +172,9 @@ Innerhalb der Antwortdatei wurden die relevanten Konfigurationsoptionen integrie
 Dabei lag der Fokus auf dem Abschnitt OOBE, um Ersteinrichtungsoptionen wie Tastaturlayout und Sprache zu überspringen. Zusätzlich wurden noch lokale Benutzerkonten angelegt. 
 Nach Erstellung der XML-Datei wurde diese, der Installation im Audit-Modus hinzugefügt.\\
 
-Die vollständige XML-Datei wurde im Verzeichnis des Windows-Systemvorbereitungstools (Sysprep, i.d.R. unter \verb|C:\Windows\System32\Sysprep|
-) gespeichert. 
-Anschließend erfolgte die Ausführung von Sysprep mit den Parametern \texttt{/oobe, /generalize, /shutdown sowie /unattend:(Pfad zur XML-Datei)}. 
+Die vollständige XML-Datei wurde im Sysprep Verzeichnis (Sysprep, i.d.R. unter \verb|C:\Windows\System32\Sysprep|
+) gespeichert. Sysprep ist ein Windows eigenes Tool, welches zur Vorbereitung von Windowssystemen dient.
+Anschließend erfolgte die Ausführung von Sysprep mit den Parametern \lstinline|/oobe, /generalize, /shutdown /unattend:(Pfad zur XML-Datei)|. 
 Dadurch wurde die Windows-Installation generalisiert und von der spezifischen VM-Umgebung entkoppelt. 
 Die einmalige Erstellung und Konfiguration beanspruchte auf einem leistungsfähigen System etwa fünf bis zehn Minuten.
 Das ist die Zeit um Windows-Server auf der VM zu installieren und mit der Tastenkombination STRG+Shift+F3, während der Abfrage des Administratorpassworts, in den Audit-Modus zu wechseln.
@@ -168,7 +186,7 @@ Entscheidend ist hierbei, dass die betreffende VM nach der Generalisierung nicht
 
 Im Zuge der Experimente mit den VM-Templates zeigte sich jedoch, dass Fehler in der Generalisierung (z. B. durch fehlerhafte Unattend-Dateien) dazu führen können, dass lokale Administratoren auf unterschiedlichen Systemen identische Sicherheits-IDs (SIDs) erhalten. 
 In diesem Fall schlägt der Domänenbeitritt fehl. Daher ist bei der Erstellung der Unattend-Datei besondere Sorgfalt erforderlich. 
-Die Überprüfung der SIDs kann nach der VM-Erstellung über den Befehl \texttt{Get-LocalUser -Name Administrator | FL} erfolgen. 
+Die Überprüfung der SIDs kann nach der VM-Erstellung über den Befehl \lstinline|Get-LocalUser -Name Administrator | FL| erfolgen. 
 Werden identische SIDs festgestellt, ist davon auszugehen, dass die Generalisierung mit Sysprep nicht korrekt durchgeführt wurde, was wiederum zum Abbruch des Skripts führen würde.
 
 
@@ -198,7 +216,7 @@ Zur Verwaltung der Kunden-VMs wurde eine einheitliche Ordnerstruktur implementie
 Hierfür wurde ein eigenes Skript (FilehandlingFunctions) entwickelt, das für jeden Kunden automatisch identische Verzeichnisse anlegt, wobei die Struktur jeweils unter dem individuellen Kundennamen eingetragen wird. 
 Innerhalb dieser Hierarchie werden die vorbereiteten VHD(X)-Dateien aus dem zentralen Vorbereitungsverzeichnis in die entsprechenden Kundenordner kopiert. 
 Vor der Erstellung überprüft das Skript, ob die betreffende Struktur bereits vorhanden ist, um redundante Duplikate zu vermeiden. 
-Die Umsetzung basiert auf einfachem File Handling, wobei neue Verzeichnisse mit dem PowerShell-Befehl \texttt{New-Item} erzeugt werden.\\
+Die Umsetzung basiert auf einfachem File Handling, wobei neue Verzeichnisse mit dem PowerShell-Befehl \lstinline|New-Item| erzeugt werden.\\
 
 Neben der Verzeichnisstruktur wird für jeden Kunden zusätzlich ein Logfile eingerichtet. 
 Dieses ermöglicht sowohl die Nachverfolgung des Skriptablaufs als auch die Identifikation möglicher Fehlerquellen oder Prozessunterbrechungen. 
@@ -221,12 +239,12 @@ Die Einrichtung des Domain Controllers basiert ebenfalls auf PowerShell.
 Bei einer manuellen Installation lässt sich vor der Heraufstufung ein Skript generieren, das die durchgeführten Arbeitsschritte abbildet. 
 Dieses Vorgehen bietet wertvolle Einblicke in die notwendigen Befehle, zusätzlich stehen umfassende Informationen in der offiziellen Microsoft-Dokumentation zur Verfügung. 
 Für die automatisierte Konfiguration wurde eine Hashmap erstellt, die alle erforderlichen Parameter wie Domänenname, NetBIOS-Name, DSRM-Passwort sowie Pfade für System- und Logdateien enthält. 
-Anschließend wurde die benötigte Rolle installiert und der Domain Controller mittels \texttt{Install-ADDSForest} heraufgestuft. 
+Anschließend wurde die benötigte Rolle installiert und der Domain Controller mittels \lstinline|Install-ADDSForest| heraufgestuft. 
 Nach einem Neustart stand damit die Grundkonfiguration zur Verfügung. Vor dem Neustart wurde zudem der Google-DNS-Server (8.8.8.8) in die Liste der Weiterleitungen aufgenommen.\\
 
 Zum betrachteten Zeitpunkt standen bereits drei VMs zur Verfügung, von denen zwei mit den vorgesehenen Rollen ausgestattet waren und ein funktionsfähiger Domain Controller bereitgestellt war. 
 Der darauffolgende Schritt bestand darin, die verbleibenden Server in die Domäne aufzunehmen, nachdem der Domain Controller vollständig gestartet war. 
-Dies konnte mit einer dedizierten PowerShell-Funktion erreicht werden, die unter Verwendung von \texttt{Invoke-Command} den Domänenbeitritt in den VMs remote ausführt.\\
+Dies konnte mit einer dedizierten PowerShell-Funktion erreicht werden, die unter Verwendung von \lstinline|Invoke-Command| den Domänenbeitritt in den VMs remote ausführt.\\
 
 Nach erfolgreichem Domänenbeitritt der Systeme folgte die Vorbereitung des Fileservers. 
 Hierzu wurde die zusätzliche Festplatte zunächst online geschaltet und mit dem Partitionsstil GPT initialisiert. 
@@ -235,12 +253,12 @@ In diesem Verzeichnis wurden standardisierte Basisordner angelegt, die später a
 Da Freigaben mit bestimmten Active-Directory-Gruppen verknüpft sind, war zuvor eine grundlegende AD-Struktur zu etablieren.\\
 
 Die erstellte Active-Directory-Struktur umfasste exemplarische Benutzerkonten (einen Testbenutzer und einen Administrationsaccount), mehrere Standardgruppen (Scan\_ LW, Datevuser, Daten\_ LW, GF für Geschäftsführung) sowie Organisationseinheiten zur strukturierten Trennung von Benutzern, Gruppen und Computern. 
-Die Benutzer wurden in Form von Hashmaps angelegt, während Gruppen über den Befehl \texttt{New-ADGroup} erstellt wurden. 
+Die Benutzer wurden in Form von Hashmaps angelegt, während Gruppen über den Befehl \lstinline|New-ADGroup| erstellt wurden. 
 Im Anschluss wurden die Benutzer den entsprechenden Gruppen zugeordnet.\\
 
 Zur Grundstruktur des Active Directory gehören auch Standardrichtlinien, etwa für Netzlaufwerke, Remotedesktop-Einstellungen, Einschränkungen der Eingabeaufforderung und Skriptausführung sowie das Deaktivieren von „New Outlook“. 
 Da viele dieser Gruppenrichtlinien auf Registry-Einträgen basieren, können sie mithilfe von Hashmaps umgesetzt werden. 
-Die benötigten Registry-Keys lassen sich entweder durch das Auslesen bestehender Richtlinien über \texttt{Get-GPPrefRegistryValue} oder durch Dokumentationen im Internet identifizieren.\\
+Die benötigten Registry-Keys lassen sich entweder durch das Auslesen bestehender Richtlinien über \lstinline|Get-GPPrefRegistryValue| oder durch Dokumentationen im Internet identifizieren.\\
 
 Komplexer gestaltet sich die Abbildung von Netzlaufwerken. Die manuelle Konfiguration eines Netzlaufwerks führt zu einer Vielzahl an Registry-Einträgen. 
 Werden diese als Grundlage für eine neue Gruppenrichtlinie übernommen, schlägt die Umsetzung häufig fehl, sodass die Laufwerke nicht im Explorer angezeigt werden. 
@@ -252,10 +270,10 @@ Ein direkter Eingriff in einzelne Registry-Einträge ist damit nicht erforderlic
 Mit Abschluss dieser Schritte stand das Grundgerüst des Active Directory bereit, womit lediglich noch wenige Arbeitsschritte bis zur Fertigstellung des Automatisierungsskripts zur Serverstruktur erforderlich waren.\\
 
 Um den Zugriff auf die Verzeichnisse des Fileservers zu ermöglichen, wurden die Ordner zunächst freigegeben und mit den notwendigen Berechtigungen versehen.
-Die Freigabe konnte mit dem Befehl \texttt{New-SmbShare} umgesetzt werden, wobei mithilfe von Hashmaps und Schleifen Freigabename, Pfad und Berechtigungen automatisiert zugewiesen wurden.
+Die Freigabe konnte mit dem Befehl \lstinline|New-SmbShare| umgesetzt werden, wobei mithilfe von Hashmaps und Schleifen Freigabename, Pfad und Berechtigungen automatisiert zugewiesen wurden.
 Im Anschluss wurden die NTFS-Berechtigungen auf Verzeichnis- und Dateiebene konfiguriert.
-Hierfür wurden die bestehenden Rechte eines Verzeichnisses zunächst mit \texttt{Get-Acl} in einer Variablen gespeichert, anschließend über eine Hashmap neue Einträge definiert (Benutzer bzw. Gruppe, Berechtigungsumfang sowie Anwendungsbereich: Ordner, Unterordner und Dateien).
-Diese wurden in ein neues ACL-Objekt überführt und mit \texttt{Set-Acl} auf das jeweilige Verzeichnis angewendet.\\
+Hierfür wurden die bestehenden Rechte eines Verzeichnisses zunächst mit \lstinline|Get-Acl| in einer Variablen gespeichert, anschließend über eine Hashmap neue Einträge definiert (Benutzer bzw. Gruppe, Berechtigungsumfang sowie Anwendungsbereich: Ordner, Unterordner und Dateien).
+Diese wurden in ein neues ACL-Objekt überführt und mit \lstinline|Set-Acl| auf das jeweilige Verzeichnis angewendet.\\
 
 Ein Problem dieser Vorgehensweise besteht darin, dass Rechte jeweils nur für einen Ordner und eine Gruppe gleichzeitig gesetzt werden können. 
 Der Versuch, mehrere Einträge parallel zu übernehmen, führte entweder zu fehlerhaften Berechtigungen oder zu fehlenden Fehlermeldungen, sodass die Rechtevergabe stets einzeln vorgenommen werden musste. 
@@ -397,25 +415,28 @@ Doch mit der wachsenden Routine, durch die gleichen Abläufe, konnte die Zeit im
 
 \section{Technische Erkenntnisse der Skripterstellung}
 
-Während der Entwicklung und Umsetzung des Automatisierungsskripts für Hyper-V traten eine Vielzahl technischer Besonderheiten und Fallstricke auf, die bei zukünftigen Projekten berücksichtigt werden sollten. Eine grundlegende Voraussetzung für bestimmte Aktionen, wie beispielsweise den Domänenbeitritt, ist die Verwendung eindeutiger SIDs. Dies wurde durch den Einsatz von \texttt{sysprep} in Verbindung mit einer funktionierenden Antwortdatei sichergestellt. Dabei zeigte sich, dass die Antwortdatei strikt in der Reihenfolge von oben nach unten abgearbeitet wird, weshalb der \texttt{OOBE}-Abschnitt möglichst früh platziert werden sollte.  
+Während der Entwicklung und Umsetzung des Automatisierungsskripts für Hyper-V traten eine Vielzahl technischer Besonderheiten und Fallstricke auf, die bei zukünftigen Projekten berücksichtigt werden sollten. Eine grundlegende Voraussetzung für bestimmte Aktionen, wie beispielsweise den Domänenbeitritt, ist die Verwendung eindeutiger SIDs. Dies wurde durch den Einsatz von \lstinline|sysprep| in Verbindung mit einer funktionierenden Antwortdatei sichergestellt. Dabei zeigte sich, dass die Antwortdatei strikt in der Reihenfolge von oben nach unten abgearbeitet wird, weshalb der \lstinline|OOBE|-Abschnitt möglichst früh platziert werden sollte.\\  
 
-Im Bereich der Skripterstellung mit PowerShell war besonders bei der Arbeit mit GUIs und Benutzerinteraktionen Aufmerksamkeit erforderlich. So erwies es sich als sinnvoll, beim Aufbau einer RAM-Auswahl Integer-Werte in Byte-Form anzugeben, da Strings in Arrays nicht zuverlässig verarbeitet wurden. Das Rückgabeverhalten wurde über \texttt{return} angepasst, um korrekte Werte zu liefern. Außerdem zeigte sich, dass in PowerShell die Überprüfung auf \texttt{NULL} konsistent mit der Schreibweise \texttt{NULL -eq \$Variable} erfolgen sollte, um logische Fehler -- insbesondere bei Array-Prüfungen -- zu vermeiden.  
 
-GUI-Fenster verhielten sich in Bezug auf die Anzeige im Vordergrund nicht immer wie erwartet, selbst wenn die Eigenschaft \texttt{TopMost} gesetzt war. Dieses Problem wurde durch die Definition eines Mutterfensters und die gezielte Anzeige untergeordneter Fenster mit \texttt{.Add\_Shown()} gelöst. Passworteingaben ließen sich in der GUI zwar ausblenden, mussten jedoch für die weitere Verarbeitung mittels \texttt{ConvertTo-SecureString -PlainText} in ein SecureString-Format konvertiert werden. Beim Auswählen von Verzeichnissen war zu beachten, dass der Pfad über die Eigenschaft \texttt{InitialDirectory} und nicht \texttt{RootFolder} festgelegt werden muss.  
+Im Bereich der Skripterstellung mit PowerShell war besonders bei der Arbeit mit GUIs und Benutzerinteraktionen Aufmerksamkeit erforderlich. So erwies es sich als sinnvoll, beim Aufbau einer RAM-Auswahl Integer-Werte in Byte-Form anzugeben, da Strings in Arrays nicht zuverlässig verarbeitet wurden. Das Rückgabeverhalten wurde über \lstinline|return| angepasst, um korrekte Werte zu liefern. Außerdem zeigte sich, dass in PowerShell die Überprüfung auf \lstinline|NULL| konsistent mit der Schreibweise \lstinline|NULL -eq \$Variable| erfolgen sollte, um logische Fehler, insbesondere bei Array-Prüfungen,zu vermeiden. \\ 
 
-Für die Eingabevalidierung, beispielsweise bei IP-Adressen, bot sich die Nutzung regulärer Ausdrücke wie \texttt{"[0-9]+\textbackslash.[0-9]+\textbackslash.[0-9]+\textbackslash.[0-9]+"} an. Variablen, die innerhalb von Remote-Jobs oder Sessions genutzt werden, mussten mit dem Präfix \texttt{Using:} übergeben werden -- auch dann, wenn sie zuvor global deklariert wurden. Innerhalb von Strings war eine Variablenersetzung nur mit der Schreibweise \texttt{\$(Variable)} möglich. Bei Abfragen, die einen String erfordern, erwies sich die Verwendung des Parameters \texttt{-ExpandProperty} als notwendig, um Objektrückgaben zu vermeiden.  
+GUI-Fenster verhielten sich in Bezug auf die Anzeige im Vordergrund nicht immer wie erwartet, selbst wenn die Eigenschaft \lstinline|TopMost| gesetzt war. Dieses Problem wurde durch die Definition eines Mutterfensters und die gezielte Anzeige untergeordneter Fenster mit \lstinline|.Add\_Shown()| gelöst. Passworteingaben ließen sich in der GUI zwar ausblenden, mussten jedoch für die weitere Verarbeitung mittels \lstinline|ConvertTo-SecureString -PlainText| in ein SecureString-Format konvertiert werden. Beim Auswählen von Verzeichnissen war zu beachten, dass der Pfad über die Eigenschaft \lstinline|InitialDirectory| und nicht \lstinline|RootFolder| festgelegt werden muss.\\  
 
-Das Ausführen von Befehlen mit dem Parameter \texttt{-AsJob} startete Prozesse im Hintergrund, was problematisch sein konnte, wenn das Ergebnis sofort benötigt wurde. In solchen Fällen war es erforderlich, den Job aktiv zu überwachen, das Ende der Ausführung abzuwarten und anschließend den Job zu entfernen. Beim Einsatz von \texttt{Invoke-Command} konnte entweder direkt mit VM-Namen oder mit zuvor erstellten Sessions gearbeitet werden; letztere mussten nach Abschluss wieder geschlossen werden. Um Anmeldevorgänge zu vermeiden, konnten Anmeldeinformationen als \texttt{PSCredential}-Objekte hinterlegt werden. Diese wurden über \texttt{New-Object} erstellt, wobei das Passwort als SecureString abgefragt und zusammen mit dem Benutzernamen in einer Variablen gespeichert wurde.  
+Für die Eingabevalidierung, beispielsweise bei IP-Adressen, bot sich die Nutzung regulärer Ausdrücke wie \lstinline|"[0-9]+\textbackslash.[0-9]+\textbackslash.[0-9]+\textbackslash.[0-9]+"| an. Variablen, die innerhalb von Remote-Jobs oder Sessions genutzt werden, mussten mit dem Präfix \lstinline|Using:| übergeben werden -- auch dann, wenn sie zuvor global deklariert wurden. Innerhalb von Strings war eine Variablenersetzung nur mit der Schreibweise \lstinline|\$(Variable)| möglich. Bei Abfragen, die einen String erfordern, erwies sich die Verwendung des Parameters \lstinline|-ExpandProperty| als notwendig, um Objektrückgaben zu vermeiden.\\  
 
-Vor der Ausführung des Skripts wurde geprüft, ob es in einer administrativen Sitzung lief. Falls nicht, wurde es über \texttt{Start-Process} mit dem Verb \texttt{RunAs} neu gestartet. Für eine einheitliche Protokollierung wurde eine Log-Funktion erstellt, die Zeitstempel im Format \texttt{"[dd/MM/yy HH:mm:ss]"} generierte. Nicht benötigte Ausgaben wurden konsequent mit \texttt{| Out-Null} unterdrückt.  
+Das Ausführen von Befehlen mit dem Parameter \lstinline|-AsJob| startete Prozesse im Hintergrund, was problematisch sein konnte, wenn das Ergebnis sofort benötigt wurde. In solchen Fällen war es erforderlich, den Job aktiv zu überwachen, das Ende der Ausführung abzuwarten und anschließend den Job zu entfernen. Beim Einsatz von \lstinline|Invoke-Command| konnte entweder direkt mit VM-Namen oder mit zuvor erstellten Sessions gearbeitet werden; letztere mussten nach Abschluss wieder geschlossen werden. Um Anmeldevorgänge zu vermeiden, konnten Anmeldeinformationen als \lstinline|PSCredential|-Objekte hinterlegt werden. Diese wurden über \lstinline|New-Object| erstellt, wobei das Passwort als SecureString abgefragt und zusammen mit dem Benutzernamen in einer Variablen gespeichert wurde. \\ 
 
-Netzwerkanpassungen innerhalb von Windows-VMs erfolgten mit \texttt{New-NetIPAddress} anstelle von \texttt{Set-NetIPAddress}. Um Dateien vom Hyper-V-Host auf eine VM zu übertragen, musste die Gastdienstschnittstelle aktiviert werden, was über \texttt{Enable-VMIntegrationService} möglich war. Anschließend konnte der Kopiervorgang mit \texttt{Copy-VMFile} durchgeführt werden, wobei Systempfade nur indirekt beschreibbar waren.  
+Vor der Ausführung des Skripts wurde geprüft, ob es in einer administrativen Sitzung lief. Falls nicht, wurde es über \lstinline|Start-Process| mit dem Verb \lstinline|RunAs| neu gestartet. Für eine einheitliche Protokollierung wurde eine Log-Funktion erstellt, die Zeitstempel im Format \lstinline|"[dd/MM/yy HH:mm:ss]"| generierte. Nicht benötigte Ausgaben wurden konsequent mit \lstinline|| Out-Null| unterdrückt. \\ 
+
+Netzwerkanpassungen innerhalb von Windows-VMs erfolgten mit \lstinline|New-\allowbreak Net\allowbreak IPAddress| anstelle von \lstinline|Set-NetIPAddress|. Um Dateien vom Hyper-V-Host auf eine VM zu übertragen, musste die Gastdienstschnittstelle aktiviert werden, was über \lstinline|Enable-VMIntegrationService| möglich war. Anschließend konnte der Kopiervorgang mit \lstinline|Copy-VMFile| durchgeführt werden, wobei Systempfade nur indirekt beschreibbar waren.  
 
 Die Installation bestimmter Serverrollen, wie des Dateiservers, war nur über XML-basierte Konfigurationen möglich. Remote Desktop Services (RDS) konnten vom Domänencontroller auf den Terminalserver installiert werden, wobei zusätzliche Konfigurationen -- etwa Session Collections, RDS-Lizenzierung und Neustarts des Verwaltungsdienstes -- direkt auf dem TS erfolgten.  
 
-Weitere Besonderheiten betrafen die Handhabung von Strings, Hash-Tabellen und VM-Eigenschaften: Beim Splitten eines Strings am Punkt musste der Punkt mit \texttt{"\textbackslash."} escaped werden. VMs konnten vollständig aus Hash-Tabellen heraus erstellt werden, wobei CPU-Anpassungen erst nach der Erstellung und MAC-Adressänderungen nur nach dem ersten Start möglich waren. Neue virtuelle Festplatten wurden per \texttt{Add-VMHardDiskDrive} angebunden, anschließend online geschaltet, benannt, mit einem Laufwerksbuchstaben versehen und formatiert.  
+Weitere Besonderheiten betrafen die Handhabung von Strings, Hash-Tabellen und VM-Eigenschaften: Beim Splitten eines Strings am Punkt musste der Punkt mit \lstinline|"\textbackslash."| escaped werden. VMs konnten vollständig aus Hash-Tabellen heraus erstellt werden, wobei CPU-Anpassungen erst nach der Erstellung und MAC-Adressänderungen nur nach dem ersten Start möglich waren. Neue virtuelle Festplatten wurden per \lstinline|Add-VMHardDiskDrive| angebunden, anschließend online geschaltet, benannt, mit einem Laufwerksbuchstaben versehen und formatiert.  
 
 Passwörter von Active-Directory-Konten ließen sich nicht ohne Weiteres zurücksetzen, während lokale Passwörter per Remote- oder PowerShell-Direct-Zugriff problemlos geändert werden konnten. Bestimmte Installationsfehlermeldungen bei RDS ließen sich möglicherweise auf fehlende Lizenzserverkonfigurationen zurückführen.\\
+
+\newpage
 
 \section{Fazit}
 
