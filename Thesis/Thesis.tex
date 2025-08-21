@@ -432,7 +432,9 @@ Netzwerkanpassungen innerhalb von Windows-VMs erfolgten mit \lstinline|New-\allo
 
 Die Installation bestimmter Serverrollen, wie des Dateiservers, war nur über XML-basierte Konfigurationen möglich. Remote Desktop Services (RDS) konnten vom Domänencontroller auf den Terminalserver installiert werden, wobei zusätzliche Konfigurationen -- etwa Session Collections, RDS-Lizenzierung und Neustarts des Verwaltungsdienstes -- direkt auf dem TS erfolgten.  
 
-Weitere Besonderheiten betrafen die Handhabung von Strings, Hash-Tabellen und VM-Eigenschaften: Beim Splitten eines Strings am Punkt musste der Punkt mit \lstinline|"\textbackslash."| escaped werden. VMs konnten vollständig aus Hash-Tabellen heraus erstellt werden, wobei CPU-Anpassungen erst nach der Erstellung und MAC-Adressänderungen nur nach dem ersten Start möglich waren. Neue virtuelle Festplatten wurden per \lstinline|Add-VMHardDiskDrive| angebunden, anschließend online geschaltet, benannt, mit einem Laufwerksbuchstaben versehen und formatiert. \\
+Weitere Besonderheiten betrafen die Handhabung von Strings, Hash-Tabellen und VM-Eigenschaften: Beim Splitten eines Strings am Punkt musste der Punkt escaped werden. 
+
+VMs konnten vollständig aus Hash-Tabellen heraus erstellt werden, wobei CPU-Anpassungen erst nach der Erstellung und MAC-Adressänderungen nach dem ersten Start möglich waren. Neue virtuelle Festplatten wurden per \lstinline|Add-VMHardDiskDrive| angebunden, anschließend online geschaltet, benannt, mit einem Laufwerksbuchstaben versehen und formatiert. \\
 
 Passwörter von Active-Directory-Konten ließen sich nicht ohne Weiteres zurücksetzen, während lokale Passwörter per Remote- oder PowerShell-Direct-Zugriff problemlos geändert werden konnten. Bestimmte Installationsfehlermeldungen bei RDS ließen sich möglicherweise auf fehlende Lizenzserverkonfigurationen zurückführen.\\
 
