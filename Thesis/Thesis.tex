@@ -89,7 +89,7 @@
 
     % === AUTOR UND HOCHSCHULE ===
     \begin{center}
-        \normalsize % (Standardgröße) — du kannst hier z. B. \large draus machen
+        \normalsize % (Standardgrö\ss e) — du kannst hier z. B. \large draus machen
         von\\[2ex]
         {\bfseries\large\fontsize{14pt}{16pt}\selectfont Kevin Hübner}\\[2ex]
         Matrikelnummer: 570746\\[4ex]
@@ -136,7 +136,7 @@ Besonders kleine und mittelständische Unternehmen sind jedoch häufig damit aus
 
 Die Idee zu dieser Arbeit entstand aus praktischen Erfahrungen in der Windows Server-Administration, insbesondere im Umgang mit Hyper-V in Server Umgebungen. In der bisherigen Vorgehensweise erfolgt die Bereitstellung neuer virtueller Maschinen (VMs) vollständig manuell – von der Erstellung der VM über die Installation des Betriebssystems bis hin zur Konfiguration der benötigten Rollen und Dienste.\\
 
-Ein typisches Szenario ergibt sich bei der Einrichtung eines neuen Kunden im Rechenzentrum. Standardmäßig werden dabei drei VMs eingerichtet: ein Domänencontroller (DC), ein Dateiserver (FS) sowie ein Terminalserver (TS). Diese klare Trennung der Rollen bietet Vorteile hinsichtlich Übersichtlichkeit, Lastverteilung und Sicherheit.
+Ein typisches Szenario ergibt sich bei der Einrichtung eines neuen Kunden im Rechenzentrum. Standardmä\ss ig werden dabei drei VMs eingerichtet: ein Domänencontroller (DC), ein Dateiserver (FS) sowie ein Terminalserver (TS). Diese klare Trennung der Rollen bietet Vorteile hinsichtlich Übersichtlichkeit, Lastverteilung und Sicherheit.
 Die manuelle Einrichtung umfasst jedoch zahlreiche wiederkehrende Arbeitsschritte, wie die Vergabe statischer IP-Adressen, die Umbenennung der Rechner, die Einbindung zusätzlicher Festplatten, die Erstellung von Standard-Benutzern und -Gruppen sowie die Konfiguration von Gruppenrichtlinien und Ordnerberechtigungen.
 Hinzu kommt, dass kundenspezifische Anwendungen wie DATEV besondere Anforderungen stellen, beispielsweise durch den Einsatz von SQL-Datenbanken. Diese zusätzlichen Konfigurationen erhöhen den manuellen Aufwand erheblich.\\
 
@@ -154,18 +154,19 @@ Ziel dieser Arbeit ist es daher, ein strukturiertes, skriptbasiertes Vorgehen f�
 \subsection{Windows Hyper-V}
 
 
-Hyper-V ist eine unter Windows verfügbare Virtualisierungsplattform, die als optionale Server- bzw. Client-Rolle bereitgestellt werden kann (z. B. in Windows 10/11 Pro oder Windows Server-Versionen). Nach der Installation stellt Hyper-V eine hardware­nahe Virtualisierungstechnologie bereit, die es ermöglicht, mehrere virtuelle Maschinen (VMs) parallel auf einem Hostsystem auszuführen. Dabei können unterschiedliche Betriebssysteme als Gastbetriebssysteme installiert werden.
+Hyper-V ist eine unter Windows verfügbare Virtualisierungsplattform. die als optionale Server- bzw. Client-Rolle bereitgestellt werden kann (z.B. in Windows 10/11 Pro oder Windows Server-Versionen). Nach der Installation stellt Hyper-V eine hardwarenahe Virtualisierungstechnologie bereit, die es ermöglicht, mehrere virtuelle Maschinen (VMs) parallel auf einem Hostsystem auszuführen. Dabei können unterschiedliche Betriebssysteme Gastbetriebssysteme installiert werden.
+
 
 Der Hypervisor von Microsoft ist als sogenannte Typ‑1-Hypervisor-Architektur realisiert. Treiber sind dabei nicht direkt im Hypervisor selbst integriert, sondern im Management-Betriebssystem, der sogenannten Parent Partition. Gastbetriebssysteme, die in Child Partitions laufen, kommunizieren mit der Hardware nicht unmittelbar, sondern über den VMBus. Dieser Mechanismus überträgt Ein- und Ausgaben (I/O-Operationen) effizient zwischen Host und Gast und reduziert potenzielle Treiberkonflikte, da der Hypervisor isoliert unterhalb des Betriebssystems, aber oberhalb der Hardware arbeitet.
 
-Hyper-V unterstützt verschiedene Formate virtueller Festplatten (VHD/VHDX), die entweder mit fester Größe oder dynamisch wachsend bereitgestellt werden können. Dynamische Datenträger bieten den Vorteil, dass der Speicher auch im laufenden Betrieb der virtuellen Maschine erweitert werden kann. Zusätzlich können physische Festplatten direkt eingebunden werden; die dabei auftretenden Performanceverluste sind vergleichsweise gering.\cite{}\\
+Hyper-V unterstützt verschiedene Formate virtueller Festplatten (VHD/VHDX), die entweder mit fester Grö\ss e oder dynamisch wachsend bereitgestellt werden können. Dynamische Datenträger bieten den Vorteil, dass der Speicher auch im laufenden Betrieb der virtuellen Maschine erweitert werden kann. Zusätzlich können physische Festplatten direkt eingebunden werden; die dabei auftretenden Performanceverluste sind vergleichsweise gering.\cite{fayyad2013benchmarking,haga2011windows,aldhamenwindows}\\
 
 
 
 
 \subsection{Windows Powershell}
 
-Die erste Veröffentlichung von PowerShell erfolgte im Jahr 2006 mit Version 1.0. Mit Windows 10 wurde PowerShell 5.0 standardmäßig in das Betriebssystem integriert, ebenso in Windows Server 2012. Bis heute ist in aktuellen Windows-Versionen, wie Windows 11 sowie Windows Server 2025, PowerShell 5.1 weiterhin als Bestandteil enthalten. Parallel dazu wird die plattformübergreifende Weiterentwicklung unter der Bezeichnung „PowerShell“ (früher „PowerShell Core“) aktiv gepflegt; die derzeit aktuelle Version ist 7.5.2.
+Die erste Veröffentlichung von PowerShell erfolgte im Jahr 2006 mit Version 1.0. Mit Windows 10 wurde PowerShell 5.0 standardmä\ss ig in das Betriebssystem integriert, ebenso in Windows Server 2012. Bis heute ist in aktuellen Windows-Versionen, wie Windows 11 sowie Windows Server 2025, PowerShell 5.1 weiterhin als Bestandteil enthalten. Parallel dazu wird die plattformübergreifende Weiterentwicklung unter der Bezeichnung „PowerShell“ (früher „PowerShell Core“) aktiv gepflegt; die derzeit aktuelle Version ist 7.5.2.
 
 PowerShell stellt für Windows-Systeme eine funktionale Entsprechung zur klassischen Shell in Unix/Linux-Umgebungen dar und hat sich in den letzten Jahren von einem Administrationswerkzeug zu einer vollwertigen Automatisierungsplattform entwickelt. Die Befehle, sogenannte „Cmdlets“, folgen einem objektorientierten Ansatz, da sie .NET-Objekte zurückgeben. Dies ermöglicht eine direkte Weiterverarbeitung über die Pipeline, die funktional an Unix-Shells erinnert, jedoch nicht mit Textströmen, sondern mit Objekten arbeitet. Dadurch können Eigenschaften und Methoden von Objekten mit dem Punkt-Operator gezielt angesprochen werden.
 
@@ -213,14 +214,14 @@ Im Rahmen der Skripterstellung wurde zunächst ein VM-Template erstellt. Mit dem
 Ein wesentlicher Bestandteil dieses Schrittes war die Erstellung einer Antwortdatei (Unattend-XML), die im späteren Prozess die automatisierte Erstkonfiguration ermöglicht.\\
 
 Zur Generierung der Antwortdatei wurde die Windows-Server-ISO eingebunden und mit dem Windows System Image Manager das darin enthaltene Abbild (install.wim) geladen.
-Anschließend wurde die Zieledition „Server Standard“ ausgewählt, da diese als Grundlage für die Kunden-VMs vorgesehen ist. Vor der Definition der eigentlichen Antwortdatei wurde eine Katalogdatei erzeugt.
+Anschlie\ss end wurde die Zieledition „Server Standard“ ausgewählt, da diese als Grundlage für die Kunden-VMs vorgesehen ist. Vor der Definition der eigentlichen Antwortdatei wurde eine Katalogdatei erzeugt.
 Innerhalb der Antwortdatei wurden die relevanten Konfigurationsoptionen integriert. Diese sind im Bereich Microsoft-Windows-Shell-Setup zu finden.
 Dabei lag der Fokus auf dem Abschnitt OOBE, um Ersteinrichtungsoptionen wie Tastaturlayout und Sprache zu überspringen. Zusätzlich wurden noch lokale Benutzerkonten angelegt. 
 Nach Erstellung der XML-Datei wurde diese, der Installation im Audit-Modus hinzugefügt.\\
 
-Die vollständige XML-Datei wurde im Sysprep Verzeichnis (Sysprep, i.d.R. unter \verb|C:\Windows\System32\Sysprep|
+Die vollständige XML-Datei wurde im Sysprep Verzeichnis (Sysprep, i.d.R. unter \lstinline|C:\Windows\System32\Sysprep|
 ) gespeichert. Sysprep ist ein Windows eigenes Tool, welches zur Vorbereitung von Windowssystemen dient.
-Anschließend erfolgte die Ausführung von Sysprep mit den Parametern \lstinline|/oobe, /generalize, /shutdown /unattend:(Pfad zur XML-Datei)|. 
+Anschlie\ss end erfolgte die Ausführung von Sysprep mit den Parametern \lstinline|/oobe, /generalize, /shutdown /unattend:(Pfad zur XML-Datei)|. 
 Dadurch wurde die Windows-Installation generalisiert und von der spezifischen VM Umgebung entkoppelt. 
 Die einmalige Erstellung und Konfiguration beanspruchte auf einem leistungsfähigen System etwa fünf bis zehn Minuten.
 Das ist die Zeit um Windows-Server auf der VM zu installieren und mit der Tastenkombination STRG+Shift+F3, während der Abfrage des Administratorpassworts, in den Audit-Modus zu wechseln.
@@ -245,7 +246,7 @@ Da bereits eine vorbereitete VHDX-Datei für die Bootpartition vorliegt, muss di
 Dafür muss die vorbereitete VHD(X)-Datei an den vorgesehenen Speicherort kopiert werden und bei der Erstellung der VM muss der Pfad zu dieser Kopie angegeben werden.
 Für den Fileserver wurde zusätzlich eine separate Festplatte eingerichtet, die der Speicherung der Nutzerdaten dient und entsprechend in das System eingebunden wird.
 Die Konfiguration über PowerShell erforderte somit lediglich Schritte, die auch über die grafische Oberfläche ausgeführt werden könnten.
-Anschließend erfolgt die Zuweisung von Ressourcen wie Arbeitsspeicher und Prozessoranzahl.
+Anschlie\ss end erfolgt die Zuweisung von Ressourcen wie Arbeitsspeicher und Prozessoranzahl.
 Für jede neue VM wird dieser Prozess identisch durchgeführt, wodurch sich manuelle Vorgehensweisen mit den PowerShell-basierten Methoden vergleichen lassen.
 Jedoch wird die Erstellung von mehreren VMs durch ein Skript erheblich vereinfacht, da die Schritte automatisiert und in einer Schleife ausgeführt werden können.\\
 
@@ -253,7 +254,7 @@ Vor dem Einstieg in weitere Schritte war eine zusätzliche Anpassung hinsichtlic
 Da die Systeme über TeamViewer verwaltet werden, musste für den Netzwerkadapter jeder VM eine statische MAC-Adresse vergeben werden.
 Dies verhindert, dass die Systeme aus der Geräteliste in TeamViewer verschwinden.
 Um die MAC-Adresse zuweisen zu können, wird die VM einmalig gestartet, sodass Windows eine temporäre Adresse generiert.
-Anschließend wird die Maschine heruntergefahren und in Hyper-V die MAC-Adresse auf statisch gesetzt.
+Anschlie\ss end wird die Maschine heruntergefahren und in Hyper-V die MAC-Adresse auf statisch gesetzt.
 Danach kann der reguläre Arbeitsablauf fortgesetzt werden.
 
 \subsection{Verzeichnisstruktur und Logdateien}
@@ -266,7 +267,7 @@ Die Umsetzung basiert auf einfachem File Handling, wobei neue Verzeichnisse mit 
 
 Neben der Verzeichnisstruktur wird für jeden Kunden zusätzlich ein Logfile eingerichtet. 
 Dieses ermöglicht sowohl die Nachverfolgung des Skriptablaufs als auch die Identifikation möglicher Fehlerquellen oder Prozessunterbrechungen. 
-Da das VHD(X)-Template für die VM-Erstellung standardmäßig die Datei unattend.xml enthält, in der Administratorpasswörter hinterlegt sind, entsteht ein nicht zu vernachlässigendes Sicherheitsrisiko. 
+Da das VHD(X)-Template für die VM-Erstellung standardmä\ss ig die Datei unattend.xml enthält, in der Administratorpasswörter hinterlegt sind, entsteht ein nicht zu vernachlässigendes Sicherheitsrisiko. 
 Um dies zu vermeiden, wird die unattend.xml nach erfolgreicher Erstellung der Kundenordner sowie der zugehörigen VM mithilfe einer im Skript implementierten Funktion wieder gelöscht.\\
 
 Für die erfolgreiche Automatisierung war es erforderlich, dass bestimmte XML- und Konfigurationsdateien auf den Zielsystemen verfügbar sind. 
@@ -285,7 +286,7 @@ Die Einrichtung des Domain Controllers basiert ebenfalls auf PowerShell.
 Bei einer manuellen Installation lässt sich vor der Heraufstufung ein Skript generieren, das die durchgeführten Arbeitsschritte abbildet. 
 Dieses Vorgehen bietet wertvolle Einblicke in die notwendigen Befehle, zusätzlich stehen umfassende Informationen in der offiziellen Microsoft-Dokumentation zur Verfügung. 
 Für die automatisierte Konfiguration wurde eine Hashmap erstellt, die alle erforderlichen Parameter wie Domänenname, NetBIOS-Name, DSRM-Passwort sowie Pfade für System- und Logdateien enthält. 
-Anschließend wurde die benötigte Rolle installiert und der Domain Controller mittels \lstinline|Install-ADDSForest| heraufgestuft. 
+Anschlie\ss end wurde die benötigte Rolle installiert und der Domain Controller mittels \lstinline|Install-ADDSForest| heraufgestuft. 
 Nach einem Neustart stand damit die Grundkonfiguration zur Verfügung. Vor dem Neustart wurde zudem der Google-DNS-Server (8.8.8.8) in die Liste der Weiterleitungen aufgenommen.\\
 
 Zum betrachteten Zeitpunkt standen bereits drei VMs zur Verfügung, von denen zwei mit den vorgesehenen Rollen ausgestattet waren und ein funktionsfähiger Domain Controller bereitgestellt war. 
@@ -294,7 +295,7 @@ Dies konnte mit einer dedizierten PowerShell-Funktion erreicht werden, die unter
 
 Nach erfolgreichem Domänenbeitritt der Systeme folgte die Vorbereitung des Fileservers. 
 Hierzu wurde die zusätzliche Festplatte zunächst online geschaltet und mit dem Partitionsstil GPT initialisiert. 
-Anschließend wurde die gesamte Speicherkapazität in einer Partition zusammengefasst, die mit einem Laufwerksbuchstaben (im Skript: D:) und einer eindeutigen Bezeichnung („Daten“) versehen wurde. 
+Anschlie\ss end wurde die gesamte Speicherkapazität in einer Partition zusammengefasst, die mit einem Laufwerksbuchstaben (im Skript: D:) und einer eindeutigen Bezeichnung („Daten“) versehen wurde. 
 In diesem Verzeichnis wurden standardisierte Basisordner angelegt, die später als Grundlage für Freigaben dienen. 
 Da Freigaben mit bestimmten Active-Directory-Gruppen verknüpft sind, war zuvor eine grundlegende AD-Struktur zu etablieren.\\
 
@@ -309,7 +310,7 @@ Die benötigten Registry-Keys lassen sich entweder durch das Auslesen bestehende
 Komplexer gestaltet sich die Abbildung von Netzlaufwerken. Die manuelle Konfiguration eines Netzlaufwerks führt zu einer Vielzahl an Registry-Einträgen. 
 Werden diese als Grundlage für eine neue Gruppenrichtlinie übernommen, schlägt die Umsetzung häufig fehl, sodass die Laufwerke nicht im Explorer angezeigt werden. 
 Dadurch werden sie für Endnutzer unbrauchbar. 
-Um dieses Problem zu umgehen, wurde eine bereits funktionierende Gruppenrichtlinie mit den Netzlaufwerken aus einem bestehenden System exportiert, in die VM des Domain Controllers übertragen, an die SID der neuen Domäne angepasst und anschließend importiert.\\
+Um dieses Problem zu umgehen, wurde eine bereits funktionierende Gruppenrichtlinie mit den Netzlaufwerken aus einem bestehenden System exportiert, in die VM des Domain Controllers übertragen, an die SID der neuen Domäne angepasst und anschlie\ss end importiert.\\
 
 Die importierten Gruppenrichtlinien (GPOs) verhalten sich nach der Anpassung der SIDs wie manuell erstellte Richtlinien. 
 Ein direkter Eingriff in einzelne Registry-Einträge ist damit nicht erforderlich, da die XML-Dateien der GPOs in einer Schleife verarbeitet und die enthaltenen Gruppen angepasst werden können. 
@@ -318,7 +319,7 @@ Mit Abschluss dieser Schritte stand das Grundgerüst des Active Directory bereit
 Um den Zugriff auf die Verzeichnisse des Fileservers zu ermöglichen, wurden die Ordner zunächst freigegeben und mit den notwendigen Berechtigungen versehen.
 Die Freigabe konnte mit dem Befehl \lstinline|New-SmbShare| umgesetzt werden, wobei mithilfe von Hashmaps und Schleifen Freigabename, Pfad und Berechtigungen automatisiert zugewiesen wurden.
 Im Anschluss wurden die NTFS-Berechtigungen auf Verzeichnis- und Dateiebene konfiguriert.
-Hierfür wurden die bestehenden Rechte eines Verzeichnisses zunächst mit \lstinline|Get-Acl| in einer Variablen gespeichert, anschließend über eine Hashmap neue Einträge definiert (Benutzer bzw. Gruppe, Berechtigungsumfang sowie Anwendungsbereich: Ordner, Unterordner und Dateien).
+Hierfür wurden die bestehenden Rechte eines Verzeichnisses zunächst mit \lstinline|Get-Acl| in einer Variablen gespeichert, anschlie\ss end über eine Hashmap neue Einträge definiert (Benutzer bzw. Gruppe, Berechtigungsumfang sowie Anwendungsbereich: Ordner, Unterordner und Dateien).
 Diese wurden in ein neues ACL-Objekt überführt und mit \lstinline|Set-Acl| auf das jeweilige Verzeichnis angewendet.\\
 
 Ein Problem dieser Vorgehensweise besteht darin, dass Rechte jeweils nur für einen Ordner und eine Gruppe gleichzeitig gesetzt werden können. 
@@ -326,12 +327,12 @@ Der Versuch, mehrere Einträge parallel zu übernehmen, führte entweder zu fehl
 Nach der Umsetzung der Freigaben und NTFS-Berechtigungen verblieb als letzter Bestandteil die Einrichtung des Terminalservers.\\
 
 Die Installation der dazugehörigen Rollen konnte nicht vollständig innerhalb des Gastesystems über PowerShell-Befehle erfolgen. 
-Stattdessen wurden die Rollen mithilfe von PowerShell Direct über den Hyper-V-Host remote in die VM installiert und anschließend konfiguriert. 
+Stattdessen wurden die Rollen mithilfe von PowerShell Direct über den Hyper-V-Host remote in die VM installiert und anschlie\ss end konfiguriert. 
 Damit konnte eine funktionsfähige Terminalserver-Umgebung bereitgestellt werden, wenngleich die Lizenzierungskonfiguration nicht Teil des Skripts war. 
 Auch ohne diese Konfiguration ist eine Anmeldung mittels Remotedesktop für einzelne Benutzer möglich, wodurch Kernfunktionen des Terminalservers zur Verfügung stehen.\\
 
 Zum Abschluss wurden sämtliche VMs einmalig neu gestartet, um einen einheitlichen Betriebszustand herzustellen und alle Konfigurationen sowie Änderungen, die einen Neustart erforderten, gültig zu machen. 
-Lediglich beim Terminalserver besteht eine geringe Wahrscheinlichkeit, dass der Dienst "Remotedesktopverwaltung" nach dem Neustart nicht ordnungsgemäß ausgeführt wird. 
+Lediglich beim Terminalserver besteht eine geringe Wahrscheinlichkeit, dass der Dienst "Remotedesktopverwaltung" nach dem Neustart nicht ordnungsgemä\ss  ausgeführt wird. 
 Da im Anschluss an die Grundkonfiguration jedoch weitere Installationen und Anpassungen erfolgen, wird dieses Restrisiko als vernachlässigbar eingestuft.\\
 
 Das Skript verfügt darüber hinaus über ein grafisches Benutzerinterface (GUI), welches die zu Beginn der Einrichtung erforderlichen Eingaben für die Erstellung der virtuellen Maschinen zentral abfragt. 
@@ -450,7 +451,7 @@ Skript-Ende & 0:43:11 & 0:43:29 & 1:09:41 & 0:43:08 & 0:41:37 \\ \hline
 \end{table}
 
 
-\subsection{Testumgebung Server 2}
+
 
 \begin{table}[H]
 \centering
@@ -486,14 +487,14 @@ Skript-Ende & 0:32:01 & 0:29:31 & 0:32:35 & 0:54:02 & 0:31:29 \\ \hline
 
 
 Die Messungen der Skriptausführungszeiten in den drei unterschiedlichen Testumgebungen zeigen deutliche Unterschiede in der Performance, die auf die jeweiligen Hardware- und Netzwerkkonfigurationen zurückzuführen sein dürften. 
-In der häuslichen Testumgebung lagen die Gesamtdauern der Skriptdurchläufe zwischen 18:33 und 19:10 Minuten \citep{tab:server_times}. 
+In der häuslichen Testumgebung lagen die Gesamtdauern der Skriptdurchläufe zwischen 18:33 und 19:10 Minuten (siehe \autoref{tab:server_times}). 
 Die einzelnen Schritte, wie das Erstellen und Anpassen der VMs oder die Initialisierung von Windows, dauerten hier nur wenige Sekunden bis wenige Minuten, was auf eine schnelle lokale Verarbeitung und geringe Latenzen hinweist.
 
 Im Vergleich dazu zeigten die Tests auf Server 1 signifikant längere Ausführungszeiten. 
-Die Gesamtdauer bewegte sich zwischen 41:37 und 1:09:41 Stunden \citep{tab:server_times1}, was insbesondere bei den Schritten „Domain beigetreten“ und „TS installiert“ deutlich sichtbar wird. 
+Die Gesamtdauer bewegte sich zwischen 41:37 und 1:09:41 Stunden (siehe \autoref{tab:server_times1}), was insbesondere bei den Schritten „Domain beigetreten“ und „TS installiert“ deutlich sichtbar wird. 
 Die erhöhte Dauer lässt sich vermutlich durch Netzwerkverzögerungen, höhere Serverlast oder parallele Prozesse erklären, die die Skriptausführung verlangsamen.
 
-Die Testumgebung auf Server 2 zeigte hingegen eine moderate Ausführungszeit zwischen 29:00 und 31:53 Minuten \citep{tab:server_times2}. 
+Die Testumgebung auf Server 2 zeigte hingegen eine moderate Ausführungszeit zwischen 29:00 und 31:53 Minuten (siehe \autoref{tab:server_times2}). 
 Die Schritte „VMs erstellt“ und „Windows Initialisierung fertig“ beanspruchten hier vergleichsweise mehr Zeit als in der häuslichen Umgebung, jedoch deutlich weniger als auf Server 1. 
 Dies deutet auf eine Serverkonfiguration hin, die effizienter arbeitet als Server 1, jedoch langsamer ist als die lokale Umgebung.
 
@@ -513,25 +514,25 @@ Das ist jedoch kein Vergleich zu der Automatisierung durch das Skript\\
 Während der Entwicklung und Umsetzung des Automatisierungsskripts für Hyper-V traten eine Vielzahl technischer Besonderheiten und Fallstricke auf, die bei zukünftigen Projekten berücksichtigt werden sollten. Eine grundlegende Voraussetzung für bestimmte Aktionen, wie beispielsweise den Domänenbeitritt, ist die Verwendung eindeutiger SIDs. Dies wurde durch den Einsatz von \lstinline|sysprep| in Verbindung mit einer funktionierenden Antwortdatei sichergestellt. Dabei zeigte sich, dass die Antwortdatei strikt in der Reihenfolge von oben nach unten abgearbeitet wird, weshalb der \lstinline|OOBE|-Abschnitt möglichst früh platziert werden sollte.\\  
 
 
-Im Bereich der Skripterstellung mit PowerShell war besonders bei der Arbeit mit GUIs und Benutzerinteraktionen Aufmerksamkeit erforderlich. So erwies es sich als sinnvoll, beim Aufbau einer RAM-Auswahl Integer-Werte in Byte-Form anzugeben, da Strings in Arrays nicht zuverlässig verarbeitet wurden. Das Rückgabeverhalten wurde über \lstinline|return| angepasst, um korrekte Werte zu liefern. Außerdem zeigte sich, dass in PowerShell die Überprüfung auf \lstinline|NULL| konsistent mit der Schreibweise \lstinline|NULL -eq \$Variable| erfolgen sollte, um logische Fehler, insbesondere bei Array-Prüfungen,zu vermeiden. \\ 
+Im Bereich der Skripterstellung mit PowerShell war besonders bei der Arbeit mit GUIs und Benutzerinteraktionen Aufmerksamkeit erforderlich. So erwies es sich als sinnvoll, beim Aufbau einer RAM-Auswahl Integer-Werte in Byte-Form anzugeben, da Strings in Arrays nicht zuverlässig verarbeitet wurden. Das Rückgabeverhalten wurde über \lstinline|return| angepasst, um korrekte Werte zu liefern. Au\ss erdem zeigte sich, dass in PowerShell die Überprüfung auf \lstinline|NULL| konsistent mit der Schreibweise \lstinline|NULL -eq \$Variable| erfolgen sollte, um logische Fehler, insbesondere bei Array-Prüfungen,zu vermeiden. \\ 
 
-GUI-Fenster verhielten sich in Bezug auf die Anzeige im Vordergrund nicht immer wie erwartet, selbst wenn die Eigenschaft \lstinline|TopMost| gesetzt war. Dieses Problem wurde durch die Definition eines Mutterfensters und die gezielte Anzeige untergeordneter Fenster mit \lstinline|.Add\_Shown()| gelöst. Passworteingaben ließen sich in der GUI zwar ausblenden, mussten jedoch für die weitere Verarbeitung mittels \lstinline|ConvertTo-SecureString -PlainText| in ein SecureString-Format konvertiert werden. Beim Auswählen von Verzeichnissen war zu beachten, dass der Pfad über die Eigenschaft \lstinline|InitialDirectory| und nicht \lstinline|Root Folder| festgelegt werden muss.\\  
+GUI-Fenster verhielten sich in Bezug auf die Anzeige im Vordergrund nicht immer wie erwartet, selbst wenn die Eigenschaft \lstinline|TopMost| gesetzt war. Dieses Problem wurde durch die Definition eines Mutterfensters und die gezielte Anzeige untergeordneter Fenster mit \lstinline|.Add\_Shown()| gelöst. Passworteingaben lie\ss en sich in der GUI zwar ausblenden, mussten jedoch für die weitere Verarbeitung mittels \lstinline|ConvertTo-SecureString -PlainText| in ein SecureString-Format konvertiert werden. Beim Auswählen von Verzeichnissen war zu beachten, dass der Pfad über die Eigenschaft \lstinline|InitialDirectory| und nicht \lstinline|Root Folder| festgelegt werden muss.\\  
 
 Für die Eingabevalidierung, beispielsweise bei IP-Adressen, bot sich die Nutzung regulärer Ausdrücke wie \lstinline|"[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+"| an. Variablen, die innerhalb von Remote-Jobs oder Sessions genutzt werden, mussten mit dem Präfix \lstinline|Using:| übergeben werden -- auch dann, wenn sie zuvor global deklariert wurden. Innerhalb von Strings war eine Variablenersetzung nur mit der Schreibweise \lstinline|\$(Variable)| möglich. Bei Abfragen, die einen String erfordern, erwies sich die Verwendung des Parameters \lstinline|-ExpandProperty| als notwendig, um Objektrückgaben zu vermeiden.\\  
 
-Das Ausführen von Befehlen mit dem Parameter \lstinline|-AsJob| startete Prozesse im Hintergrund, was problematisch sein konnte, wenn das Ergebnis sofort benötigt wurde. In solchen Fällen war es erforderlich, den Job aktiv zu überwachen, das Ende der Ausführung abzuwarten und anschließend den Job zu entfernen. Beim Einsatz von \lstinline|Invoke-Command| konnte entweder direkt mit VM-Namen oder mit zuvor erstellten Sessions gearbeitet werden; letztere mussten nach Abschluss wieder geschlossen werden. Um Anmeldevorgänge zu vermeiden, konnten Anmeldeinformationen als \lstinline|PSCredential|-Objekte hinterlegt werden. Diese wurden über \lstinline|New-Object| erstellt, wobei das Passwort als SecureString abgefragt und zusammen mit dem Benutzernamen in einer Variablen gespeichert wurde. \\ 
+Das Ausführen von Befehlen mit dem Parameter \lstinline|-AsJob| startete Prozesse im Hintergrund, was problematisch sein konnte, wenn das Ergebnis sofort benötigt wurde. In solchen Fällen war es erforderlich, den Job aktiv zu überwachen, das Ende der Ausführung abzuwarten und anschlie\ss end den Job zu entfernen. Beim Einsatz von \lstinline|Invoke-Command| konnte entweder direkt mit VM-Namen oder mit zuvor erstellten Sessions gearbeitet werden; letztere mussten nach Abschluss wieder geschlossen werden. Um Anmeldevorgänge zu vermeiden, konnten Anmeldeinformationen als \lstinline|PSCredential|-Objekte hinterlegt werden. Diese wurden über \lstinline|New-Object| erstellt, wobei das Passwort als SecureString abgefragt und zusammen mit dem Benutzernamen in einer Variablen gespeichert wurde. \\ 
 
 Vor der Ausführung des Skripts wurde geprüft, ob es in einer administrativen Sitzung lief. Falls nicht, wurde es über \lstinline|Start-Process| mit dem Verb \lstinline|RunAs| neu gestartet. Für eine einheitliche Protokollierung wurde eine Log-Funktion erstellt, die Zeitstempel im Format \lstinline|"[dd/MM/yy HH:mm:ss]"| generierte. Nicht benötigte Ausgaben wurden konsequent mit \lstinline|| Out-Null| unterdrückt. \\ 
 
-Netzwerkanpassungen innerhalb von Windows-VMs erfolgten mit \lstinline|New-\allowbreak Net\allowbreak IPAddress| anstelle von \lstinline|Set-NetIPAddress|. Um Dateien vom Hyper-V-Host auf eine VM zu übertragen, musste die Gastdienstschnittstelle aktiviert werden, was über \lstinline|Enable-VMIntegrationService| möglich war. Anschließend konnte der Kopiervorgang mit \lstinline|Copy-VMFile| durchgeführt werden, wobei Systempfade nur indirekt beschreibbar waren.\\  
+Netzwerkanpassungen innerhalb von Windows-VMs erfolgten mit \lstinline|New-\allowbreak Net\allowbreak IPAddress| anstelle von \lstinline|Set-NetIPAddress|. Um Dateien vom Hyper-V-Host auf eine VM zu übertragen, musste die Gastdienstschnittstelle aktiviert werden, was über \lstinline|Enable-VMIntegrationService| möglich war. Anschlie\ss end konnte der Kopiervorgang mit \lstinline|Copy-VMFile| durchgeführt werden, wobei Systempfade nur indirekt beschreibbar waren.\\  
 
 Die Installation bestimmter Serverrollen, wie des Dateiservers, war nur über XML-basierte Konfigurationen möglich. Remote Desktop Services (RDS) konnten vom Domänencontroller auf den Terminalserver installiert werden, wobei zusätzliche Konfigurationen -- etwa Session Collections, RDS-Lizenzierung und Neustarts des Verwaltungsdienstes -- direkt auf dem TS erfolgten.  
 
 Weitere Besonderheiten betrafen die Handhabung von Strings, Hash-Tabellen und VM-Eigenschaften: Beim Splitten eines Strings am Punkt musste der Punkt escaped werden. 
 
-VMs konnten vollständig aus Hash-Tabellen heraus erstellt werden, wobei CPU-Anpassungen erst nach der Erstellung und MAC-Adressänderungen nach dem ersten Start möglich waren. Neue virtuelle Festplatten wurden per \lstinline|Add-VMHardDiskDrive| angebunden, anschließend online geschaltet, benannt, mit einem Laufwerksbuchstaben versehen und formatiert. \\
+VMs konnten vollständig aus Hash-Tabellen heraus erstellt werden, wobei CPU-Anpassungen erst nach der Erstellung und MAC-Adressänderungen nach dem ersten Start möglich waren. Neue virtuelle Festplatten wurden per \lstinline|Add-VMHardDiskDrive| angebunden, anschlie\ss end online geschaltet, benannt, mit einem Laufwerksbuchstaben versehen und formatiert. \\
 
-Passwörter von Active-Directory-Konten ließen sich nicht ohne Weiteres zurücksetzen, während lokale Passwörter per Remote- oder PowerShell-Direct-Zugriff problemlos geändert werden konnten. Bestimmte Installationsfehlermeldungen bei RDS ließen sich möglicherweise auf fehlende Lizenzserverkonfigurationen zurückführen.\\
+Passwörter von Active-Directory-Konten lie\ss en sich nicht ohne Weiteres zurücksetzen, während lokale Passwörter per Remote- oder PowerShell-Direct-Zugriff problemlos geändert werden konnten. Bestimmte Installationsfehlermeldungen bei RDS lie\ss en sich möglicherweise auf fehlende Lizenzserverkonfigurationen zurückführen.\\
 
 \newpage
 
@@ -542,7 +543,7 @@ Ausgangspunkt war die übliche manuelle Vorgehensweise, bei der zahlreiche wiede
 
 Das entwickelte Powershell-Skript übernimmt die wesentliche Aufgaben der Systemeinrichtung. 
 Dazu zählen die automatisierte Erstellung von VMs auf Basis eines vorbereiteten Windows-Server-Templates, die Vergabe statischer IP-Adressen und Computernamen, die Konfiguration von Active Directory auf einemdem dazu Eingerichteten Domain Controller, die Einrichtung eines Fileserver und die dazugehörigen Freigaben sowie die Zuweisung von NTFS-Berechtigungen. 
-Ergänzend wurde die Konfiguration des Terminalservers einschließlich der benötigten Rollenkomponenten umgesetzt. 
+Ergänzend wurde die Konfiguration des Terminalservers einschlie\ss lich der benötigten Rollenkomponenten umgesetzt. 
 Durch diese Automatisierung konnte der manuelle Aufwand erheblich reduziert und die Gefahr von Fehlern in der Einrichtung minimiert werden.\\
 
 Die Tabellen zur Umsetzung verdeutlichen, dass ein hoher Automatisierungsgrad erreicht wurde.
@@ -557,21 +558,21 @@ So wäre es sinnvoll, die Funktionalität dahingehend zu erweitern, dass optiona
 Ebenso könnte eine flexible Erweiterung des Speichers einzelner VMs implementiert werden, idealerweise über eine grafische Oberfläche zur vereinfachten Bedienung.\\
 
 Weitere Verbesserungsmöglichkeiten bestehen insbesondere im Bereich der Terminalserver-Konfiguration, beispielsweise durch die automatische Einbindung des Lizenzservers. 
-Auch die Anpassung des Skripts an Failover-Cluster stellt einen relevanten nächsten Schritt dar, da die aktuelle Entwicklung ausschließlich in einer Standalone-Hyper-V-Umgebung getestet wurde und cluster-spezifische Rollen und Eigenschaften noch nicht berücksichtigt werden.\\
+Auch die Anpassung des Skripts an Failover-Cluster stellt einen relevanten nächsten Schritt dar, da die aktuelle Entwicklung ausschlie\ss lich in einer Standalone-Hyper-V-Umgebung getestet wurde und cluster-spezifische Rollen und Eigenschaften noch nicht berücksichtigt werden.\\
 
 Ein weiterer Optimierungsbedarf betrifft die derzeit implementierte Wartezeit nach der Installation des Domänencontrollers. 
 Momentan wird hierfür ein statisches Zeitintervall von 6,5 Minuten per sleep-Befehl genutzt. 
 Dieses Vorgehen ist zwar funktional, jedoch unflexibel und wenig professionell. 
 Eine zuverlässigere Methode zur Erkennung des erfolgreichen Systemstarts wäre hier wünschenswert, auch wenn die Beobachtung und zeitliche Abschätzung des Bootvorgangs von Windows-Servern eine gewisse Herausforderung darstellt.\\
 
-Schließlich könnte die Benutzerverwaltung verbessert werden, indem Benutzerkonten und Gruppen über eine XML-Datei definiert und direkt nach der Erstellung automatisch verarbeitet werden. 
-Auf diese Weise ließe sich der Grad der Standardisierung und Automatisierung nochmals erhöhen.\\
+Schlie\ss lich könnte die Benutzerverwaltung verbessert werden, indem Benutzerkonten und Gruppen über eine XML-Datei definiert und direkt nach der Erstellung automatisch verarbeitet werden. 
+Auf diese Weise lie\ss e sich der Grad der Standardisierung und Automatisierung nochmals erhöhen.\\
 
 \newpage
 
 \section*{Erklärung zum Einsatz von KI-Werkzeugen}
 
-Während der Erstellung dieser Bachelorarbeit wurden KI-gestützte Hilfsmittel zur Optimierung des sprachlichen Ausdrucks und der Textstruktur verwendet. Der Einsatz beschränkte sich ausschließlich auf Aspekte der Lesbarkeit und Formulierung. Eine eigenständige inhaltliche Generierung oder Erweiterung der wissenschaftlichen Ergebnisse durch KI erfolgte nicht.
+Während der Erstellung dieser Bachelorarbeit wurden KI-gestützte Hilfsmittel zur Optimierung des sprachlichen Ausdrucks und der Textstruktur verwendet. Der Einsatz beschränkte sich ausschlie\ss lich auf Aspekte der Lesbarkeit und Formulierung. Eine eigenständige inhaltliche Generierung oder Erweiterung der wissenschaftlichen Ergebnisse durch KI erfolgte nicht.
 
 
 Die folgenden Prompts wurden im Zuge der Bearbeitung eingesetzt:
@@ -626,7 +627,7 @@ Was die Eingabe ist: unstrukturierter beschreibender Text, evtl. Alltags-/Erfahr
 
 Was die Ausgabe sein soll: ein wissenschaftlich strukturierter, sprachlich verbesserter Text mit Kapiteln/Abschnitten.
 
-Wie die Form sein soll: z. B. LaTeX-Syntax mit \textbackslash section-Blöcken oder ein formatierter Fließtext für eine Bachelorarbeit o. Ä.
+Wie die Form sein soll: z. B. LaTeX-Syntax mit \textbackslash section-Blöcken oder ein formatierter Flie\ss text für eine Bachelorarbeit o. Ä.
 
 Worauf beim Umschreiben geachtet werden soll: keine inhaltliche Veränderung, aber sprachliche Straffung, logischere Struktur, passiver Schreibstil (3. Person).
 \end{quote}
