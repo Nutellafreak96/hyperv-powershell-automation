@@ -9,6 +9,8 @@ This script:
 - Adds users to those groups.
 - Adds the admin user to built-in administrative groups.
 - Moves the default Administrator account into the "Admins" OU so that GPOs can be applied.
+- Requires ActiveDirectory PowerShell module.
+- Must be run with sufficient privileges to create users, groups, and modify memberships.
 
 .PARAMETER Using:OUPathname
 Distinguished Name (DN) of the root OU where the users and groups will be created.
@@ -23,8 +25,9 @@ Password for the test user "tuser".
 FQDN of the Active Directory domain.
 
 .NOTES
-- Requires ActiveDirectory PowerShell module.
-- Must be run with sufficient privileges to create users, groups, and modify memberships.
+    Author: Kevin Hübner
+    Language: PowerShell
+    Context: Windows Server Setup Automation (NTFS, Shares, ACL)
 
 .EXAMPLE
 .\Create-UsersAndGroups.ps1

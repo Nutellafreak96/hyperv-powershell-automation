@@ -1,8 +1,17 @@
-﻿#Zum erstellen von .NET Klassen und damit zum erstellen von GUI Fenstern in Powershell muessen diese beiden Sachen eingebunden werden
+﻿<#
+.DESCRIPTION
+Main script to handle variables and execute the scripts to automate the server structure creation
+.NOTES
+    Author: Kevin Hübner
+    Language: PowerShell
+    Context: Windows Server Setup Automation (NTFS, Shares, ACL)
+#>
+
+#Needed to create and visualize .NET windows
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
-#Funktionen zum Erstellen und Anzeigen der GUI Fenster.
+#Scripts to handle specific parts of the automation
 . .\UserInterfaceFunctions\UiFunctions.ps1
 . .\FileHandling\FileHandlingFunctions.ps1
 . .\VMHandling\VmHandlingFunctions.ps1
@@ -11,7 +20,7 @@ Add-Type -AssemblyName System.Drawing
 
 
 
-#Ueberpruefen ob das Skript als Administrator ausgefuehrt wird
+#Check if the scipt is executed via an administrator shell/cmd
 
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
     $scriptPath = $MyInvocation.MyCommand.Path
@@ -22,57 +31,57 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
 }
 
 
-#Script-Variablen
-$ErrorCount = 0 #Variable zum zählen der erhaltenen Errormeldungen
-$Daten = UserInterface #Speichert alle Eingaben in einem Array
+#Script-Variables
+$ErrorCount = 0                                                 #Error Count
+$Daten = UserInterface                                          #Saved user input as Array
 $VHDX = Get-VHDSizeBytes
 if ($null -eq $VHDX) { Write-Host "Invalid VHDX-Size"; Exit }
 if ($Daten -is [string]) { Write-Host $Daten; Exit }
-$KundeSpeicherort = $Daten[0] #Speicherort der VM´s
-$Kunde = $Daten[1] #Name des Kunden
-$Global:KundeRDP = "$($Daten[1])-RDP" #Name der SessionCollection
-$Global:DomainName = $Daten[2] #Name der Domäne
-$Global:NetBIOSName = $Daten[3] #NetBIOS-Name 
-$Global:OUName = $Daten[4] #$Name der OU des Kunden
-$Global:DCIPAdress = $Daten[5]  #IP Adresse die der DC haben soll
-$Global:FSIPAdress = $Daten[6]  #IP Adresse die der FS haben soll
-$Global:TSIPAdress = $Daten[7]  #IP Adresse die der TS haben soll
-$Global:DefaultGateway = $Daten[8]  #DefaultGateway fuer die Server [in der Regel die Firewall]
-$LPWord = $Daten[9] #password for the local Administrator
-$DPWord = $Daten[9]  #password for the domain Administrator
-$Global:Dsrm = $Daten[10] #Passwort für den DSRM-Administrators
-$Global:BSPW = $Daten[11] #Passwort des Test Users
-$Global:ASPW = $Daten[12] #Passwort des Chambionic Domain-Administrators 
-$RamDc = $Daten[13] #Variable um den Ausgewaehlten RAM den VM´s zuzuweisen
-$RamFs = $Daten[14] #Variable um den Ausgewaehlten RAM den VM´s zuzuweisen
-$RamTs = $Daten[15] #Variable um den Ausgewaehlten RAM den VM´s zuzuweisen
-$SwitchSelected = $Daten[16] #Variable zum speichern der Netzwerkschnittstelle der VMs
-$DateienSpeicherort = $Daten[17] #Speicherort der vorbereiteten Datein
-$CoreDc = $Daten[18] #Anzahl der Prozessoren der Dc Vm
-$CoreFs = $Daten[19] #Anzahl der Prozessoren der Fs Vm
-$CoreTs = $Daten[20] #Anzahl der Prozessoren der Ts Vm
-$FQDN = "TS." + $DomainName #FQDN fuer die Remote Desktop Service installation
+$KundeSpeicherort = $Daten[0]                                   #Path of the VMs
+$Kunde = $Daten[1]                                              #Client name
+$Global:KundeRDP = "$($Daten[1])-RDP"                           #SessionCollection name
+$Global:DomainName = $Daten[2]                                  #Domain name
+$Global:NetBIOSName = $Daten[3]                                 #NetBIOS-Name 
+$Global:OUName = $Daten[4]                                      #$Organizational Unit name
+$Global:DCIPAdress = $Daten[5]                                  #Domain Controller IP Adress
+$Global:FSIPAdress = $Daten[6]                                  #Fileserver IP Adress
+$Global:TSIPAdress = $Daten[7]                                  #Terminalserver IP Adress
+$Global:DefaultGateway = $Daten[8]                              #DefaultGateway 
+$LPWord = $Daten[9]                                             #password for the local Administrator
+$DPWord = $Daten[9]                                             #password for the domain Administrator
+$Global:Dsrm = $Daten[10]                                       #DSRM password
+$Global:BSPW = $Daten[11]                                       #Test-user password
+$Global:ASPW = $Daten[12]                                       #Firm Admin-user password 
+$RamDc = $Daten[13]                                             #RAM value DC
+$RamFs = $Daten[14]                                             #RAM value FS
+$RamTs = $Daten[15]                                             #RAM value TS
+$SwitchSelected = $Daten[16]                                    #Networkswitch for VMs
+$DateienSpeicherort = $Daten[17]                                #Path to prepared Files
+$CoreDc = $Daten[18]                                            #CPU cores DC
+$CoreFs = $Daten[19]                                            #CPU cores FS
+$CoreTs = $Daten[20]                                            #CPU cores TS
+$FQDN = "TS." + $DomainName                                     #FQDN TS
 
-#Pfad der WindowsServer VHDX
+#Path of the WindowsServer VHDX
 $DC_VHDX_Path = "$($KundeSpeicherort)\$($Kunde)\DC\Serverprep.vhdx"
 $FS_VHDX_Path = "$($KundeSpeicherort)\$($Kunde)\FS\Serverprep.vhdx"
 $TS_VHDX_Path = "$($KundeSpeicherort)\$($Kunde)\TS\Serverprep.vhdx"
 
-#Namen der VM´s
-$VM_Name_DC = "$($Kunde)-DC" #Name der VM - DC
-$VM_Name_FS = "$($Kunde)-FS" #Name der VM - FS
-$VM_Name_TS = "$($Kunde)-TS" #Name der VM - TS
+#VM names
+$VM_Name_DC = "$($Kunde)-DC" 
+$VM_Name_FS = "$($Kunde)-FS" 
+$VM_Name_TS = "$($Kunde)-TS" 
 
-#Variable fuer die Schnittstelle um das Kopieren zwischen Host und VM zu ermoeglichen
+# Integration Services component name
 $CopyService = "Gastdienstschnittstelle" 
 
 #String manipulation to setup the correct strings for the domain part of the script
-$DomainNameSplit = $DomainName -split "\." #Aufteilung des Domain namen in eintelteile
-$Global:DomainForGPO = ($DomainNameSplit | ForEach-Object { "DC=$_" }) -join "," #Zusammensetzen zu einem Distinguished Name
-$Global:OUPathname = "OU=" + $OUName + "," + $DomainForGPO #Distinguished Name für die OU
+$DomainNameSplit = $DomainName -split "\." 
+$Global:DomainForGPO = ($DomainNameSplit | ForEach-Object { "DC=$_" }) -join "," 
+$Global:OUPathname = "OU=" + $OUName + "," + $DomainForGPO 
 
 
-#Login für die Remote-Session des lokalen Administrators
+#Credentials of local Administrator
 $LUser = "Administrator"
 $LPWord = $Daten[9] 
 $LCredentialParams = @{
@@ -81,7 +90,7 @@ $LCredentialParams = @{
 }
 $LCredential = New-Object @LCredentialParams
 
-#Login für die Remote-Session des Donmain Administrators
+#Credentials of domain Administrator
 $DUser = "$($NetBIOSName)\Administrator"
 $DPWord = $Daten[9] 
 $DCredentialParams = @{
@@ -91,9 +100,9 @@ $DCredentialParams = @{
 $DCredential = New-Object @DCredentialParams
 
 
-<#hashtables mit Daten für die VM´s#>
+<#Hashtables for VM creation#>
 
-#Fuer den DomainController
+#DomainController
 $DC = @{
     Name       = $VM_Name_DC
     Generation = 2
@@ -101,7 +110,7 @@ $DC = @{
     Path       = "$($KundeSpeicherort)\$Kunde\DC"
     SwitchName = $SwitchSelected
 }
-#Fuer den Fileserver
+#Fileserver
 $FS = @{
     Name       = $VM_Name_FS
     Generation = 2
@@ -109,7 +118,7 @@ $FS = @{
     Path       = "$($KundeSpeicherort)\$($Kunde)\FS"
     SwitchName = $SwitchSelected
 }
-#Fuer den Terminalserver
+#Terminalserver
 $TS = @{
     Name       = $VM_Name_TS
     Generation = 2
@@ -120,32 +129,28 @@ $TS = @{
 
 #Log Handling
 $LogFilePath = "$($KundeSpeicherort)\$($Kunde)\LOG_File.txt"
-#How to write to LogFile
-#Write-Output "$(Get-TimeStamp) -- Message" | Out-File $LogFilePath -append
+
 
 <#Functions to Handle small things about VMs#>
 
-
-
-#Erstellen der VM´s
+#VM creation via hashtables
 function CreateVMs {
     New-VM @DC | Out-Null
     New-VM @FS | Out-Null
     New-VM @TS | Out-Null
     
-    #Erstellen und hinzufuegen einer neuen virtuellen Festplatte fuer den FS
-    #Laufwerk an VM fuer FS Haengen (G:Daten [500MB])
+    #create and attach vhd(x) to fileserver vm
     
     New-VHD -Fixed -Path "$($KundeSpeicherort)\$($Kunde)\FS\fs.vhdx" -SizeBytes $VHDX | Out-Null
     Add-VMHardDiskDrive -VMName $VM_Name_FS  -Path "$($KundeSpeicherort)\$($Kunde)\FS\fs.vhdx" 
 }
-#Löschen der VM´s
+#Delete VMs
 function DeleteVMs {
     Remove-VM -Name $VM_Name_DC -Force
     Remove-VM -Name $VM_Name_FS -Force
     Remove-VM -Name $VM_Name_TS -Force
 }
-
+#Start VMs
 function StartVMs {   
     Start-VM -Name $VM_Name_DC -AsJob | Out-Null
     Start-VM -Name $VM_Name_FS -AsJob | Out-Null
@@ -154,7 +159,7 @@ function StartVMs {
     Get-Job | Where-Object State -like 'Completed' | Remove-Job | Out-Null
 
 }
-#Stoppen der VM´s
+#Stop VMs
 function StopVMs {
 
     Stop-VM -Name $VM_Name_DC -AsJob | Out-Null
@@ -163,7 +168,7 @@ function StopVMs {
     Get-Job | Wait-Job | Out-Null
     Get-Job | Where-Object State -like 'Completed' | Remove-Job | Out-Null
 }
-#Neustarten der VMs
+#Restart VMs
 function RestartVMs {
     Restart-VM -Name $VM_Name_DC -AsJob -Force | Out-Null
     Restart-VM -Name $VM_Name_FS -AsJob -Force | Out-Null
@@ -173,12 +178,12 @@ function RestartVMs {
 
 }
 
-#Installiert die ActiveDiretoryDomainService Rolle um aus der VM "DC" einen DomainController zu machen
+#Install ActiveDiretoryDomainService Role
 function DeployADDSRole {
     Invoke-Command -VMName $VM_Name_DC -FilePath ".\DeployDomainControlerRole.ps1" -Credential $LCredential
 }
 
-#Fuegt die VM�s FS und TS zu der Domain des DC hinzu
+#Join the Domain 
 
 function JoinDomain {
     Invoke-Command -VMName $VM_Name_FS -ScriptBlock { Add-Computer -DomainName $Using:DomainName -Credential $Using:DCredential -Restart } -Credential $LCredential
@@ -187,12 +192,12 @@ function JoinDomain {
 
 
 
-#Haengt eine virtuelle Festplatte an f�r die Daten und erstellt die notwendigsten Ordner
+#Create directory structure on the Fileserver
 function DirectoryPreparation {
     Invoke-Command -VMName $VM_Name_FS -FilePath ".\FileHandling\DirectoryPreparations.ps1" -Credential $DCredential
 }
 
-#Erstellt die standard Gruppenrichtlinien und Gruppen und erstellt auch ein paar Benutzer
+#Create basic AD structure
 function BasicADStructure {
     Invoke-Command -VMName $VM_Name_DC -FilePath ".\ActiveDirectoryHandling\OrganizationalUnitStructure.ps1" -Credential $DCredential 
     Invoke-Command -VMName $VM_Name_DC -FilePath ".\ActiveDirectoryHandling\ADUserGroups.ps1" -Credential $DCredential 
@@ -200,12 +205,12 @@ function BasicADStructure {
     Invoke-Command -VMName $VM_Name_DC -ScriptBlock { Move-Item -Path "C:\temp\DefaultApps.xml" -Destination "C:\Windows\SYSVOL\domain\scripts" } -Credential $DCredential 
 }
 
-#Legt die Zugriffsrechte fuer verschiedene Ordner fest
+#Set User permissions for directorys
 function DirPermissions {
     Invoke-Command -VMName $VM_Name_FS -FilePath ".\FileHandling\Permissions.ps1" -Credential $DCredential
 }
 
-#Installiert die remoteDesktopService Rolle um aus der VM "TS" einen TerminalServer zu machen
+#Install and configure RemoteDesktop roles
 function DeployTSRole {
     param(
         [string]$DC,
@@ -219,18 +224,18 @@ function DeployTSRole {
     $TsSession1 = New-PSSession -VMName $TS -Credential $Credential
     
     
-    # Step 1: Wait until VM is ready initially
+    #Wait until VM is ready initially
     #Wait-ForVM -VMName $TS -Credential $Credential 
 
-    # Step 2: Install RDS roles with automatic reboot
+    #Install RDS roles with automatic reboot
     Invoke-Command -Session $TsSession1 -FilePath ".\DeployRemoteDesktopServices.ps1" 
     Get-PSSession | Remove-PSSession
 
-    # Step 2.5: Wait again after reboot
-    #Wait-ForVM -VMName $TS -Credential $Credential -MaxRetries 15 -WaitSeconds 10 -Path $Path
+    #Wait again after reboot
+    
     Start-Sleep -Seconds 150
 
-    # Step 3: Configure RDS deployment
+    #Configure RDS deployment
     #Invoke-Command -VMName $TS -FilePath ".\ConfigureRemoteDesktopDeployment.ps1" -Credential $Credential
     $TsSession2 = New-PSSession -VMName $TS -Credential $Credential
     if ($null -eq $TsSession2) { $TsSession2 = New-PSSession -VMName $TS -Credential $Credential }
@@ -245,7 +250,7 @@ function DeployTSRole {
     Get-PSSession | Remove-PSSession
 }
 
-#Funktion zum aendern der Passwoerter der lokalen Admins
+#Change passwords of the local admini
 function ChangeAdminPasswords {
     param(
         [string]$LAdminDc,   # Plain text Local Admin password (DC)
@@ -288,43 +293,43 @@ function ChangeAdminPasswords {
 ############################################################
 
 
-#Erstellen des Ordners fuer die Vms des Kunden
+
 CreateCustomerDirectory  -CustomerPath $KundeSpeicherort -CustomerName $Kunde -SourcePath $DateienSpeicherort  -Path $LogFilePath 
 Write-Output "$(Get-TimeStamp) -- Skript nach dem Erstellen der Ordnerstruktur und Kopieren der vhdx" | Out-File $LogFilePath -append
 
-#Erstelln der VMs
+
 CreateVMs
 Write-Output "$(Get-TimeStamp) -- VMs erstellt" | Out-File $LogFilePath -append
 
-#Bearbeiten der Anzahl der virtuellen Prozessoren und des Arbeitsspeichers
+
 UpdateVMResources -VmDc $VM_Name_DC -VmFs $VM_Name_FS -VmTs $VM_Name_TS -CoreDc $CoreDc -CoreFs $CoreFs -CoreTs $CoreTs -RamDc $RamDc -RamFs $RamFs -RamTs $RamTs
 
 Write-Output "$(Get-TimeStamp) -- VM Ressourcen angepasst" | Out-File $LogFilePath -append
 
 
-#Starten der VMs
+
 StartVMs
 
 Write-Output "$(Get-TimeStamp) -- VMs gestartet" | Out-File $LogFilePath -append
 
 
-#Start-Sleep -Seconds 240 #4min warten damit Server online sind
+
 Wait-ForVM -VMName $VM_Name_DC -Credential $LCredential -MaxRetries 100 -WaitSeconds 10 -Path $LogFilePath 
-###########################
+
 
 
 Write-Output "$(Get-TimeStamp) -- Windows Initialisierung fertig" | Out-File $LogFilePath -append
 
-#Kopieren der wichtigsten Dateien auf den Servern
+
 CopyFilesToVMs -IntegrationServiceName $CopyService -VmDc $VM_Name_DC  -VmFs $VM_Name_FS -VmTs $VM_Name_TS  -SourcePath $DateienSpeicherort -Credential $LCredential
 Write-Output "$(Get-TimeStamp) -- Kopieren der Dateien fertig" | Out-File $LogFilePath -append
 
-#Loeschen der Antwortdatei zum ueberspringen von Windows einrichtungspunkten | Löschen der unattend.xml
+
 DeleteSensitiveFiles -VmDc $VM_Name_DC -VmFs $VM_Name_FS -VmTs $VM_Name_TS -Credential $LCredential
 Write-Output "$(Get-TimeStamp) -- Löschen Sicherheitsrelevanter Dateien fertig" | Out-File $LogFilePath -append
 
 
-#Stoppen der Vms um die MacAddresse statisch zu setzen
+
 StopVMs
 $DcState = (Get-VM -Name $VM_Name_DC).State
 $FsState = (Get-VM -Name $VM_Name_FS).State
@@ -339,11 +344,11 @@ while ( ($DcState -ne "off") -or ($FsState -ne "off") -or ($TsState -ne "off") )
 Write-Output "$(Get-TimeStamp) -- VMs gestoppt" | Out-File $LogFilePath -append
 
 
-#MacAddressen auf statisch setzen
+
 ChangeMacAddress -VmDC $VM_Name_DC -VmFs $VM_Name_FS -VmTs $VM_Name_TS
 Write-Output "$(Get-TimeStamp) -- MAC Addressen der VMs auf statisch umgestellt" | Out-File $LogFilePath -append
 
-#Starten der Vms um weiter daran zu arbeiten
+
 StartVMs
 Start-Sleep -Seconds 10
 Write-Output "$(Get-TimeStamp) -- VMs erneut gestartet" | Out-File $LogFilePath -append
@@ -355,7 +360,7 @@ while ( ($DcState -eq "off") -or ($FsState -eq "off") -or ($TsState -eq "off") )
     $FsState = (Get-VM -Name $VM_Name_FS).State
     $TsState = (Get-VM -Name $VM_Name_TS).State
 }
-#Aendern der IP-Adressen der Server auf statische IPs
+
 Wait-ForVM -VMName $VM_Name_DC -Credential $LCredential -MaxRetries 20 -WaitSeconds 10 -Path $LogFilePath 
 
 ChangeVMSettings -VmDC $VM_Name_DC -VmFs $VM_Name_FS -VmTs $VM_Name_TS -Credential $LCredential
@@ -364,48 +369,48 @@ Write-Output "$(Get-TimeStamp) -- VMs haben eine feste IP erhalten und der virtu
 
 Wait-ForVM -VMName $VM_Name_DC -Credential $LCredential -MaxRetries 20 -WaitSeconds 10 -Path $LogFilePath 
 
-#Installieren der Active Direktory Rolle 
+ 
 DeployADDSRole
 Write-Output "$(Get-TimeStamp) -- DC wurde erstellt" | Out-File $LogFilePath -append
 
 Start-Sleep -Seconds 390 #6,5min warten auf Server neustart
 
 
-#Hinzufuegen der anderen server zu der Domaene 
+
 JoinDomain
 Write-Output "$(Get-TimeStamp) -- VMs treten der Domain bei" | Out-File $LogFilePath -append
 
-#Start-Sleep -Seconds 60 #1min warten auf Server neustart
+
 Wait-ForVM -VMName $VM_Name_FS -Credential $DCredential -MaxRetries 60 -WaitSeconds 10 -Path $LogFilePath  
 
-#Erstellen der wichtigsten Laufwerke und Ordner
+
 DirectoryPreparation
 
 
 Write-Output "$(Get-TimeStamp) -- Ordnerstruktur auf der neuen Festplatte am FS erstellt" | Out-File $LogFilePath -append
 
-#Erstellen der Grundarbeitsstruktur (Organisationseinheit)
+
 BasicADStructure
 Write-Output "$(Get-TimeStamp) -- OU,User,Gruppen,GPO erstellt " | Out-File $LogFilePath -append
 Wait-ForVM -VMName $VM_Name_DC -Credential $DCredential -MaxRetries 60 -WaitSeconds 10 -Path $LogFilePath  
-#Start-Sleep -Seconds 20 #20sec warten auf Server neustart
 
 
-#Freigeben der Ordner und setzen der Zugriffsrechte
+
+
 DirPermissions
 Write-Output "$(Get-TimeStamp) -- Ordner Freigaben erstellt und NTFS Rechte bearbeitet" | Out-File $LogFilePath -append
-#Installieren der Remotedesktopdienste auf dem ts
+
 
 DeployTSRole -DC $VM_Name_DC -TS $VM_Name_TS -RdpName $KundeRDP -Credential $DCredential -FQDN $FQDN -Path $LogFilePath
 Write-Output "$(Get-TimeStamp) -- TS Rolle installiert und eingerichtet" | Out-File $LogFilePath -append
 
 
-#Ändern der Passwörter
+
 $PArray = PasswordChange
 
 ChangeAdminPasswords -LAdminDc $PArray[0] -LAdminFs $PArray[1] -LAdminTs $PArray[2] -DC $VM_Name_DC -FS $VM_Name_FS -TS $VM_Name_TS -Credential $DCredential
 Write-Output "$(Get-TimeStamp) -- Script finished | Errors:$($ErrorCount)" | Out-File $LogFilePath -append 
 
-#VMs neustarten
+
 RestartVMs
 Write-Output "$(Get-TimeStamp) -- VMs neugestartet" | Out-File $LogFilePath -append

@@ -1,3 +1,12 @@
+<#
+.DESCRIPTION
+Script to configure the necessary Remote Desktop roles
+.NOTES
+    Author: Kevin Hübner
+    Language: PowerShell
+    Context: Windows Server Setup Automation (NTFS, Shares, ACL)
+#>
+
 param(
     [string]$KundeRDP,
     [string]$DomainName

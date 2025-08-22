@@ -1,4 +1,14 @@
 ﻿<#
+.DESCRIPTION
+Script to manage VM settings
+.NOTES
+    Author: Kevin Hübner
+    Language: PowerShell
+    Context: Windows Server Setup Automation (NTFS, Shares, ACL)
+#>
+
+
+<#
 .SYNOPSIS
 Updates CPU and memory resources of the specified VMs.
 
@@ -118,7 +128,21 @@ function ChangeVMSettings {
 }
 
 
-<#Funktion zum warten auf das die VM gebootet ist bzw commands entgegennimmt#>
+<#
+.SYNOPSIS
+Uses the execution of a command remote on a virtual maschine to check if its usable
+.PARAMETER VMName
+Name of the virtual maschine
+.PARAMETER Credential
+User credentials to login to the windows user
+.PARAMETER MaxRetries
+Number of iterations possible
+.PARAMETER WaitSeconds
+Seconds to wait till the next loop iteration
+.PARAMETER Path
+Path of the Log file
+#>
+
 function Wait-ForVM {
     param (
         [Parameter(Mandatory=$true)][string]$VMName,

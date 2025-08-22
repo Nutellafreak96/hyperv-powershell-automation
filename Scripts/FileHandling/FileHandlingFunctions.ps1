@@ -1,4 +1,14 @@
-﻿#Funktion um einen Zeitstempel zu erstellen z.B. für Logs
+﻿
+<#
+.DESCRIPTION
+This Scripts has functions to create/delte or copy Files/Directorys on VMs
+.NOTES
+    Author: Kevin Hübner
+    Language: PowerShell
+    Context: Windows Server Setup Automation (NTFS, Shares, ACL)
+#>
+
+#Funktion um einen Zeitstempel zu erstellen z.B. für Logs
 function Get-TimeStamp {
     return "[{0:dd/MM/yy} {0:HH:mm:ss}]" -f (Get-Date)
 }

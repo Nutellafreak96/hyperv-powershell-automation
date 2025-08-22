@@ -13,13 +13,17 @@ This script automates the creation and linking of GPOs for:
 - Drive mapping group SID correction in XML
 It also updates an XML file with correct group SIDs for drive mapping preferences.
 
+- Requires RSAT tools (GroupPolicy and ActiveDirectory modules)
+- This script assumes that group names match the names used in Drive.xml
+- Uses `Set-GPRegistryValue` to enforce registry-based GPO settings
+
 .PARAMETER Using:OUPathname
 A scoped variable (e.g. from a parent script block) containing the base OU distinguished name used for GPO targeting.
 
 .NOTES
-- Requires RSAT tools (GroupPolicy and ActiveDirectory modules)
-- This script assumes that group names match the names used in Drive.xml
-- Uses `Set-GPRegistryValue` to enforce registry-based GPO settings
+    Author: Kevin Hübner
+    Language: PowerShell
+    Context: Windows Server Setup Automation (NTFS, Shares, ACL)
 #>
 
 

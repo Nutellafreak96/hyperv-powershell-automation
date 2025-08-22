@@ -12,6 +12,9 @@ This script creates a base OU and several child OUs commonly used in RDS/Windows
 - Groups
 - Deactivated Users
 
+- Requires the ActiveDirectory PowerShell module
+- Make sure the computer objects (e.g., "TS", "FS") already exist in the domain
+
 Additionally, it moves the computers "TS" and "FS" to the corresponding OUs.
 
 .PARAMETER Using:OUName
@@ -24,8 +27,9 @@ The distinguished name (DN) of the domain where the root OU should be placed.
 The full DN path of the root OU used to create sub-OUs.
 
 .NOTES
-- Requires the ActiveDirectory PowerShell module
-- Make sure the computer objects (e.g., "TS", "FS") already exist in the domain
+    Author: Kevin Hübner
+    Language: PowerShell
+    Context: Windows Server Setup Automation (NTFS, Shares, ACL)
 #>
 
 # --- Define OU structures using hashtables ---

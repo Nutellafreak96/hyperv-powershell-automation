@@ -6,10 +6,13 @@ Prepares the file server (FS) for DATEV and configures folder structures for sha
 This script brings disk 1 online, formats it as NTFS with drive letter D:, and creates several directories used for file sharing in a DATEV environment. 
 These include folders for configuration databases, general data storage, scanned documents, and management files.
 
-.NOTES
 - This script assumes that Disk 1 is intended for use as the data volume.
 - Folders are created in the `D:\Freigaben\` structure.
 
+.NOTES
+    Author: Kevin Hübner
+    Language: PowerShell
+    Context: Windows Server Setup Automation (NTFS, Shares, ACL)
 .EXAMPLE
 .\Prepare-DatevFolders.ps1
 #>

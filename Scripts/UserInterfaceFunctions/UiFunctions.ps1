@@ -1,20 +1,13 @@
-﻿<#
-/**
- * @file YourScriptName.ps1
- * @brief Script to provide user interface functions for input gathering in Windows PowerShell.
- *
- * This script loads the necessary .NET assemblies for Windows Forms and Drawing, 
- * enabling GUI elements such as forms, buttons, labels, and text boxes.
- *
- * It contains multiple functions to display dialog windows for user input, 
- * such as getting firm names, domain values, and selecting virtual machine switches.
- *
- * @note Requires PowerShell with access to System.Windows.Forms and System.Drawing assemblies.
- *
- * @author Your Name
- * @date 2025-07-28
- */
+﻿
+<#
+.DESCRIPTION
+This Script with a lot User Interface functions and a function to combine the smaller User Interface functions
+.NOTES
+    Author: Kevin Hübner
+    Language: PowerShell
+    Context: Windows Server Setup Automation (NTFS, Shares, ACL)
 #>
+
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 

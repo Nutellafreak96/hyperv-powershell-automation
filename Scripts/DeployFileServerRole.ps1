@@ -1,4 +1,11 @@
-﻿#Fileserver installieren und einrichten
+﻿<#
+.DESCRIPTION
+Script to change the settings of the Networkadapter of a VM and install the fileserver role
+.NOTES
+    Author: Kevin Hübner
+    Language: PowerShell
+    Context: Windows Server Setup Automation (NTFS, Shares, ACL)
+#>
 
 $InterfaceAlias = Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.InterfaceAlias -like "Extern*" -or $_.InterfaceAlias -like "Ethernet*"} | Select-Object -ExpandProperty InterfaceAlias
 

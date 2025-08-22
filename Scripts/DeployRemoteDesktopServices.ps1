@@ -1,5 +1,11 @@
-﻿#Erstellen eines Terminalservers durch das Installieren der Rolle Remodedesktopservices
-
+﻿<#
+.DESCRIPTION
+Script to change install and configure the active directory service role
+.NOTES
+    Author: Kevin Hübner
+    Language: PowerShell
+    Context: Windows Server Setup Automation (NTFS, Shares, ACL)
+#>
 Install-WindowsFeature -IncludeManagementTools -Name @( 
             "Remote-Desktop-Services",
             "RDS-RD-Server", 

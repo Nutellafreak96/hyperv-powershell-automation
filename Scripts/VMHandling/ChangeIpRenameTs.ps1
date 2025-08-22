@@ -1,4 +1,13 @@
-﻿$InterfaceAlias = Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.InterfaceAlias -like "Extern*" -or $_.InterfaceAlias -like "Ethernet*"} | Select-Object -ExpandProperty InterfaceAlias
+﻿<#
+.DESCRIPTION
+Script to change the Network Adapter Settings on a VM and rename the virtual computer
+.NOTES
+    Author: Kevin Hübner
+    Language: PowerShell
+    Context: Windows Server Setup Automation (NTFS, Shares, ACL)
+#>
+
+$InterfaceAlias = Get-NetIPAddress -AddressFamily IPv4 | Where-Object {$_.InterfaceAlias -like "Extern*" -or $_.InterfaceAlias -like "Ethernet*"} | Select-Object -ExpandProperty InterfaceAlias
 
 <#disable ipv6 to prevent problems for joining a domain#>
 Disable-NetAdapterBinding -Name $InterfaceAlias -ComponentID "ms_tcpip6"

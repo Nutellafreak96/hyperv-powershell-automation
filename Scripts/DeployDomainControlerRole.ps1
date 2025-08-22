@@ -1,6 +1,11 @@
-﻿#Installieren der ADDS Rolle und Konfigurieren eines neuen Forest (Heraufstufen zu einem DomainController)
-#Add-Computer -DomainName $Domäne -Restart ##hinzufuegen zu einer domäne
-
+﻿<#
+.DESCRIPTION
+Script to change install and configure the active directory service role
+.NOTES
+    Author: Kevin Hübner
+    Language: PowerShell
+    Context: Windows Server Setup Automation (NTFS, Shares, ACL)
+#>
 
 
 $ADDS = @{
