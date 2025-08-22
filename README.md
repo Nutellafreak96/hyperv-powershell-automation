@@ -39,10 +39,10 @@ Ziel der Arbeit ist die automatisierte Bereitstellung, Konfiguration und Rollenz
 Um die automatisierte Erstellung und Konfiguration zu starten, rufe folgendes Skript aus einer PowerShell-Konsole mit administrativen Rechten auf:
 
 ```
-C:\hyperv-powershell-automation\Scripts\Main.ps1
+PathTo\hyperv-powershell-automation\Scripts\Main.ps1
 ```
 
-Stelle sicher, dass alle Abhängigkeiten korrekt platziert und Hyper-V sowie PowerShell aktiviert und entsprechend konfiguriert sind.
+Stelle sicher, dass Hyper-V sowie PowerShell aktiviert ist.
 
 ---
 
